@@ -1,0 +1,14 @@
+<Context>
+	<Resource
+		auth="Container"
+		type="javax.sql.DataSource"
+		name="jdbc/newbankdb"
+		driverClassName="org.postgresql.Driver"
+		url="jdbc:postgresql://localhost:5432/newbankdb"
+		username="user1"
+		password="pass1"
+		
+		maxTotal="5"
+		maxIdle="1"
+	/>
+</Context>
