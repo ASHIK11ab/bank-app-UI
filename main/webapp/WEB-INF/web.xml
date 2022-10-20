@@ -29,6 +29,10 @@
 
 	<!-- Filters -->
 	<filter>
+		<filter-name>SkipAuthenticationPageFilter</filter-name>
+		<filter-class>filter.SkipAuthenticationPageFilter</filter-class>
+	</filter>
+	<filter>
 		<filter-name>AuthenticationFilter</filter-name>
 		<filter-class>filter.AuthenticationFilter</filter-class>
 	</filter>
@@ -38,6 +42,10 @@
 	</filter>
 
 	<!-- Filter mappings -->
+	<filter-mapping>
+		<filter-name>SkipAuthenticationPageFilter</filter-name>
+		<url-pattern>/login/*</url-pattern>
+	</filter-mapping>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
 		<url-pattern>/admin/*</url-pattern>
