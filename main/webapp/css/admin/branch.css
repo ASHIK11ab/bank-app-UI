@@ -1,0 +1,29 @@
+@charset "UTF-8";
+
+.wrapper {
+	width: 600px;
+	border: 1.5px solid #ddd;
+	margin: auto;
+	padding: 25px 30px;
+	font-family: Arial, sans-serif;
+	box-sizing: border-box;
+}
+
+
+section .title {
+	font-size: 18px;
+	text-transform: captialize;
+}
+
+
+section.manager-section {
+	margin-top: 1.2rem;
+}
+
+
+@media(max-width: 800px) {
+	.wrapper {
+		position: relative;
+		width: 100%;
+	}
+}
