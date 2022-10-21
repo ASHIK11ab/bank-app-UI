@@ -2,17 +2,11 @@ package servlet.admin;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.InputMismatchException;
-
-import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 
 import dao.AdminDAO;
 import model.UserBean;
@@ -55,6 +49,8 @@ public class LoginServlet extends HttpServlet {
         if((admin != null) && admin.getPassword().equals(password)) {
         	HttpSession session = req.getSession();
         	session.setAttribute("id", admin.getId());
+        	// 2 days.
+        	session.setMaxInactiveInterval(60*60*24*2);
         	session.setAttribute("role", 1);
             res.sendRedirect("/bank-app/admin/dashboard");
         } else {
