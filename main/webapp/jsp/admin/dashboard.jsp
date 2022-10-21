@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Admin dashboard</title>
+	<meta charset="UTF-8">
+	<title>Admin dashboard</title>
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
 </head>
 <body>
-	<h1>In dashboard</h1>
-	<a href="/bank-app/admin/logout">Logout</a>
+	<jsp:include page="/jsp/admin/components/navbar.jsp" />
 </body>
 </html>
