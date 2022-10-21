@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+.container {
+	position: relative;
+	width: 80%;
+	margin: 8rem auto auto auto;
+}
