@@ -1,0 +1,80 @@
+@charset "UTF-8";
+
+.navbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	border-bottom: 1.3px solid #ddd;
+	padding: 15px 20px;
+	box-sizing: border-box;
+	font-size: 16px;
+	font-family: Arial;
+	z-index: 1;
+}
+
+.navbar .app-name {
+	font-size: 18px;
+	font-family: Arial;
+	text-transform: capitalize;
+	text-decoration: none;
+	letter-spacing: 1.2px;
+	font-weight: 600;
+	color: #52285e;
+	cursor: pointer;
+}
+
+.nav {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	width: 70%;
+}
+
+.sub-nav .text {
+	font-weight: 600;
+	text-transform: capitalize;
+	cursor: pointer;
+}
+
+.sub-nav .links {
+	opacity: 0;
+	padding: 0;
+	background-color: #fff;
+	border: 1.2px solid #ddd;
+}
+
+.sub-nav:hover .links {
+	opacity: 1;
+	transition: opacity .8s;
+}
+
+.sub-nav .links li {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	list-style: none;
+	padding-left: 0;
+	position: absolute;
+	padding: 15px 10px;
+}
+
+
+.sub-nav .links a {
+	display: block;
+	text-decoration: none;
+	text-transform: captialize;
+	font-weight: 500;
+	color: dodgerblue;
+	margin-bottom: 5px;
+}
+
+
+.sub-nav .links a:hover {
+	text-decoration: underline;
+}
