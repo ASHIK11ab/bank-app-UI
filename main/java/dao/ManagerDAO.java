@@ -131,7 +131,7 @@ public class ManagerDAO {
 		try {
 			conn = Factory.getDataSource().getConnection();
 			stmt = conn.createStatement();	
-			rs = stmt.executeQuery("SELECT m.id, m.name as manager_name, m.phone, m.email, m.password, m.branch_id, b.name as branch_name FROM manager m JOIN branch b ON m.branch_id = b.id");
+			rs = stmt.executeQuery("SELECT m.id, m.name as manager_name, m.phone, m.email, m.password, m.branch_id, b.name as branch_name FROM manager m JOIN branch b ON m.branch_id = b.id ORDER BY m.id");
 			
 			while(rs.next()) {
 				manager = new EmployeeBean();

@@ -36,7 +36,7 @@ public class BranchDAO {
 		try {
 			conn = Factory.getDataSource().getConnection();
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id");
+			rs = stmt.executeQuery("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id ORDER BY b.name");
 			
 			while(rs.next()) {
 				branch = new BranchBean();
