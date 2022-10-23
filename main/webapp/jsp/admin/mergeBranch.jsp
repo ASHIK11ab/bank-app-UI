@@ -17,7 +17,7 @@
 	<main class="container">
 		<section>
 			<h1>Merge Branches</h1>
-			<form action="/bank-app/admin/branches/branch/merge" method="post">
+			<form action="/bank-app/admin/branches/merge" method="post">
 				
 				<label>Base branch:</label>
 				<jsp:include page="/jsp/components/branchDropdown.jsp">

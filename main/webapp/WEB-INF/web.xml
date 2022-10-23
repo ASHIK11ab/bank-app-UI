@@ -68,7 +68,7 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>MergeBranchServlet</servlet-name>
-		<url-pattern>/admin/branches/branch/merge</url-pattern>
+		<url-pattern>/admin/branches/merge</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>ManagersServlet</servlet-name>
