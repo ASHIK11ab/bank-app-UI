@@ -7,7 +7,7 @@
 	<meta charset="UTF-8">
 	<title>Managers</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
 </head>
 <body>	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />

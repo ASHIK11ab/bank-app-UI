@@ -7,7 +7,7 @@
 	<meta charset="UTF-8">
 	<title>${ requestScope.branch.getName() } branch</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/admin/branch.css">
 </head>
 <body>

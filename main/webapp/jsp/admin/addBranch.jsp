@@ -6,7 +6,7 @@
 	<meta charset="UTF-8">
 	<title>Create new branch</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/form.css">
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/admin/add-branch.css">
 </head>

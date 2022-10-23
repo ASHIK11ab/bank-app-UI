@@ -5,7 +5,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Admin dashboard</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
 </head>
 <body>
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
