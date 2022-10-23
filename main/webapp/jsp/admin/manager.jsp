@@ -7,6 +7,7 @@
 	<meta charset="UTF-8">
 	<title>Manager</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
 	<style>
 		.wrapper {
 			width: 600px;
@@ -19,7 +20,7 @@
 	
 		section .title {
 			font-size: 18px;
-			text-transform: captialize;
+			text-transform: capitalize;
 		}
 	</style>
 </head>
@@ -30,13 +31,13 @@
 	
 	<main class="container">
 		<div class="wrapper">
-			<section class="manager-section">
+			<section>
 				<h2 class="title">Manager details:</h2>
 				<p>Name: ${ manager.getName() }</p>
 				<p>Email: ${ manager.getEmail() }</p>
 				<p>Phone: ${ manager.getPhone() }</p>
 			</section>
-			<section class="branch-section">
+			<section>
 				<h1 class="title">Branch details:</h1>
 				<p>Branch Name: ${ manager.getBranchName() }</p>
 			</section>
