@@ -6,6 +6,24 @@
 	margin: 8rem auto auto auto;
 }
 
+.wrapper {
+	width: 600px;
+	border: 1.5px solid #ddd;
+	margin: auto;
+	padding: 25px 30px;
+	font-family: Arial, sans-serif;
+	box-sizing: border-box;
+}
+
+section .title {
+	font-size: 18px;
+	text-transform: capitalize;
+}
+
+.wrapper h1 {
+	text-align: center;
+}
+
 .container .group {
 	display: flex;
 	flex-direction: column;

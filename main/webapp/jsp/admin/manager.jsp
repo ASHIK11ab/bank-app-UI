@@ -8,21 +8,6 @@
 	<title>Manager</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<style>
-		.wrapper {
-			width: 600px;
-			border: 1.5px solid #ddd;
-			margin: auto;
-			padding: 25px 30px;
-			font-family: Arial, sans-serif;
-			box-sizing: border-box;
-		}
-	
-		section .title {
-			font-size: 18px;
-			text-transform: capitalize;
-		}
-	</style>
 </head>
 <body>
 	<c:set var="manager" value="${ requestScope.manager }" />
