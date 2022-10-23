@@ -18,20 +18,16 @@
 		<section>
 			<h1>Merge Branches</h1>
 			<form action="/bank-app/admin/branches/branch/merge" method="post">
+				
 				<label>Base branch:</label>
-				<select name="base-branch-id" id="base-branch-id">
-					<option value="-1" selected disabled hidden>Select branch</option>
-					<c:forEach items="${ requestScope.branches }" var="branch">
-						<option value="${ branch.getId() }">${ branch.getName() }</option>
-					</c:forEach>
-				</select>
+				<jsp:include page="/jsp/components/branchDropdown.jsp">
+					<jsp:param name="name" value="base-branch-id" />
+				</jsp:include>
+				
 				<label>Target branch:</label>
-				<select name="target-branch-id" id="target-branch-id">
-					<option value="-1" selected disabled hidden>Select branch</option>
-					<c:forEach items="${ requestScope.branches }" var="branch">
-						<option value="${ branch.getId() }">${ branch.getName() }</option>
-					</c:forEach>
-				</select>
+				<jsp:include page="/jsp/components/branchDropdown.jsp">
+					<jsp:param name="name" value="target-branch-id" />
+				</jsp:include>
 				
 				<button>merge branches</button>
 			</form>

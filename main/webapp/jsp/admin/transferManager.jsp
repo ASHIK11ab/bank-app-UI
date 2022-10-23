@@ -18,20 +18,16 @@
 		<section>
 			<h1>Transfer managers</h1>
 			<form action="/bank-app/admin/managers/transfer" method="post">
+			
 				<label>First Branch:</label>
-				<select name="first-branch-id">
-					<option value="-1" selected disabled hidden>Select branch</option>
-					<c:forEach items="${ requestScope.branches }" var="branch">
-						<option value="${ branch.getId() }">${ branch.getName() }</option>
-					</c:forEach>
-				</select>
+				<jsp:include page="/jsp/components/branchDropdown.jsp">
+					<jsp:param name="name" value="first-branch-id" />
+				</jsp:include>
+				
 				<label>Second Branch:</label>
-				<select name="second-branch-id">
-					<option value="-1" selected disabled hidden>Select branch</option>
-					<c:forEach items="${ requestScope.branches }" var="branch">
-						<option value="${ branch.getId() }">${ branch.getName() }</option>
-					</c:forEach>
-				</select>
+				<jsp:include page="/jsp/components/branchDropdown.jsp">
+					<jsp:param name="name" value="second-branch-id" />
+				</jsp:include>
 				
 				<button>transfer managers</button>
 			</form>
