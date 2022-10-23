@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 
 import model.AddressBean;
 import model.BranchBean;
+import model.EmployeeBean;
 import model.UserBean;
 import util.Util;
 
@@ -34,6 +35,7 @@ public class BranchDAO {
 	public LinkedList<BranchBean> getAll() throws SQLException {
 		LinkedList<BranchBean> branches = new LinkedList<BranchBean>();
 		BranchBean branch = null;
+		EmployeeBean manager = null;
 		AddressBean address = null;
 		
 		Connection conn = null;
@@ -46,11 +48,12 @@ public class BranchDAO {
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM branch");
+			rs = stmt.executeQuery("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id");
 			
 			while(rs.next()) {
 				branch = new BranchBean();
 				address = new AddressBean();
+				manager = new EmployeeBean();
 				
 				branch.setId(rs.getInt("id"));
 				branch.setName(rs.getString("name"));
@@ -61,7 +64,16 @@ public class BranchDAO {
                 address.setState(rs.getString("state"));
                 address.setPincode(rs.getInt("pincode"));
                 
+                manager.setId(rs.getLong("manager_id"));
+                manager.setName(rs.getString("manager_name"));
+                manager.setPhone(rs.getLong("manager_phone"));
+                manager.setEmail(rs.getString("manager_email"));
+                manager.setPassword(rs.getString("manager_password"));
+                manager.setBranchId(branch.getId());
+                manager.setBranchName(branch.getName());
+                
                 branch.setAddress(address);
+                branch.setManager(manager);
                 branches.add(branch);
 			}
 		} catch(SQLException e) {
@@ -93,7 +105,7 @@ public class BranchDAO {
 	
 	public BranchBean get(int id) throws SQLException {
 		BranchBean branch = null;
-		UserBean manager = null;
+		EmployeeBean manager = null;
 		AddressBean address = null;
 		
 		Connection conn = null;
@@ -112,7 +124,7 @@ public class BranchDAO {
 			if(rs.next()) {
 				branch = new BranchBean();
 				address = new AddressBean();
-				manager = new UserBean();
+				manager = new EmployeeBean();
 				
 				branch.setId(rs.getInt("id"));
 				branch.setName(rs.getString("name"));
@@ -128,6 +140,8 @@ public class BranchDAO {
                 manager.setPhone(rs.getLong("manager_phone"));
                 manager.setEmail(rs.getString("manager_email"));
                 manager.setPassword(rs.getString("manager_password"));
+                manager.setBranchId(branch.getId());
+                manager.setBranchName(branch.getName());
                 
                 branch.setAddress(address);
                 branch.setManager(manager);
@@ -167,7 +181,7 @@ public class BranchDAO {
 		ResultSet rs1 = null, rs2 = null;
 		
 		BranchBean branch;
-		UserBean manager = null;
+		EmployeeBean manager = null;
 		String managerPassword = Util.genPassword(), msg = "";
 		long managerId = 0;
 		boolean exceptionOccured = false;
@@ -204,11 +218,11 @@ public class BranchDAO {
                 managerId = rs2.getLong(1);
             }
 
-            branch = new BranchBean();
-            branch.setId(branchId);
-            branch.setName(name);
-            branch.setAddress(address);
-            branch.setManager(manager);
+//            branch = new BranchBean();
+//            branch.setId(branchId);
+//            branch.setName(name);
+//            branch.setAddress(address);
+//            branch.setManager(manager);
         } catch(SQLException e) {
             exceptionOccured = true;
             msg = "Error adding branch";

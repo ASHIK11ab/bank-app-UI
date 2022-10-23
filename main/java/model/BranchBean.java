@@ -6,7 +6,7 @@ public class BranchBean implements Serializable {
 	private int id;
     private String name;
     private AddressBean address;
-    private UserBean manager;
+    private EmployeeBean manager;
     
     // getters
     public int getId() {
@@ -21,12 +21,12 @@ public class BranchBean implements Serializable {
     	return this.address;
     }
     
-    public UserBean getManager() {
+    public EmployeeBean getManager() {
     	return this.manager;
     }
     
     // setters
-    public void setManager(UserBean manager) {
+    public void setManager(EmployeeBean manager) {
         this.manager = manager;
     }
 
