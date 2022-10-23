@@ -162,94 +162,65 @@ public class BranchDAO {
 	
 	
 	// Adds a new branch to DB.
-	public void create(String name, AddressBean address, String managerName, 
-						String managerEmail, long managerPhone) throws SQLException {
-		Connection conn = null;
-		PreparedStatement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
+	public BranchBean create(Connection conn, String name, AddressBean address) throws SQLException {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		
-		BranchBean branch;
-		EmployeeBean manager = null;
-		String managerPassword = Util.genPassword(), msg = "";
-		long managerId = 0;
+		BranchBean branch = null;
+		String msg = null;
 		boolean exceptionOccured = false;
 		int branchId = 0;
 				
 		try {
-            conn = Factory.getDataSource().getConnection();
-            stmt1 = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            stmt1.setString(1, name);
-            stmt1.setString(2, address.getDoorNo());
-            stmt1.setString(3, address.getStreet());
-            stmt1.setString(4, address.getCity());
-            stmt1.setString(5, address.getState());
-            stmt1.setLong(6, address.getPincode());
+            stmt = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, name);
+            stmt.setString(2, address.getDoorNo());
+            stmt.setString(3, address.getStreet());
+            stmt.setString(4, address.getCity());
+            stmt.setString(5, address.getState());
+            stmt.setLong(6, address.getPincode());
 
-            stmt1.executeUpdate();
-            rs1 = stmt1.getGeneratedKeys();
+            stmt.executeUpdate();
+            rs = stmt.getGeneratedKeys();
 
-            if(rs1.next()) {
-                branchId = rs1.getByte(1);
+            if(rs.next()) {
+                branchId = rs.getInt(1);
             }
 
-            stmt2 = conn.prepareStatement("INSERT INTO manager (name, password, phone, email, branch_id) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            stmt2.setString(1, managerName);
-            stmt2.setString(2, managerPassword);
-            stmt2.setLong(3, managerPhone);
-            stmt2.setString(4, managerEmail);
-            stmt2.setInt(5, branchId);
-
-            stmt2.executeUpdate();
-            rs2 = stmt2.getGeneratedKeys();
-
-            if(rs2.next()) {
-                managerId = rs2.getLong(1);
-            }
-
-//            branch = new BranchBean();
-//            branch.setId(branchId);
-//            branch.setName(name);
-//            branch.setAddress(address);
-//            branch.setManager(manager);
+            branch = new BranchBean();
+            branch.setId(branchId);
+            branch.setName(name);
+            branch.setAddress(address);
         } catch(SQLException e) {
             exceptionOccured = true;
             msg = "Error adding branch";
         } finally {
             try {
-                if(rs1 != null)
-                    rs1.close();
-                if(rs2 != null)
-                    rs2.close();
+                if(rs != null)
+                    rs.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {
-                if(stmt1 != null)
-                    stmt1.close();
-                if(stmt2 != null)
-                    stmt2.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
+                if(stmt != null)
+                    stmt.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
+		else
+			return branch;
 	}
 	
 	
 	// deletes a branch from DB.
-	public void delete(int id) throws SQLException {
-		Connection conn = null;
+	public void delete(Connection conn, int id) throws SQLException {
 		PreparedStatement stmt = null;
 		
 		String msg = "";
 		boolean exceptionOccured = false;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM branch WHERE id = ?");
 			stmt.setInt(1,  id);
 			stmt.executeUpdate();
@@ -260,11 +231,6 @@ public class BranchDAO {
             try {
                 if(stmt != null)
                     stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		

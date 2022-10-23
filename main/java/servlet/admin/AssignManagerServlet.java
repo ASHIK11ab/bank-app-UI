@@ -2,6 +2,7 @@ package servlet.admin;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
@@ -42,6 +43,7 @@ public class AssignManagerServlet extends HttpServlet {
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		Connection conn = null;
 		PrintWriter out = res.getWriter();
 		String name, email;
 		long phone;
@@ -51,6 +53,7 @@ public class AssignManagerServlet extends HttpServlet {
 		long oldBranchManagerId = -1;
 		
 		try {
+			conn = Factory.getDataSource().getConnection();
 			name = req.getParameter("manager-name");
 			phone = Long.parseLong(req.getParameter("manager-phone"));
 			email = req.getParameter("manager-email");
@@ -64,8 +67,8 @@ public class AssignManagerServlet extends HttpServlet {
 				oldBranchManagerId = branch.getManager().getId();
 				// Remove old manager and assign new manager.
 				
-				managerDAO.delete(oldBranchManagerId);
-				managerDAO.create(branchId, name, email, phone);
+				managerDAO.delete(conn, oldBranchManagerId);
+				managerDAO.create(conn, branch.getId(), name, email, phone);
 			}
 			out.println("<div class='notification success'>" + "manager assigned to branch" + "</div>");
 			
@@ -74,6 +77,12 @@ public class AssignManagerServlet extends HttpServlet {
 		} catch(SQLException e) {
 			out.println("<div class='notification danger'>" + e.getMessage() + "</div>");
 		} finally {
+			
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+            
 			doGet(req, res);
 			out.close();
 		}

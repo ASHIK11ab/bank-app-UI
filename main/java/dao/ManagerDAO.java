@@ -20,9 +20,8 @@ import util.Util;
 
 public class ManagerDAO {
 	// Create a new manager account and assign to branch.
-	public void create(int branchId, String managerName, 
+	public void create(Connection conn, int branchId, String managerName, 
 						String managerEmail, long managerPhone) throws SQLException {
-		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -31,7 +30,6 @@ public class ManagerDAO {
 		long managerId = 0;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("INSERT INTO manager (name, password, phone, email, branch_id) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			
 			// Assign new manager.
@@ -59,11 +57,6 @@ public class ManagerDAO {
             try {
                 if(stmt != null)
                     stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		
@@ -180,15 +173,13 @@ public class ManagerDAO {
 	}
 	
 	
-	public void delete(long id) throws SQLException {
-		Connection conn = null;
+	public void delete(Connection conn, long id) throws SQLException {
 		PreparedStatement stmt = null;
 		
 		String msg = "";
 		boolean exceptionOccured = false;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM manager WHERE id = ?");
 			stmt.setLong(1,  id);
 			stmt.executeUpdate();
@@ -199,11 +190,6 @@ public class ManagerDAO {
             try {
                 if(stmt != null)
                     stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		
