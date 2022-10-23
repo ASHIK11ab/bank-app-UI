@@ -25,6 +25,22 @@
 		<servlet-class>servlet.admin.MergeBranchServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>ManagersServlet</servlet-name>
+		<servlet-class>servlet.admin.ManagersServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ManagerServlet</servlet-name>
+		<servlet-class>servlet.admin.ManagerServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>AssignManagerServlet</servlet-name>
+		<servlet-class>servlet.admin.AssignManagerServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>TransferManagerServlet</servlet-name>
+		<servlet-class>servlet.admin.TransferManagerServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>AdminLogoutServlet</servlet-name>
 		<servlet-class>servlet.admin.LogoutServlet</servlet-class>
 	</servlet>
@@ -53,6 +69,22 @@
 	<servlet-mapping>
 		<servlet-name>MergeBranchServlet</servlet-name>
 		<url-pattern>/admin/branches/branch/merge</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ManagersServlet</servlet-name>
+		<url-pattern>/admin/managers</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ManagerServlet</servlet-name>
+		<url-pattern>/admin/managers/manager/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AssignManagerServlet</servlet-name>
+		<url-pattern>/admin/managers/manager/assign</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>TransferManagerServlet</servlet-name>
+		<url-pattern>/admin/managers/transfer</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>AdminLogoutServlet</servlet-name>

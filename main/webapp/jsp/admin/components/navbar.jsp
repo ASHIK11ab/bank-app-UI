@@ -26,8 +26,8 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/admin/managers">view managers</a>
-					<a href="#">assign new manager</a>
-					<a href="#">transfer managers</a>
+					<a href="/bank-app/admin/managers/manager/assign">assign new manager</a>
+					<a href="/bank-app/admin/managers/transfer">transfer managers</a>
 				</li>
 			</ul>
 		</div>
