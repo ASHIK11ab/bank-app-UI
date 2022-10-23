@@ -3,6 +3,8 @@ package servlet.admin;
 import java.io.IOException;
 
 import java.io.PrintWriter;
+import java.sql.SQLException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +43,19 @@ public class LoginServlet extends HttpServlet {
 			password = req.getParameter("password");
 		} catch(NumberFormatException e) {
 			req.setAttribute("error", "Invliad input for id");
-			req.getRequestDispatcher("/jsp/admin/login.jsp").forward(req, res);
+			doGet(req, res);
+			return;
 		}
 		
-		out = res.getWriter();
-		admin = adminDAO.get(id);
+		try {
+			admin = adminDAO.get(id);    
+		} catch(SQLException e) {
+			out = res.getWriter();
+			res.setStatus(500);
+			out.println("<h1>Internal error</h1>");
+			out.close();
+			return;
+		}
 		
         if((admin != null) && admin.getPassword().equals(password)) {
         	HttpSession session = req.getSession();
@@ -56,14 +66,7 @@ public class LoginServlet extends HttpServlet {
             res.sendRedirect("/bank-app/admin/dashboard");
         } else {
 			req.setAttribute("error", "Invalid id or password");
-            req.getRequestDispatcher("/jsp/admin/login.jsp").forward(req, res);
+            doGet(req, res);
         }
-        
-        out.close();
-	}
-	
-	
-	public void destroy() {
-		System.out.println("Admin login servlet destroyed");
 	}
 }

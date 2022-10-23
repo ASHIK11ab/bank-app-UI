@@ -15,7 +15,7 @@ import model.UserBean;
 import util.Factory;
 
 public class AdminDAO {
-	public UserBean get(long id) {
+	public UserBean get(long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -25,6 +25,9 @@ public class AdminDAO {
 		String password;
         String name;
         String email;
+        
+        boolean exceptionOccured = false;
+        String msg = "";
         
         try {
             conn = Factory.getDataSource().getConnection();
@@ -47,7 +50,8 @@ public class AdminDAO {
                 admin.setPassword(password);
             }
         } catch(SQLException e) {
-            System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = e.getMessage();
         } finally {
             try {
                 if(rs != null)
@@ -65,6 +69,9 @@ public class AdminDAO {
             } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
         
-        return admin;
+        if(exceptionOccured)
+        	throw new SQLException(msg);
+        else
+        	return admin;
 	}
 }
