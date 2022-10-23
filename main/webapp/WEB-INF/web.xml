@@ -57,6 +57,10 @@
 		<servlet-class>servlet.admin.RemoveIntegratedBankServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>ProfileServlet</servlet-name>
+		<servlet-class>servlet.admin.ProfileServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>AdminLogoutServlet</servlet-name>
 		<servlet-class>servlet.admin.LogoutServlet</servlet-class>
 	</servlet>
@@ -117,6 +121,10 @@
 	<servlet-mapping>
 		<servlet-name>RemoveIntegratedBankServlet</servlet-name>
 		<url-pattern>/admin/integrated-banks/bank/delete</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProfileServlet</servlet-name>
+		<url-pattern>/admin/profile</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>AdminLogoutServlet</servlet-name>

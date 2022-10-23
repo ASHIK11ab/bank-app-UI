@@ -35,7 +35,7 @@
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
-					<a href="#">view profile</a>
+					<a href="/bank-app/admin/profile">view profile</a>
 					<a href="/bank-app/admin/logout">logout</a>
 				</li>
 			</ul>
