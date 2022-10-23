@@ -5,30 +5,40 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>${ requestScope.branch.getName() } branch</title>
+	<title>Manager</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/component/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/admin/branch.css">
+	<style>
+		.wrapper {
+			width: 600px;
+			border: 1.5px solid #ddd;
+			margin: auto;
+			padding: 25px 30px;
+			font-family: Arial, sans-serif;
+			box-sizing: border-box;
+		}
+	
+		section .title {
+			font-size: 18px;
+			text-transform: captialize;
+		}
+	</style>
 </head>
 <body>
+	<c:set var="manager" value="${ requestScope.manager }" />
 	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
-
-	<c:set var="branch" value="${ requestScope.branch }" />
-	<c:set var="manager" value="${ branch.getManager() }" />
 	
 	<main class="container">
 		<div class="wrapper">
-			<section class="branch-section">
-				<h1 class="title">Branch details:</h1>
-				<p>Name: ${ branch.getName() }</p>
-				<p>Address: ${ branch.getAddress() }</p>
-			</section>
 			<section class="manager-section">
 				<h2 class="title">Manager details:</h2>
 				<p>Name: ${ manager.getName() }</p>
 				<p>Email: ${ manager.getEmail() }</p>
 				<p>Phone: ${ manager.getPhone() }</p>
+			</section>
+			<section class="branch-section">
+				<h1 class="title">Branch details:</h1>
+				<p>Branch Name: ${ manager.getBranchName() }</p>
 			</section>
 		</div>
 	</main>

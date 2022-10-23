@@ -16,7 +16,7 @@
 	
 	<main class="container">
 		<section class="form">
-			<h1 class="form-title">add manager</h1>
+			<h1 class="form-title">add branch</h1>
 			<form action="/bank-app/admin/branches/branch/create" method="post">
 				<section class="branch">
 					<h3>Branch Details:</h3>

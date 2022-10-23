@@ -1,5 +1,5 @@
 <header class="navbar">
-	<a class="app-name" href="/bank-app/admin/dashboard">your bank</a>
+	<a class="app-name" href="/bank-app/admin/dashboard">Your bank</a>
 	<nav class="nav">
 		<div class="sub-nav">
 			<span class="text">branches</span>
@@ -25,7 +25,7 @@
 			<span class="text">managers</span>
 			<ul class="links">
 				<li>
-					<a href="#">view managers</a>
+					<a href="/bank-app/admin/managers">view managers</a>
 					<a href="#">assign new manager</a>
 					<a href="#">transfer managers</a>
 				</li>

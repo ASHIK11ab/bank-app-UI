@@ -27,13 +27,12 @@ public class MergeBranchServlet extends HttpServlet {
 		
 		try {
 			branches = branchDAO.getAll();
+			req.setAttribute("branches", branches);
+			req.getRequestDispatcher("/jsp/admin/mergeBranch.jsp").include(req, res);
 		} catch(SQLException e) {
 			res.setStatus(500);
 			res.getWriter().println("<h1>Internal error</h1>");
 		}
-		
-		req.setAttribute("branches", branches);
-		req.getRequestDispatcher("/jsp/admin/mergeBranch.jsp").include(req, res);
 	}
 	
 	
