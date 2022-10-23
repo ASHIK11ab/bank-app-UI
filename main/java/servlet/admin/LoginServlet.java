@@ -1,6 +1,7 @@
 package servlet.admin;
 
 import java.io.IOException;
+
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpSession;
 
 import dao.AdminDAO;
 import model.UserBean;
+import util.Factory;
 
 
 public class LoginServlet extends HttpServlet {
@@ -18,8 +20,7 @@ public class LoginServlet extends HttpServlet {
 	private AdminDAO adminDAO;
 	
 	public void init() {		
-		adminDAO = new AdminDAO();
-		System.out.println("Admin login servlet initialized");
+		adminDAO = Factory.getAdminDAO();
 	}
 	
 	

@@ -11,12 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import dao.BranchDAO;
 import model.AddressBean;
+import util.Factory;
 
 public class AddBranchServlet extends HttpServlet {
 	private BranchDAO branchDAO;
 	
 	public void init() {
-		branchDAO = new BranchDAO();
+		branchDAO = Factory.getBranchDAO();
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {

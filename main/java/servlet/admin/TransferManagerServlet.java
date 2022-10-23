@@ -19,19 +19,15 @@ import javax.sql.DataSource;
 
 import dao.BranchDAO;
 import model.BranchBean;
+import util.Factory;
+
 
 public class TransferManagerServlet extends HttpServlet {
 	private BranchDAO branchDAO;
-	private DataSource dataSource;
+	
 	
 	public void init() {
-		branchDAO = new BranchDAO();
-		try {			
-			Context ctx = new InitialContext();
-			dataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/newbankdb");
-		} catch(NamingException e) {
-			System.out.println(e.getMessage());
-		}
+		branchDAO = Factory.getBranchDAO();
 	}
 	
 	
@@ -83,7 +79,7 @@ public class TransferManagerServlet extends HttpServlet {
 		}
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
             stmt = conn.prepareStatement("UPDATE manager SET branch_id = ? WHERE id = ?");
             
             firstBranch = branchDAO.get(firstBranchId);

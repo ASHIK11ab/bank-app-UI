@@ -1,6 +1,7 @@
 package servlet.admin;
 
 import java.io.IOException;
+
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -12,13 +13,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import dao.BranchDAO;
 import model.BranchBean;
+import util.Factory;
 
 
 public class MergeBranchServlet extends HttpServlet {
 	private BranchDAO branchDAO;
 	
 	public void init() {
-		branchDAO = new BranchDAO();
+		branchDAO = Factory.getBranchDAO();
 	}
 	
 	

@@ -1,6 +1,7 @@
 package servlet.admin;
 
 import java.io.IOException;
+
 import java.sql.SQLException;
 import java.util.LinkedList;
 
@@ -12,12 +13,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import dao.ManagerDAO;
 import model.EmployeeBean;
+import util.Factory;
+
 
 public class ManagersServlet extends HttpServlet {
 	private ManagerDAO	managerDAO;
 	
 	public void init() {
-		managerDAO = new ManagerDAO();
+		managerDAO = Factory.getManagerDAO();
 	}
 	
 	

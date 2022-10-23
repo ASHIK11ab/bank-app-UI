@@ -119,4 +119,9 @@
 		<filter-name>AdminAuthenticationFilter</filter-name>
 		<url-pattern>/admin/*</url-pattern>
 	</filter-mapping>
+	
+	<!-- Listeners -->
+	<listener>
+		<listener-class>listener.AppListener</listener-class>
+	</listener>
 </web-app>

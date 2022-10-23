@@ -12,20 +12,9 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import model.UserBean;
+import util.Factory;
 
 public class AdminDAO {
-	private DataSource dataSource;
-	
-	public AdminDAO() {
-		try {			
-			Context context = new InitialContext();
-			dataSource = (DataSource) context.lookup("java:comp/env/jdbc/newbankdb");
-		} catch(NamingException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-	
-	
 	public UserBean get(long id) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -38,7 +27,7 @@ public class AdminDAO {
         String email;
         
         try {
-            conn = dataSource.getConnection();
+            conn = Factory.getDataSource().getConnection();
             stmt = conn.prepareStatement("SELECT * FROM admin WHERE id = ?");
             stmt.setLong(1, id);
             rs = stmt.executeQuery();

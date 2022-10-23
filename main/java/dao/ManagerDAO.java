@@ -15,21 +15,10 @@ import javax.sql.DataSource;
 
 import model.EmployeeBean;
 import model.UserBean;
+import util.Factory;
 import util.Util;
 
 public class ManagerDAO {
-	private DataSource dataSource;
-	
-	public ManagerDAO() {
-		try {			
-			Context context = new InitialContext();
-			dataSource = (DataSource) context.lookup("java:comp/env/jdbc/newbankdb");
-		} catch(NamingException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-	
-	
 	// Create a new manager account and assign to branch.
 	public void create(int branchId, String managerName, 
 						String managerEmail, long managerPhone) throws SQLException {
@@ -42,7 +31,7 @@ public class ManagerDAO {
 		long managerId = 0;
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("INSERT INTO manager (name, password, phone, email, branch_id) values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			
 			// Assign new manager.
@@ -93,7 +82,7 @@ public class ManagerDAO {
 		String msg = "";
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("SELECT m.id, m.name as manager_name, m.phone, m.email, m.password, m.branch_id, b.name as branch_name FROM manager m JOIN branch b ON m.branch_id = b.id WHERE m.id = ?");
 			stmt.setLong(1, id);
 			rs = stmt.executeQuery();
@@ -147,7 +136,7 @@ public class ManagerDAO {
 		String msg = "";
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.createStatement();	
 			rs = stmt.executeQuery("SELECT m.id, m.name as manager_name, m.phone, m.email, m.password, m.branch_id, b.name as branch_name FROM manager m JOIN branch b ON m.branch_id = b.id");
 			
@@ -199,7 +188,7 @@ public class ManagerDAO {
 		boolean exceptionOccured = false;
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM manager WHERE id = ?");
 			stmt.setLong(1,  id);
 			stmt.executeUpdate();

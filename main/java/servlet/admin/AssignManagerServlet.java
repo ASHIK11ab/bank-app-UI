@@ -14,14 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import dao.BranchDAO;
 import dao.ManagerDAO;
 import model.BranchBean;
+import util.Factory;
 
 public class AssignManagerServlet extends HttpServlet {
 	private ManagerDAO managerDAO;
 	private BranchDAO branchDAO;
 	
 	public void init() {
-		managerDAO = new ManagerDAO();
-		branchDAO = new BranchDAO();
+		managerDAO = Factory.getManagerDAO();
+		branchDAO = Factory.getBranchDAO();
 	}
 	
 	

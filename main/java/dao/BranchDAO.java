@@ -16,22 +16,10 @@ import model.AddressBean;
 import model.BranchBean;
 import model.EmployeeBean;
 import model.UserBean;
+import util.Factory;
 import util.Util;
 
 public class BranchDAO {
-	private DataSource dataSource;
-	
-	
-	public BranchDAO() {
-		try {			
-			Context ctx = new InitialContext();
-			dataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/newbankdb");
-		} catch(NamingException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-	
-	
 	public LinkedList<BranchBean> getAll() throws SQLException {
 		LinkedList<BranchBean> branches = new LinkedList<BranchBean>();
 		BranchBean branch = null;
@@ -46,7 +34,7 @@ public class BranchDAO {
 		String msg = "";
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id");
 			
@@ -116,7 +104,7 @@ public class BranchDAO {
 		String msg = "";
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id WHERE branch_id = ?");
 			stmt.setInt(1, id);
 			rs = stmt.executeQuery();
@@ -188,7 +176,7 @@ public class BranchDAO {
 		int branchId = 0;
 				
 		try {
-            conn = dataSource.getConnection();
+            conn = Factory.getDataSource().getConnection();
             stmt1 = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt1.setString(1, name);
             stmt1.setString(2, address.getDoorNo());
@@ -261,7 +249,7 @@ public class BranchDAO {
 		boolean exceptionOccured = false;
 		
 		try {
-			conn = dataSource.getConnection();
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM branch WHERE id = ?");
 			stmt.setInt(1,  id);
 			stmt.executeUpdate();

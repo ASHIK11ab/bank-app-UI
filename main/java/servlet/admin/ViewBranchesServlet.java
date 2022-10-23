@@ -12,12 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import dao.BranchDAO;
 import model.BranchBean;
+import util.Factory;
 
 public class ViewBranchesServlet extends HttpServlet {
 	private BranchDAO branchDAO;
 	
 	public void init() {
-		branchDAO = new BranchDAO();
+		branchDAO = Factory.getBranchDAO();
 	}
 	
 	
