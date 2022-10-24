@@ -15,9 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import dao.BranchDAO;
 import dao.ManagerDAO;
 import model.BranchBean;
+import model.EmployeeBean;
 import util.Factory;
 
 public class AssignManagerServlet extends HttpServlet {
+	private static final long serialVersionUID = 1533366166730604989L;
 	private ManagerDAO managerDAO;
 	private BranchDAO branchDAO;
 	
@@ -50,6 +52,7 @@ public class AssignManagerServlet extends HttpServlet {
 		int branchId;
 		
 		BranchBean branch = null;
+		EmployeeBean manager = null;
 		long oldBranchManagerId = -1;
 		
 		try {
@@ -68,14 +71,20 @@ public class AssignManagerServlet extends HttpServlet {
 				// Remove old manager and assign new manager.
 				
 				managerDAO.delete(conn, oldBranchManagerId);
-				managerDAO.create(conn, branch.getId(), name, email, phone);
+				manager = managerDAO.create(conn, branch.getId(), name, email, phone);
+				out.println("<div class='notification success'>" + "manager assigned to branch" + "</div>");
+				
+				req.setAttribute("manager", manager);
+				req.setAttribute("displayPassword", true);
+				req.getRequestDispatcher("/jsp/admin/manager.jsp").include(req, res);
 			}
-			out.println("<div class='notification success'>" + "manager assigned to branch" + "</div>");
 			
 		} catch(NumberFormatException e) {
 			out.println("<div class='notification danger'>" + "invalid input" + "</div>");
+			doGet(req, res);
 		} catch(SQLException e) {
 			out.println("<div class='notification danger'>" + e.getMessage() + "</div>");
+			doGet(req, res);
 		} finally {
 			
             try {
@@ -83,7 +92,6 @@ public class AssignManagerServlet extends HttpServlet {
                     conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
             
-			doGet(req, res);
 			out.close();
 		}
 	}

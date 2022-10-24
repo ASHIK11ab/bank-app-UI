@@ -5,7 +5,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Manager</title>
+	<title>Manager: ${ requestScope.manager.getName() }</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
 </head>
@@ -18,12 +18,18 @@
 		<div class="wrapper">
 			<section>
 				<h2 class="title">Manager details:</h2>
-				<p>Name: ${ manager.getName() }</p>
+				<p>Id   : ${ manager.getId() }</p>
+				
+				<c:if test="${ requestScope.displayPassword }">
+					<p>Password: ${ manager.getPassword() }</p>
+				</c:if>
+				
+				<p>Name : ${ manager.getName() }</p>
 				<p>Email: ${ manager.getEmail() }</p>
 				<p>Phone: ${ manager.getPhone() }</p>
 			</section>
 			<section>
-				<h1 class="title">Branch details:</h1>
+				<h2 class="title">Branch details:</h2>
 				<p>Branch Name: ${ manager.getBranchName() }</p>
 			</section>
 		</div>

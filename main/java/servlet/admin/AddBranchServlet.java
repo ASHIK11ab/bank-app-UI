@@ -14,9 +14,11 @@ import dao.BranchDAO;
 import dao.ManagerDAO;
 import model.AddressBean;
 import model.BranchBean;
+import model.EmployeeBean;
 import util.Factory;
 
 public class AddBranchServlet extends HttpServlet {
+	private static final long serialVersionUID = -4891823564773458976L;
 	private BranchDAO branchDAO;
 	private ManagerDAO managerDAO;
 	
@@ -33,7 +35,9 @@ public class AddBranchServlet extends HttpServlet {
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
 		PrintWriter out = res.getWriter();
-		BranchBean branch;
+		
+		BranchBean branch = null;
+		EmployeeBean manager = null;
 		AddressBean address;
 		
 		String name, doorNo, street, city, state;
@@ -72,10 +76,17 @@ public class AddBranchServlet extends HttpServlet {
 		try {
 			conn = Factory.getDataSource().getConnection();
 			branch = branchDAO.create(conn, name, address);
-			managerDAO.create(conn, branch.getId(), managerName, managerEmail, managerPhone);
+			manager = managerDAO.create(conn, branch.getId(), managerName, managerEmail, managerPhone);
+			branch.setManager(manager);
+			
 			out.println("<div class='notification success'>" + "branch created successfully" + "</div>");
+			req.setAttribute("branch", branch);
+			req.setAttribute("displayManagerPassword", true);
+			req.getRequestDispatcher("/jsp/admin/branch.jsp").include(req, res);
+			
 		} catch(SQLException e) {
 			out.println("<div class='notification danger'>" + "error creating branch" + "</div>");
+			doGet(req, res);
 		} finally {
 			
             try {
@@ -83,7 +94,6 @@ public class AddBranchServlet extends HttpServlet {
                     conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
             
-			doGet(req, res);
 			out.close();
 		}
 	}
