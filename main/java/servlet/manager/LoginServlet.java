@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import constant.Role;
 import dao.ManagerDAO;
 import model.EmployeeBean;
 import util.Factory;
@@ -64,7 +65,7 @@ public class LoginServlet extends HttpServlet {
         	session.setAttribute("id", manager.getId());
         	// 2 days.
         	session.setMaxInactiveInterval(60*60*24*2);
-        	session.setAttribute("role", 2);
+        	session.setAttribute("role", Role.MANAGER);
             res.sendRedirect("/bank-app/manager/dashboard");
         } else {
 			req.setAttribute("error", "Invalid id or password");

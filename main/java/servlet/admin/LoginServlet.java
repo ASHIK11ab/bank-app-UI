@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import constant.Role;
 import dao.AdminDAO;
 import model.UserBean;
 import util.Factory;
@@ -27,7 +29,9 @@ public class LoginServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		req.getRequestDispatcher("/jsp/admin/login.jsp").forward(req, res);
+		req.setAttribute("title", "Admin Login");
+		req.setAttribute("actionURL", req.getRequestURI());
+		req.getRequestDispatcher("/jsp/components/loginForm.jsp").forward(req, res);
 	}
 	
 	
@@ -62,7 +66,7 @@ public class LoginServlet extends HttpServlet {
         	session.setAttribute("id", admin.getId());
         	// 2 days.
         	session.setMaxInactiveInterval(60*60*24*2);
-        	session.setAttribute("role", 1);
+        	session.setAttribute("role", Role.ADMIN);
             res.sendRedirect("/bank-app/admin/dashboard");
         } else {
 			req.setAttribute("error", "Invalid id or password");
