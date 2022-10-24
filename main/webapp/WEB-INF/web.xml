@@ -41,6 +41,10 @@
 		<servlet-class>servlet.admin.TransferManagerServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>ManagerPasswordResetServlet</servlet-name>
+		<servlet-class>servlet.admin.ManagerPasswordResetServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>IntegratedBanksServlet</servlet-name>
 		<servlet-class>servlet.admin.IntegratedBanksServlet</servlet-class>
 	</servlet>
@@ -105,6 +109,10 @@
 	<servlet-mapping>
 		<servlet-name>TransferManagerServlet</servlet-name>
 		<url-pattern>/admin/managers/transfer</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ManagerPasswordResetServlet</servlet-name>
+		<url-pattern>/admin/managers/manager/password-reset</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>IntegratedBanksServlet</servlet-name>
