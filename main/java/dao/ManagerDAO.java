@@ -20,12 +20,14 @@ import util.Util;
 
 public class ManagerDAO {
 	// Create a new manager account and assign to branch.
-	public void create(Connection conn, int branchId, String managerName, 
-						String managerEmail, long managerPhone) throws SQLException {
+	public EmployeeBean create(Connection conn, int branchId, String managerName, 
+								String managerEmail, long managerPhone) throws SQLException {
+		BranchDAO branchDAO = Factory.getBranchDAO();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		String managerPassword = Util.genPassword(), msg = "";
+		EmployeeBean manager = null;
+		String managerPassword = Util.genPassword(), msg = "", branchName;
 		boolean exceptionOccured = false;
 		long managerId = 0;
 		
@@ -44,6 +46,16 @@ public class ManagerDAO {
 
 	        if(rs.next()) {
 	            managerId = rs.getLong(1);
+	            
+	            manager = new EmployeeBean();
+	            manager.setId(managerId);
+	            manager.setName(managerName);
+	            manager.setEmail(managerEmail);
+	            manager.setPhone(managerPhone);
+	            manager.setPassword(managerPassword);
+	            manager.setBranchId(branchId);
+	            branchName = branchDAO.get(branchId).getName();
+	            manager.setBranchName(branchName);
 	        }
 		} catch(SQLException e) {
 			exceptionOccured = true;
@@ -62,6 +74,8 @@ public class ManagerDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
+		else
+			return manager;
 	}
 	
 	
