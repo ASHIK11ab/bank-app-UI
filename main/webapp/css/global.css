@@ -54,3 +54,28 @@ section .title {
 	text-decoration: none;
 	text-transform: capitalize;
 }
+
+.cards {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeate(auto-fit, minmax(300px, auto));
+}
+
+.cards .card {
+	position: relative;
+	width: 100%;
+	background-color: #ddd;
+	border-radius: 5px;
+	padding: 1.5rem 2rem;
+	font-family: Arial, sans-serif;
+}
+
+.card .title {
+	text-align: center;
+	font-size: 20px;
+	font-weight: 500;
+}
+
+.card .cnt {
+	font-size: 30px;
+}
