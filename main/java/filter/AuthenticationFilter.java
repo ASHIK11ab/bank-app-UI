@@ -1,6 +1,7 @@
 package filter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.http.HttpFilter;
 import javax.servlet.FilterChain;
@@ -14,9 +15,10 @@ public class AuthenticationFilter extends HttpFilter {
 
 	public void doFilter(HttpServletRequest req,HttpServletResponse res, FilterChain chain) throws ServletException, IOException {		
 		// Make sure that the session is a valid session.
+		// Redirect to respective login page if not authenticated.
 		HttpSession session = req.getSession(false);
 		if(session == null || session.getAttribute("role") == null) {
-			res.sendRedirect("/bank-app/login/admin");
+			res.getWriter().println("<h1>In app homepage</h1>");
 			return;
 		}
 		
