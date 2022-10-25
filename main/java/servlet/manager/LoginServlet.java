@@ -18,24 +18,17 @@ import util.Factory;
 
 
 public class LoginServlet extends HttpServlet {
-	private static final long serialVersionUID = 6415721614440963644L;
-	
-	private ManagerDAO managerDAO;
-	
-	public void init() {		
-		managerDAO = Factory.getManagerDAO();
-	}
-	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		req.setAttribute("title", "Manager Login");
-		req.setAttribute("actionURL", "/bank-app/login/manager");
+		req.setAttribute("actionURL", req.getRequestURI());
 		req.getRequestDispatcher("/jsp/components/loginForm.jsp").forward(req, res);
 	}
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out;
+		ManagerDAO managerDAO = Factory.getManagerDAO();
 		
 		EmployeeBean manager = null;
 		long id = 0;
@@ -63,6 +56,7 @@ public class LoginServlet extends HttpServlet {
         if((manager != null) && manager.getPassword().equals(password)) {
         	HttpSession session = req.getSession();
         	session.setAttribute("id", manager.getId());
+        	session.setAttribute("branch-id", manager.getBranchId());
         	// 2 days.
         	session.setMaxInactiveInterval(60*60*24*2);
         	session.setAttribute("role", Role.MANAGER);

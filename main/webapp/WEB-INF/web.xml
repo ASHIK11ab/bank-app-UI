@@ -75,8 +75,36 @@
 		<servlet-class>servlet.manager.LoginServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>DashboardServlet</servlet-name>
+		<servlet-name>ManagerDashboardServlet</servlet-name>
 		<servlet-class>servlet.manager.DashboardServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>EmployeesServlet</servlet-name>
+		<servlet-class>servlet.manager.EmployeesServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>EmployeeServlet</servlet-name>
+		<servlet-class>servlet.manager.EmployeeServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>AddEmployeeServlet</servlet-name>
+		<servlet-class>servlet.manager.AddEmployeeServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>RemoveEmployeeServlet</servlet-name>
+		<servlet-class>servlet.manager.RemoveEmployeeServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ManagerProfileServlet</servlet-name>
+		<servlet-class>servlet.manager.ProfileServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>EmployeePasswordResetServlet</servlet-name>
+		<servlet-class>servlet.manager.EmployeePasswordResetServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ManagerLogoutServlet</servlet-name>
+		<servlet-class>servlet.manager.LogoutServlet</servlet-class>
 	</servlet>
 	
 	<!-- Admin servlet mappings -->
@@ -155,8 +183,36 @@
 		<url-pattern>/login/manager</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>DashboardServlet</servlet-name>
+		<servlet-name>ManagerDashboardServlet</servlet-name>
 		<url-pattern>/manager/dashboard</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>EmployeesServlet</servlet-name>
+		<url-pattern>/manager/employees</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>EmployeeServlet</servlet-name>
+		<url-pattern>/manager/employees/employee/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AddEmployeeServlet</servlet-name>
+		<url-pattern>/manager/employees/employee/create</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>RemoveEmployeeServlet</servlet-name>
+		<url-pattern>/manager/employees/employee/remove</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ManagerProfileServlet</servlet-name>
+		<url-pattern>/manager/profile</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>EmployeePasswordResetServlet</servlet-name>
+		<url-pattern>/manager/employees/employee/password-reset</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ManagerLogoutServlet</servlet-name>
+		<url-pattern>/manager/logout</url-pattern>
 	</servlet-mapping>
 
 	<!-- Filters -->
