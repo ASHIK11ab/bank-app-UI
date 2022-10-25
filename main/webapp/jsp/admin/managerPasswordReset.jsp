@@ -18,13 +18,13 @@
 			<h1 class="title">Manager Password Reset</h1>
 			
 			<form action="/bank-app/admin/managers/manager/password-reset" method="post">
-				<label>Select Manager:</label>
-				<select name="manager-id">
-					<option value="-1" selected disabled hidden>Select Manager</option>
-					<c:forEach items="${ requestScope.managers }" var="manager">
-						<option value="${ manager.getId() }">${ manager.getName() }</option>
-					</c:forEach>
-				</select>
+				
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="Select Manager:" />
+					<jsp:param name="name" value="manager-id" />
+					<jsp:param name="placeholderOptionText" value="select manager" />
+					<jsp:param name="displayId" value="${ true }" />
+				</jsp:include>
 				
 				<label>New Password:</label>
 				<input type="text" name="password" placeholder="manager password" maxlength="15" required>

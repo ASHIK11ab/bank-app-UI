@@ -17,13 +17,13 @@
 		<div class="wrapper">
 			<h1>Remove Integrated Bank</h1>
 			<form action="/bank-app/admin/integrated-banks/bank/delete" method="post">
-				<label>Select Bank:</label>
-				<select name="bank-id">
-					<option value="-1" selected disabled hidden>Select bank</option>
-					<c:forEach items="${ requestScope.integratedBanks }" var="bank">
-						<option value="${ bank.getId() }">${ bank.getName() }</option>
-					</c:forEach>
-				</select>
+				
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="Select Bank:" />
+					<jsp:param name="name" value="bank-id" />
+					<jsp:param name="placeholderOptionText" value="select bank" />
+					<jsp:param name="displayId" value="${ false }" />
+				</jsp:include>
 				
 				<button>Remove bank</button>
 			</form>

@@ -29,7 +29,7 @@ public class RemoveIntegratedBankServlet extends HttpServlet {
 		
 		try {
 			integratedBanks = integratedBankDAO.getAll();
-			req.setAttribute("integratedBanks", integratedBanks);
+			req.setAttribute("values", integratedBanks);
 			req.getRequestDispatcher("/jsp/admin/removeIntegratedBank.jsp").include(req, res);
 		} catch(SQLException e) {
 			res.setStatus(500);

@@ -19,14 +19,18 @@
 			<h1>Merge Branches</h1>
 			<form action="/bank-app/admin/branches/merge" method="post">
 				
-				<label>Base branch:</label>
-				<jsp:include page="/jsp/components/branchDropdown.jsp">
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="Base branch:" />
 					<jsp:param name="name" value="base-branch-id" />
+					<jsp:param name="placeholderOptionText" value="select branch" />
+					<jsp:param name="displayId" value="${ false }" />
 				</jsp:include>
 				
-				<label>Target branch:</label>
-				<jsp:include page="/jsp/components/branchDropdown.jsp">
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="Target branch:" />
 					<jsp:param name="name" value="target-branch-id" />
+					<jsp:param name="placeholderOptionText" value="select branch" />
+					<jsp:param name="displayId" value="${ false }" />
 				</jsp:include>
 				
 				<button>merge branches</button>

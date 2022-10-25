@@ -19,11 +19,15 @@
 			<h1>Assign Manager</h1>
 			<form action="/bank-app/admin/managers/manager/assign" method="post">
 				
-				<jsp:include page="/jsp/components/managerForm.jsp" />
+				<jsp:include page="/jsp/components/employeeRegistrationForm.jsp">
+					<jsp:param name="employeeType" value="manager" />
+				</jsp:include>
 				
-				<label>Branch:</label>
-				<jsp:include page="/jsp/components/branchDropdown.jsp">
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="Branch to assign:" />
 					<jsp:param name="name" value="branch-id" />
+					<jsp:param name="placeholderOptionText" value="select branch" />
+					<jsp:param name="displayId" value="${ false }" />
 				</jsp:include>
 				
 				<button>Assign manager</button>

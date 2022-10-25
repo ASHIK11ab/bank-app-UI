@@ -24,6 +24,7 @@
 						<jsp:param name="labelName" value="Select Employee" />
 						<jsp:param name="name" value="id" />
 						<jsp:param name="placeholderOptionText" value="Select employee" />
+						<jsp:param name="displayId" value="${ true }" />
 					</jsp:include>
 					
 					<button>Remove employee</button>
