@@ -28,6 +28,7 @@
 					<a href="/bank-app/admin/managers">view managers</a>
 					<a href="/bank-app/admin/managers/manager/assign">assign new manager</a>
 					<a href="/bank-app/admin/managers/transfer">transfer managers</a>
+					<a href="/bank-app/admin/managers/manager/password-reset">reset manager password</a>
 				</li>
 			</ul>
 		</div>

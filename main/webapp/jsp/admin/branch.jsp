@@ -20,12 +20,18 @@
 	<main class="container">
 		<div class="wrapper">
 			<section class="branch-section">
-				<h1 class="title">Branch details:</h1>
+				<h2 class="title">Branch details:</h2>
 				<p>Name: ${ branch.getName() }</p>
 				<p>Address: ${ branch.getAddress() }</p>
 			</section>
 			<section class="manager-section">
 				<h2 class="title">Manager details:</h2>
+				<p>Id: ${ manager.getId() }</p>
+				
+				<c:if test="${ requestScope.displayManagerPassword }">
+					<p>Password: ${ manager.getPassword() }<p>
+				</c:if>
+				
 				<p>Name: ${ manager.getName() }</p>
 				<p>Email: ${ manager.getEmail() }</p>
 				<p>Phone: ${ manager.getPhone() }</p>

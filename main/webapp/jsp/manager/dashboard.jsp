@@ -5,12 +5,12 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Admin dashboard</title>
+	<title>Manager dashboard</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
 </head>
 <body>
-	<jsp:include page="/jsp/admin/components/navbar.jsp" />
+	<jsp:include page="/jsp/manager/components/navbar.jsp" />
 	
 	<main class="container">
 		<div class="cards">

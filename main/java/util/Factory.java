@@ -14,6 +14,7 @@ public class Factory {
 	// DAO
 	private static BranchDAO branchDAO;
 	private static ManagerDAO managerDAO;
+	private static EmployeeDAO employeeDAO;
 	private static AdminDAO adminDAO;
 	private static IntegratedBankDAO integratedBankDAO;
 	
@@ -24,6 +25,7 @@ public class Factory {
 			
 			branchDAO = new BranchDAO();
 			managerDAO = new ManagerDAO();
+			employeeDAO = new EmployeeDAO();
 			adminDAO = new AdminDAO();
 			integratedBankDAO = new IntegratedBankDAO();
 		} catch(NamingException e) {
@@ -43,6 +45,10 @@ public class Factory {
 	
 	public static ManagerDAO getManagerDAO() {
 		return managerDAO;
+	}
+	
+	public static EmployeeDAO getEmployeeDAO() {
+		return employeeDAO;
 	}
 	
 	public static AdminDAO getAdminDAO() {

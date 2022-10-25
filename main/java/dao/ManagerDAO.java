@@ -20,12 +20,14 @@ import util.Util;
 
 public class ManagerDAO {
 	// Create a new manager account and assign to branch.
-	public void create(Connection conn, int branchId, String managerName, 
-						String managerEmail, long managerPhone) throws SQLException {
+	public EmployeeBean create(Connection conn, int branchId, String managerName, 
+								String managerEmail, long managerPhone) throws SQLException {
+		BranchDAO branchDAO = Factory.getBranchDAO();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		String managerPassword = Util.genPassword(), msg = "";
+		EmployeeBean manager = null;
+		String managerPassword = Util.genPassword(), msg = "", branchName;
 		boolean exceptionOccured = false;
 		long managerId = 0;
 		
@@ -44,6 +46,16 @@ public class ManagerDAO {
 
 	        if(rs.next()) {
 	            managerId = rs.getLong(1);
+	            
+	            manager = new EmployeeBean();
+	            manager.setId(managerId);
+	            manager.setName(managerName);
+	            manager.setEmail(managerEmail);
+	            manager.setPhone(managerPhone);
+	            manager.setPassword(managerPassword);
+	            manager.setBranchId(branchId);
+	            branchName = branchDAO.get(branchId).getName();
+	            manager.setBranchName(branchName);
 	        }
 		} catch(SQLException e) {
 			exceptionOccured = true;
@@ -62,6 +74,8 @@ public class ManagerDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
+		else
+			return manager;
 	}
 	
 	
@@ -72,23 +86,25 @@ public class ManagerDAO {
 		
 		EmployeeBean manager = null;
 		boolean exceptionOccured = false;
-		String msg = "";
+		String msg = "", branchName = "";
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("SELECT m.id, m.name as manager_name, m.phone, m.email, m.password, m.branch_id, b.name as branch_name FROM manager m JOIN branch b ON m.branch_id = b.id WHERE m.id = ?");
+			stmt = conn.prepareStatement("SELECT * FROM manager WHERE id = ?");
 			stmt.setLong(1, id);
 			rs = stmt.executeQuery();
 			
 			if(rs.next()) {
 				manager = new EmployeeBean();
 				manager.setId(rs.getLong("id"));
-				manager.setName(rs.getString("manager_name"));
+				manager.setName(rs.getString("name"));
 				manager.setPhone(rs.getLong("phone"));
 				manager.setEmail(rs.getString("email"));
 				manager.setPassword(rs.getString("password"));
 				manager.setBranchId(rs.getInt("branch_id"));
-				manager.setBranchName(rs.getString("branch_name"));
+				
+				branchName = Factory.getBranchDAO().get(manager.getBranchId()).getName();
+				manager.setBranchName(branchName);
 			}
 		} catch(SQLException e) {
 			exceptionOccured = true;
@@ -126,22 +142,26 @@ public class ManagerDAO {
 		LinkedList<EmployeeBean> managers = new LinkedList<EmployeeBean>();
 		EmployeeBean manager = null;
 		boolean exceptionOccured = false;
-		String msg = "";
+		String msg = "", branchName = "";
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
 			stmt = conn.createStatement();	
-			rs = stmt.executeQuery("SELECT m.id, m.name as manager_name, m.phone, m.email, m.password, m.branch_id, b.name as branch_name FROM manager m JOIN branch b ON m.branch_id = b.id ORDER BY m.id");
+			rs = stmt.executeQuery("SELECT * FROM manager");
 			
 			while(rs.next()) {
 				manager = new EmployeeBean();
 				manager.setId(rs.getLong("id"));
-				manager.setName(rs.getString("manager_name"));
+				manager.setName(rs.getString("name"));
 				manager.setPhone(rs.getLong("phone"));
 				manager.setEmail(rs.getString("email"));
 				manager.setPassword(rs.getString("password"));
 				manager.setBranchId(rs.getInt("branch_id"));
-				manager.setBranchName(rs.getString("branch_name"));
+				
+				if(branchName.equals(""))
+					branchName = Factory.getBranchDAO().get(manager.getBranchId()).getName();
+					
+				manager.setBranchName(branchName);
 				
 				managers.add(manager);
 			}

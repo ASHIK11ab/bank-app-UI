@@ -5,32 +5,30 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Manager: ${ requestScope.manager.getName() }</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
+	<title>${ requestScope.employee.getName() } employee | ${ requestScope.employee.getBranchName() }</title>
 	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
+	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
 </head>
 <body>
-	<c:set var="manager" value="${ requestScope.manager }" />
-	
-	<jsp:include page="/jsp/admin/components/navbar.jsp" />
+	<jsp:include page="/jsp/manager/components/navbar.jsp" />
 	
 	<main class="container">
 		<div class="wrapper">
+			<h1>Employee details:</h1>
 			<section>
-				<h2 class="title">Manager details:</h2>
-				<p>Id   : ${ manager.getId() }</p>
+				<p>Id: ${ employee.getId() }</p>
 				
 				<c:if test="${ requestScope.displayPassword }">
-					<p>Password: ${ manager.getPassword() }</p>
+					<p>Password: ${ employee.getPassword() }
 				</c:if>
 				
-				<p>Name : ${ manager.getName() }</p>
-				<p>Email: ${ manager.getEmail() }</p>
-				<p>Phone: ${ manager.getPhone() }</p>
+				<p>Name : ${ employee.getName() }</p>
+				<p>Email: ${ employee.getEmail() }</p>
+				<p>Phone: ${ employee.getPhone() }</p>
 			</section>
 			<section>
 				<h2 class="title">Branch details:</h2>
-				<p>Branch Name: ${ manager.getBranchName() }</p>
+				<p>Branch Name: ${ employee.getBranchName() }</p>
 			</section>
 		</div>
 	</main>
