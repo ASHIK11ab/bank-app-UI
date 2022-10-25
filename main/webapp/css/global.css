@@ -58,12 +58,14 @@ section .title {
 .cards {
 	position: relative;
 	display: grid;
-	grid-template-columns: repeate(auto-fit, minmax(300px, auto));
+	grid-gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(300px, auto));
 }
 
 .cards .card {
 	position: relative;
 	width: 100%;
+	text-align: center;
 	background-color: #ddd;
 	border-radius: 5px;
 	padding: 1.5rem 2rem;
@@ -71,11 +73,13 @@ section .title {
 }
 
 .card .title {
-	text-align: center;
+	display: block;
 	font-size: 20px;
 	font-weight: 500;
 }
 
 .card .cnt {
-	font-size: 30px;
+	display: block;
+	margin-top: 1rem;
+	font-size: 35px;
 }
