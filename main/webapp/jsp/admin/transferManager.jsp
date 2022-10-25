@@ -18,15 +18,19 @@
 		<section>
 			<h1>Transfer managers</h1>
 			<form action="/bank-app/admin/managers/transfer" method="post">
-			
-				<label>First Branch:</label>
-				<jsp:include page="/jsp/components/branchDropdown.jsp">
+				
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="First branch:" />
 					<jsp:param name="name" value="first-branch-id" />
+					<jsp:param name="placeholderOptionText" value="select branch" />
+					<jsp:param name="displayId" value="${ false }" />
 				</jsp:include>
 				
-				<label>Second Branch:</label>
-				<jsp:include page="/jsp/components/branchDropdown.jsp">
+				<jsp:include page="/jsp/components/genericDropdown.jsp">
+					<jsp:param name="labelName" value="Second branch:" />
 					<jsp:param name="name" value="second-branch-id" />
+					<jsp:param name="placeholderOptionText" value="select branch" />
+					<jsp:param name="displayId" value="${ false }" />
 				</jsp:include>
 				
 				<button>transfer managers</button>

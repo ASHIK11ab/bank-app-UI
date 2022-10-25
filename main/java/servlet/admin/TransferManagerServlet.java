@@ -36,7 +36,7 @@ public class TransferManagerServlet extends HttpServlet {
 		
 		try {
 			branches = branchDAO.getAll();
-			req.setAttribute("branches", branches);
+			req.setAttribute("values", branches);
 			req.getRequestDispatcher("/jsp/admin/transferManager.jsp").include(req, res);
 		} catch(SQLException e) {
 			res.setStatus(500);

@@ -30,7 +30,7 @@ public class ManagerPasswordResetServlet extends HttpServlet {
 		
 		try {
 			managers = managerDAO.getAll();
-			req.setAttribute("managers", managers);
+			req.setAttribute("values", managers);
 			req.getRequestDispatcher("/jsp/admin/managerPasswordReset.jsp").include(req, res);
 		} catch(SQLException e) {
 			res.setStatus(500);

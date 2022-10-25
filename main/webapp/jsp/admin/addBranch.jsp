@@ -38,7 +38,9 @@
 				<section class="manager">
 					<h3>Manager Details:</h3>
 					
-					<jsp:include page="/jsp/components/managerForm.jsp" />				
+					<jsp:include page="/jsp/components/employeeRegistrationForm.jsp">
+						<jsp:param name="employeeType" value="manager" />
+					</jsp:include>			
 				
 				</section>
 				
