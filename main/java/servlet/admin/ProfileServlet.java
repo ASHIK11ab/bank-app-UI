@@ -23,19 +23,21 @@ public class ProfileServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		PrintWriter out;
-		long adminId = (Long) req.getSession(false).getAttribute("id");
+		PrintWriter out = res.getWriter();
 		
 		try {
+			long adminId = (Long) req.getSession(false).getAttribute("id");
 			UserBean admin = adminDAO.get(adminId);
 			req.setAttribute("user", admin);
 			req.getRequestDispatcher("/jsp/admin/profile.jsp").forward(req, res);
-		} catch(SQLException e) {
-			out = res.getWriter();
+		} catch(ClassCastException e) {
 			res.setStatus(500);
 			out.println("<h1>Internal error</h1>");
+		} catch(SQLException e) {
+			res.setStatus(500);
+			out.println("<h1>Internal error</h1>");
+		} finally {
 			out.close();
-			return;
 		}
 	}
 }

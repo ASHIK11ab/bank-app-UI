@@ -61,7 +61,7 @@
 		<servlet-class>servlet.admin.RemoveIntegratedBankServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>ProfileServlet</servlet-name>
+		<servlet-name>AdminProfileServlet</servlet-name>
 		<servlet-class>servlet.admin.ProfileServlet</servlet-class>
 	</servlet>
 	<servlet>
@@ -169,7 +169,7 @@
 		<url-pattern>/admin/integrated-banks/bank/delete</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>ProfileServlet</servlet-name>
+		<servlet-name>AdminProfileServlet</servlet-name>
 		<url-pattern>/admin/profile</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
