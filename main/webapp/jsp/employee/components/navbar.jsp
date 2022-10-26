@@ -5,7 +5,8 @@
 			<span class="text">accounts</span>
 			<ul class="links">
 				<li>
-					<a href="#">view account</a>
+					<a href="/bank-app/employee/account/view">view account</a>
+					<a href="/bank-app/employee/account/create">create account</a>
 				</li>
 			</ul>
 		</div>
