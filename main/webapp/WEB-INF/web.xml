@@ -121,6 +121,22 @@
 		<servlet-class>servlet.employee.DashboardServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>ViewAccountServlet</servlet-name>
+		<servlet-class>servlet.employee.ViewAccountServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>InitiateAccountCreationServlet</servlet-name>
+		<servlet-class>servlet.employee.InitiateAccountCreationServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>CreateCustomerServlet</servlet-name>
+		<servlet-class>servlet.employee.CreateCustomerServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>CreateAccountServlet</servlet-name>
+		<servlet-class>servlet.employee.CreateAccountServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
 	</servlet>
@@ -247,6 +263,22 @@
 	<servlet-mapping>
 		<servlet-name>EmployeeDashboardServlet</servlet-name>
 		<url-pattern>/employee/dashboard</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ViewAccountServlet</servlet-name>
+		<url-pattern>/employee/account/view</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>InitiateAccountCreationServlet</servlet-name>
+		<url-pattern>/employee/account/create</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CreateCustomerServlet</servlet-name>
+		<url-pattern>/employee/account/create/new-customer</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CreateAccountServlet</servlet-name>
+		<url-pattern>/employee/account/create/existing-customer</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
