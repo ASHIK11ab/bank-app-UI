@@ -66,12 +66,12 @@ public class CustomerDAO {
             customer.setAge(age);
             customer.setGender(gender);
             customer.setOccupation(occupation);
+            customer.setMartialStatus(martialStatus);
             customer.setIncome(income);
             customer.setAdhaar(adhaar);
             customer.setPan(pan);
             customer.setAddress(address);
 		} catch(SQLException e) {
-			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {
@@ -85,11 +85,6 @@ public class CustomerDAO {
                     stmt1.close();
                 if(stmt2 != null)
                     stmt2.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		

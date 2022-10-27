@@ -105,11 +105,6 @@ public class RegularAccountDAO {
 			    if(stmt3 != null)
 			        stmt3.close();
 			} catch(SQLException e) { System.out.println(e.getMessage()); }
-			
-			try {
-			    if(conn != null)
-			        conn.close();
-			} catch(SQLException e) { System.out.println(e.getMessage()); }
 		}
 		
 		if(exceptionOccured)
