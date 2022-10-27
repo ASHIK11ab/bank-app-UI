@@ -95,6 +95,41 @@ public class CustomerDAO {
 	}
 	
 	
+	public boolean delete(long customerId) throws SQLException {
+		Connection conn = Factory.getDataSource().getConnection();
+		PreparedStatement stmt = null;
+		
+		String msg = "";
+		boolean exceptionOccured = false;
+		int rowsAffected = -1;
+		
+		try {
+			stmt = conn.prepareStatement("DELETE FROM customer WHERE id = ?");
+			stmt.setLong(1, customerId);
+			rowsAffected = stmt.executeUpdate();
+			System.out.println(rowsAffected);
+		} catch(SQLException e) {
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+            
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+		
+		if(exceptionOccured)
+			throw new SQLException(msg);
+		else
+			return rowsAffected == 1;
+	}
+	
+	
 	public CustomerBean get(long customerId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
