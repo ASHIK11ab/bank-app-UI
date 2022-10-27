@@ -137,6 +137,10 @@
 		<servlet-class>servlet.employee.CreateAccountServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>CloseAccountServlet</servlet-name>
+		<servlet-class>servlet.employee.CloseAccountServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
 	</servlet>
@@ -279,6 +283,10 @@
 	<servlet-mapping>
 		<servlet-name>CreateAccountServlet</servlet-name>
 		<url-pattern>/employee/account/create/existing-customer</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CloseAccountServlet</servlet-name>
+		<url-pattern>/employee/account/close</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
