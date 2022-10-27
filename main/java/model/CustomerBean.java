@@ -24,7 +24,7 @@ public class CustomerBean extends UserBean {
     	return this.martialStatus;
     }
     
-    public String getOccupaton() {
+    public String getOccupation() {
     	return this.occupation;
     }
     
