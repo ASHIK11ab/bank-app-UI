@@ -122,8 +122,8 @@ public class DepositAccountDAO {
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
-            stmt1 = conn.prepareStatement("SELECT * FROM account a JOIN deposit_account da ON a.account_no = da.account_no WHERE a.account_no = ?");
-            stmt2 = conn.prepareStatement("SELECT name FROM customer WHERE customer_id = ?");
+            stmt1 = conn.prepareStatement("SELECT * FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no WHERE a.account_no = ?");
+            stmt2 = conn.prepareStatement("SELECT name FROM customer WHERE id = ?");
             
             stmt1.setLong(1, accountNo);
             rs1 = stmt1.executeQuery();
@@ -135,7 +135,8 @@ public class DepositAccountDAO {
                 account.setCustomerId(rs1.getLong("customer_id"));
                 account.setOpeningDate(rs1.getDate("opening_date").toLocalDate());
                 account.setTypeId(rs1.getInt("type_id"));
-                account.setIntrestRate(rs1.getFloat("intrest_rate"));
+                account.setBranchId(rs1.getInt("branch_id"));
+                account.setIntrestRate(rs1.getFloat("rate_of_intrest"));
                 account.setTenureMonths(rs1.getInt("tenure_months"));
                 account.setPayoutAccountNo(rs1.getLong("payout_account_no"));
                 account.setDebitFromAccountNo(rs1.getLong("debit_from_account_no"));
