@@ -87,3 +87,40 @@ section .title {
 .hidden {
 	display: none;
 }
+
+.notification {
+	position: absolute;
+	top: -5rem;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    padding: 20px 25px;
+    border-radius: 10px;
+    animation: slide-from-top 8s;
+}
+
+.notification.success {
+    background-color: #19e719;
+}
+
+.notification.danger {
+	background-color: #ff8686;
+}
+
+@keyframes slide-from-top {
+	0% {
+		top: -5rem;
+	}
+	
+	10% {
+		top: 2rem;
+	}
+	
+	90% {
+		top: 2rem;
+	}
+	
+	100% {
+		top: -5rem;
+	}
+}

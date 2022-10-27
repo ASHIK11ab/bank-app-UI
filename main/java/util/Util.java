@@ -33,4 +33,26 @@ public class Util {
 
         return pin;
     }
+    
+    
+    public static int getNoOfDigits(long number) {
+    	int digits = 0;
+    	number = Math.abs(number);
+    	
+    	while(number != 0) {
+    		number = number / 10;
+    		digits++;
+    	}
+    	
+    	return digits;
+    }
+    
+    
+    public static String createNotification(String msg, String status) {
+    	String html = "";
+    	html += "<div class='notification " + status + "'>";
+    	html += msg;
+    	html += "</div>";
+    	return html;
+    }
 }
