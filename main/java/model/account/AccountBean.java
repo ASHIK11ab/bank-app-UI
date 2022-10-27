@@ -10,12 +10,17 @@ public abstract class AccountBean implements Serializable {
     private NomineeBean nominee;
     private int branchId;
     private float balance;
+    private int typeId;
     private LocalDate openingDate;
 
 
     // Getters
     public LocalDate getOpeningDate() {
         return this.openingDate;
+    }
+    
+    public int getTypeId() {
+    	return this.typeId;
     }
     
     public long getCustomerId() {
@@ -49,6 +54,10 @@ public abstract class AccountBean implements Serializable {
     
     public void setCustomerId(long customerId) {
     	this.customerId = customerId;
+    }
+    
+    public void setTypeId(int typeId) {
+    	this.typeId = typeId;
     }
     
     public void setCustomerName(String name) {
