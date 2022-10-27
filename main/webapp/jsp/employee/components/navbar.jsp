@@ -12,6 +12,16 @@
 			</ul>
 		</div>
 		<div class="sub-nav">
+			<span class="text">deposits</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/employee/deposit/view">view deposit</a>
+					<a href="#">create deposit</a>
+					<a href="#">close deposit</a>
+				</li>
+			</ul>
+		</div>
+		<div class="sub-nav">
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
