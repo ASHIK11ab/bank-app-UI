@@ -7,6 +7,7 @@
 				<li>
 					<a href="/bank-app/employee/account/view">view account</a>
 					<a href="/bank-app/employee/account/create">create account</a>
+					<a href="/bank-app/employee/account/close">close account</a>
 				</li>
 			</ul>
 		</div>

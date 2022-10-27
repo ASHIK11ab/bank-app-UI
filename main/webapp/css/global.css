@@ -90,7 +90,7 @@ section .title {
 
 .notification {
 	position: absolute;
-	top: -5rem;
+	top: -10rem;
     margin-left: 50%;
     transform: translateX(-50%);
     font-size: 20px;
@@ -109,7 +109,7 @@ section .title {
 
 @keyframes slide-from-top {
 	0% {
-		top: -5rem;
+		top: -10rem;
 	}
 	
 	10% {
@@ -121,6 +121,6 @@ section .title {
 	}
 	
 	100% {
-		top: -5rem;
+		top: -10rem;
 	}
 }
