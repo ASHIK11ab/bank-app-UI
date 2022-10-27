@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import dao.AccountDAO;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
 import model.account.RegularAccountBean;
@@ -33,7 +34,8 @@ public class CloseAccountServlet extends HttpServlet {
 		PrintWriter out = res.getWriter();
 		
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
-		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
+		AccountDAO accountDAO = Factory.getAccountDAO();
 		
 		RegularAccountBean account = null;
 		
@@ -55,7 +57,7 @@ public class CloseAccountServlet extends HttpServlet {
 			
 			// Display account and ask for confirmation.
 			if(actionType == 0) {
-				account = accountDAO.get(accountNo);
+				account = regularAccountDAO.get(accountNo);
 				
 				if(account != null && account.getBranchId() == branchId) {
 					req.setAttribute("confirmationType", 1);
