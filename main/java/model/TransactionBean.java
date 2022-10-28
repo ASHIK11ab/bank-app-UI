@@ -1,9 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class TransactionBean {
-    private long id;
+public class TransactionBean implements Serializable {
+	private static final long serialVersionUID = 5180056775213961391L;
+	
+	private long id;
     private int typeId;
     private String description;
     private long fromAccountNo;

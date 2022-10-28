@@ -52,8 +52,6 @@ public class CloseDepositServlet extends HttpServlet {
 			
 			actionType = Integer.parseInt(req.getParameter("action-type"));
 			accountNo = Long.parseLong(req.getParameter("account-no"));
-			System.out.println(actionType);
-			System.out.println(accountNo);
 			
 			if(Util.getNoOfDigits(accountNo) != 11 ) {
 				isError = true;
