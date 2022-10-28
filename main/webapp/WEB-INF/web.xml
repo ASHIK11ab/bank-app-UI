@@ -145,6 +145,10 @@
 		<servlet-class>servlet.employee.ViewDepositServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>CreateDepositServlet</servlet-name>
+		<servlet-class>servlet.employee.CreateDepositServlet</servlet-class>
+	</servlet>
+	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
 	</servlet>
@@ -295,6 +299,10 @@
 	<servlet-mapping>
 		<servlet-name>ViewDepositServlet</servlet-name>
 		<url-pattern>/employee/deposit/view</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CreateDepositServlet</servlet-name>
+		<url-pattern>/employee/deposit/create</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
