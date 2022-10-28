@@ -24,16 +24,8 @@
 				</form>
 			</section>
 			
-			<c:if test="${ requestScope.account != null }">
-				<c:set var="account" value="${ requestScope.account }" scope="request"/>
-			
+			<c:if test="${ requestScope.account != null }">			
 				<jsp:include page="/jsp/components/depositAccount.jsp" />
-					
-				<section>
-					<h2>Customer details:</h2>
-					<p>Customer Id: ${ account.getCustomerId() }
-					<p>Customer Name: ${ account.getCustomerName() }
-				</section>
 			</c:if>
 		</div>
 	</main>

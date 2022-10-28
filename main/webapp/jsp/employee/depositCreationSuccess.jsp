@@ -12,7 +12,6 @@
 </head>
 <body>
 	<jsp:include page="/jsp/employee/components/navbar.jsp" />
-	<c:set var="account" value="${ requestScope.account }" scope="request"/>
 	
 	<main class="container">
 		<div class="wrapper">
