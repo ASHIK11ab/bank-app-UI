@@ -75,7 +75,7 @@ public class CloseAccountServlet extends HttpServlet {
 				conn = Factory.getDataSource().getConnection();
 				
                 // Check whether account is linked with any deposit account(s).
-                stmt1 = conn.prepareStatement("SELECT account_no from deposit_account WHERE debit_from_account = ? OR payout_account_no = ? limit 1");
+                stmt1 = conn.prepareStatement("SELECT account_no from deposit_account WHERE debit_from_account_no = ? OR payout_account_no = ? limit 1");
                 stmt1.setLong(1, accountNo);
                 stmt1.setLong(2, accountNo);
                 rs1 = stmt1.executeQuery();

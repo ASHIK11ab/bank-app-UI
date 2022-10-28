@@ -36,6 +36,13 @@ public class ViewDepositServlet extends HttpServlet {
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			accountNo = Long.parseLong(req.getParameter("account-no"));
+			
+			if(Util.getNoOfDigits(accountNo) != 11 ) {
+				out.println(Util.createNotification("A/C no must be a 11 digit number", "danger"));
+				doGet(req, res);
+				out.close();
+			}
+			
 			account = accountDAO.get(accountNo);
 			if(account != null && account.getBranchId() == branchId) {
 				req.setAttribute("account", account);
