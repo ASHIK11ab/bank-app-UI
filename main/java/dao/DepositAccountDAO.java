@@ -16,10 +16,9 @@ import util.Factory;
 
 public class DepositAccountDAO {
 	public DepositAccountBean create(Connection conn, long customerId, String customerName,
-										int branchId, int accountType, NomineeBean nominee,
+										int branchId, int depositType, NomineeBean nominee,
 										int amount, int tenureMonths, long payoutAccountNo,
-										long debitFromAccountNo, int amountPerMonth,
-										LocalDate recurringDate) throws SQLException {
+										long debitFromAccountNo, LocalDate recurringDate) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null;
 		
@@ -36,10 +35,10 @@ public class DepositAccountDAO {
 			else
 				stmt1 = conn.prepareStatement("INSERT INTO account (customer_id, branch_id, balance, opening_date) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 		
-			if(accountType == DepositAccountType.FD.id)
+			if(depositType == DepositAccountType.FD.id)
 				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no) VALUES (?, ?, ?, ?, ?, ?)");
 			else
-				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, amount_per_month, recurringDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, amount_per_month, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 	        stmt1.setLong(1, customerId);
 	        stmt1.setInt(2, branchId);
@@ -54,17 +53,17 @@ public class DepositAccountDAO {
 	        if(rs1.next())
 	            generatedAccountNo = rs1.getLong(1);
 	        
-	        intrestRate = DepositAccountBean.getTypeIntrestRate(DepositAccountType.getType(accountType));
+	        intrestRate = DepositAccountBean.getTypeIntrestRate(DepositAccountType.getType(depositType));
 	        
             // create deposit account which maps to account
             stmt2.setLong(1, generatedAccountNo);
-            stmt2.setInt(2, accountType);
+            stmt2.setInt(2, depositType);
             stmt2.setLong(3, payoutAccountNo);
             stmt2.setFloat(4, intrestRate);
             stmt2.setInt(5, tenureMonths);
             stmt2.setLong(6, debitFromAccountNo);
             
-            if(accountType == DepositAccountType.RD.id) {
+            if(depositType == DepositAccountType.RD.id) {
             	stmt2.setFloat(7, amount);
             	stmt2.setDate(8, Date.valueOf(recurringDate));            	
             }
@@ -75,18 +74,22 @@ public class DepositAccountDAO {
             account.setAccountNo(generatedAccountNo);
             account.setCustomerId(customerId);
             account.setCustomerName(customerName);
+            account.setBranchId(branchId);
+            account.setBalance(amount);
             account.setOpeningDate(LocalDate.now());
-            account.setTypeId(accountType);
+            account.setNominee(nominee);
+            account.setTypeId(depositType);
             account.setIntrestRate(intrestRate);
             account.setTenureMonths(tenureMonths);
             account.setPayoutAccountNo(payoutAccountNo);
             account.setDebitFromAccountNo(debitFromAccountNo);
             
-            if(accountType == DepositAccountType.RD.id) {
-            	account.setAmountPerMonth(amountPerMonth);
+            if(depositType == DepositAccountType.RD.id) {
+            	account.setAmountPerMonth(amount);
             	account.setRecurringDate(recurringDate);
             }
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error";
 		} finally {
@@ -118,6 +121,7 @@ public class DepositAccountDAO {
 		boolean exceptionOccured = false;
 		String msg = "";
 		
+		NomineeBean nominee = null;
 		DepositAccountBean account = null;
 		
 		try {
@@ -128,14 +132,14 @@ public class DepositAccountDAO {
             stmt1.setLong(1, accountNo);
             rs1 = stmt1.executeQuery();
             
-            if(rs1.next()) {
+            if(rs1.next()) {            	
                 account = new DepositAccountBean();
                 account.setAccountNo(rs1.getLong(1));
+                account.setBranchId(rs1.getInt("branch_id"));
                 account.setBalance(rs1.getFloat("balance"));
                 account.setCustomerId(rs1.getLong("customer_id"));
                 account.setOpeningDate(rs1.getDate("opening_date").toLocalDate());
                 account.setTypeId(rs1.getInt("type_id"));
-                account.setBranchId(rs1.getInt("branch_id"));
                 account.setIntrestRate(rs1.getFloat("rate_of_intrest"));
                 account.setTenureMonths(rs1.getInt("tenure_months"));
                 account.setPayoutAccountNo(rs1.getLong("payout_account_no"));
@@ -151,6 +155,7 @@ public class DepositAccountDAO {
                 
                 if(rs2.next())
                 	account.setCustomerName(rs2.getString("name"));
+                
             }
 		} catch(SQLException e) {
 			exceptionOccured = true;
