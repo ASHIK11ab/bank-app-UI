@@ -8,6 +8,14 @@ public enum DepositAccountType {
 	
 	private DepositAccountType(int id) { this.id = id;}
 	
+	public static int getId(DepositAccountType type) {
+		switch(type) {
+			case FD: return 3;
+			case RD: return 4;
+			default: return -1;
+		}
+	}
+	
 	public static DepositAccountType getType(int id) {
 		switch(id) {
 			case 3: return FD;
