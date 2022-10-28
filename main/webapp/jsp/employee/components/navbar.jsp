@@ -17,7 +17,7 @@
 				<li>
 					<a href="/bank-app/employee/deposit/view">view deposit</a>
 					<a href="/bank-app/employee/deposit/create">create deposit</a>
-					<a href="#">close deposit</a>
+					<a href="/bank-app/employee/deposit/close">close deposit</a>
 				</li>
 			</ul>
 		</div>

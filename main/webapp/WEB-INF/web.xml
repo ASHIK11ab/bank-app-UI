@@ -148,6 +148,16 @@
 		<servlet-name>CreateDepositServlet</servlet-name>
 		<servlet-class>servlet.employee.CreateDepositServlet</servlet-class>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>CloseDepositServlet</servlet-name>
+		<servlet-class>servlet.employee.CloseDepositServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CloseDepositServlet</servlet-name>
+		<url-pattern>/employee/deposit/close</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
