@@ -1,17 +1,31 @@
 package model.account;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 
-public abstract class AccountBean implements Serializable {
+import model.Nominee;
+
+public abstract class Account {
     private long accountNo;
     private long customerId;
     private String customerName;
-    private NomineeBean nominee;
+    private Nominee nominee;
     private int branchId;
     private float balance;
     private int typeId;
     private LocalDate openingDate;
+    
+    
+    public Account(long accountNo, long customerId, String customerName, Nominee nominee,
+		            int branchId, float amount, LocalDate openingDate, int typeId) {
+		this.accountNo = accountNo;
+		this.customerId = customerId;
+		this.customerName = customerName;
+		this.nominee = nominee;
+		this.branchId = branchId;
+		this.balance = amount;
+		this.openingDate = openingDate;
+		this.typeId = typeId;
+	}
 
 
     // Getters
@@ -43,40 +57,21 @@ public abstract class AccountBean implements Serializable {
         return this.balance;
     }
 
-    public NomineeBean getNominee() {
+    public Nominee getNominee() {
     	return this.nominee;
     }
     
     // setters
-    public void setAccountNo(long accountNo) {
-    	this.accountNo = accountNo;
-    }
-    
-    public void setCustomerId(long customerId) {
-    	this.customerId = customerId;
-    }
-    
-    public void setTypeId(int typeId) {
-    	this.typeId = typeId;
-    }
-    
-    public void setCustomerName(String name) {
-    	this.customerName = name;
-    }
     
     public void setBranchId(int branchId) {
     	this.branchId = branchId;
     }
     
-    public void setBalance(float balance) {
-    	this.balance = balance;
+    public void addAmount(float amount) {
+        this.balance += amount;
     }
-    
-    public void setNominee(NomineeBean nominee) {
-    	this.nominee = nominee;
-    }
-    
-    public void setOpeningDate(LocalDate openingDate) {
-    	this.openingDate = openingDate;
+
+    public void deductAmount(float amount) {
+        this.balance -= amount;
     }
 }
