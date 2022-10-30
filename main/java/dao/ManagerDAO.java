@@ -159,7 +159,7 @@ public class ManagerDAO {
 				
                 // Get from cache
 				if(branchName.equals(""))
-					branchName = Factory.getBranchDAO().get(manager.getBranchId()).name;
+					branchName = Factory.getBranchDAO().get(branchId).name;
 					
 				manager = new Employee(id, name, password, email, phone, branchId, branchName);				
 				managers.add(manager);

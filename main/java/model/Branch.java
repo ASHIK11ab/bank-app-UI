@@ -103,8 +103,15 @@ public class Branch {
     public Employee getEmployee(long employeeId) {
         return this.employees.get(employeeId);
     }
+    
+    public String getName() {
+    	return name;
+    }
 
-
+    public Address getAddress() {
+    	return address;
+    }
+    
     public int getId() {
         return this.id;
     }

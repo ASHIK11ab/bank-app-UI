@@ -27,7 +27,7 @@ public class Customer extends User {
     // private HashMap<Long, Integer> depositAccounts;
 
 
-    public Customer(int id, String name, String password, long phone,
+    public Customer(long id, String name, String password, long phone,
                         String email, byte age, char gender, String martialStatus,
                         String occupation, int income, long adhaar, String pan,
                         String transPassword, Address address) {

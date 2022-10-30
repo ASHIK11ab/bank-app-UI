@@ -51,7 +51,7 @@ public class BranchDAO {
                 managerEmail = rs.getString("manager_email");
                 managerPassword = rs.getString("manager_password");
                 
-                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branch.getId(), branch.name);
+                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branch.getId(), branch.getName());
                 branch.assignManager(manager);
                 
                 branches.add(branch);
@@ -121,7 +121,7 @@ public class BranchDAO {
                 managerEmail = rs.getString("manager_email");
                 managerPassword = rs.getString("manager_password");
                 
-                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branch.getId(), branch.name);
+                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branch.getId(), branch.getName());
                 branch.assignManager(manager);
 			}
 		} catch(SQLException e) {
