@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.EmployeeDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 public class EmployeeServlet extends HttpServlet {
@@ -18,7 +18,7 @@ public class EmployeeServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
 		PrintWriter out = res.getWriter();
-		EmployeeBean employee = null;
+		Employee employee = null;
 		long employeeId = -1;
 		int branchId = -1;
 		

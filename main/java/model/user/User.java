@@ -1,16 +1,20 @@
-package model;
+package model.user;
 
-import java.io.Serializable;
 
-public class UserBean implements Serializable {
-	
-	private static final long serialVersionUID = 253983475845L;
-	
-    private long id;
-    private long phone;
+public class User {
+    private final long id;
     private String name;
     private String password;
     private String email;
+    private long phone;
+
+    public User(long id, String name, String password, String email, long phone) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.phone = phone;
+        this.email = email;
+    }
 
     // Getters
     public long getId() {
@@ -34,10 +38,6 @@ public class UserBean implements Serializable {
     }
 
     // Setters
-    public void setId(long id) {
-    	this.id = id;
-    }
-    
     public void setPhone(long phone) {
     	this.phone = phone;
     }
@@ -52,5 +52,14 @@ public class UserBean implements Serializable {
     
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String toString() {
+        String repr = "";
+        repr += "\nId      : " + this.id;
+        repr += "\nName    : " + this.name;
+        repr += "\nPhone   : " + this.phone;
+        repr += "\nEmail   : " + this.email;
+        return repr;
     }
 }

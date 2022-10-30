@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import model.TransactionBean;
+import model.Transaction;
 import util.Factory;
 
 public class TransactionDAO {
-	public TransactionBean create(Connection conn, int typeId, String description, long fromAccountNo,
+	public Transaction create(Connection conn, int typeId, String description, long fromAccountNo,
 									long toAccountNo, float amount, boolean fromAccountOwnBank,
 									boolean toAccountOwnBank, float fromAccountBeforeBalance,
 									float toAccountBeforeBalance) throws SQLException {
@@ -24,7 +24,7 @@ public class TransactionDAO {
 		
 		LocalDate today = LocalDate.now();
 		LocalTime time = LocalTime.now();
-		TransactionBean transaction = null;
+		Transaction transaction = null;
 		boolean exceptionOccured = false;
 		String msg = "";
 		long transactionId = -1;
@@ -64,14 +64,9 @@ public class TransactionDAO {
                 stmt2.executeUpdate();	
             }
             
-            transaction = new TransactionBean();
-            transaction.setId(transactionId);
-            transaction.setDescription(description);
-            transaction.setFromAccountNo(fromAccountNo);
-            transaction.setToAccountNo(toAccountNo);
-            transaction.setAmount(amount);
-            transaction.setTypeId(typeId);
-            transaction.setDateTime(LocalDateTime.parse(today.toString() + 'T' + time.toString()));
+            transaction = new Transaction(transactionId, typeId, fromAccountNo, toAccountNo, 
+            								amount, LocalDateTime.parse(today.toString() + 'T' + time.toString()),
+            								description);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;

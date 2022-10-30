@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.DepositAccountDAO;
-import model.account.DepositAccountBean;
+import model.account.DepositAccount;
 import util.Factory;
 import util.Util;
 
@@ -25,7 +25,7 @@ public class ViewDepositServlet extends HttpServlet {
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		DepositAccountDAO accountDAO = Factory.getDepositAccountDAO();
-		DepositAccountBean account = null;
+		DepositAccount account = null;
 		
 		boolean exceptionOccured = false, isError = false;
 		String errorMsg = "";

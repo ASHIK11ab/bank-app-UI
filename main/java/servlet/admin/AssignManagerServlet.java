@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import dao.BranchDAO;
 import dao.ManagerDAO;
-import model.BranchBean;
-import model.EmployeeBean;
+import model.Branch;
+import model.user.Employee;
 import util.Factory;
 
 public class AssignManagerServlet extends HttpServlet {
@@ -30,7 +30,7 @@ public class AssignManagerServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<BranchBean> branches;
+		LinkedList<Branch> branches;
 		
 		try {
 			branches = branchDAO.getAll();
@@ -51,8 +51,8 @@ public class AssignManagerServlet extends HttpServlet {
 		long phone;
 		int branchId;
 		
-		BranchBean branch = null;
-		EmployeeBean manager = null;
+		Branch branch = null;
+		Employee manager = null;
 		long oldBranchManagerId = -1;
 		
 		try {

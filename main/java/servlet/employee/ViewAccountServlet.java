@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.RegularAccountDAO;
-import model.account.RegularAccountBean;
+import model.account.RegularAccount;
 import util.Factory;
 
 
@@ -24,7 +24,7 @@ public class ViewAccountServlet extends HttpServlet {
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
-		RegularAccountBean account = null;
+		RegularAccount account = null;
 		long accountNo = -1;
 		int branchId = -1;
 		

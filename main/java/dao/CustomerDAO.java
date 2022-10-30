@@ -6,20 +6,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import model.AddressBean;
-import model.CustomerBean;
+import model.Address;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
 public class CustomerDAO {
-	public CustomerBean create(Connection conn, String name, long phone, String email, 
+	public Customer create(Connection conn, String name, long phone, String email, 
 								byte age, char gender, String martialStatus,
 					            String occupation, int income, long adhaar, String pan,
-					            AddressBean address) throws SQLException {
+					            Address address) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs = null;
 		
-		CustomerBean customer = null;
+		Customer customer = null;
 		
 		boolean exceptionOccured = false;
 		String msg = "", password = Util.genPassword(), transactionPassword = Util.genPassword();
@@ -55,23 +55,12 @@ public class CustomerDAO {
             stmt2.setString(12, address.getState());
             stmt2.setInt(13, address.getPincode());
             stmt2.executeUpdate();
-                        
-            customer = new CustomerBean();
-            customer.setId(customerId);
-            customer.setName(name);
-            customer.setEmail(email);
-            customer.setPhone(phone);
-            customer.setPassword(password);
-            customer.setTransPassword(transactionPassword);
-            customer.setAge(age);
-            customer.setGender(gender);
-            customer.setOccupation(occupation);
-            customer.setMartialStatus(martialStatus);
-            customer.setIncome(income);
-            customer.setAdhaar(adhaar);
-            customer.setPan(pan);
-            customer.setAddress(address);
+            
+            customer = new Customer(customerId, name, password, phone, email, age,
+				                    gender, martialStatus, occupation, income, adhaar, pan, 
+				                    transactionPassword, address);
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {
@@ -107,8 +96,8 @@ public class CustomerDAO {
 			stmt = conn.prepareStatement("DELETE FROM customer WHERE id = ?");
 			stmt.setLong(1, customerId);
 			rowsAffected = stmt.executeUpdate();
-			System.out.println(rowsAffected);
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {
@@ -130,16 +119,22 @@ public class CustomerDAO {
 	}
 	
 	
-	public CustomerBean get(long customerId) throws SQLException {
+	public Customer get(long customerId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		CustomerBean customer = null;
-		AddressBean address = null;
+		Customer customer = null;
+		Address address = null;
 		boolean exceptionOccured = false;
-		String doorNo, street, city, state, msg = "";
-		int pincode;
+		
+        String name, email, pan, martialStatus, occupation;
+        String transPassword, customerPassword;
+        String doorNo, street, city, state, msg="";
+        long phone, adhaar;
+        int pincode, income;
+        char gender;
+        byte age;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -149,30 +144,32 @@ public class CustomerDAO {
             rs = stmt.executeQuery();
             
             if(rs.next()) {
-                customer = new CustomerBean();
-                customer.setId(customerId);
-                customer.setName(rs.getString("name"));
-                customer.setEmail(rs.getString("email"));
-                customer.setPhone(rs.getLong("phone"));
-                customer.setPassword(rs.getString("password"));
-                customer.setTransPassword(rs.getString("transaction_password"));
-                customer.setAge(rs.getByte("age"));
-                customer.setGender(rs.getString("gender").charAt(0));
-                customer.setOccupation(rs.getString("occupation"));
-                customer.setIncome(rs.getInt("income"));
-                customer.setAdhaar(rs.getLong("adhaar"));
-                customer.setPan(rs.getString("pan"));
+                name = rs.getString("name");
+                customerPassword = rs.getString("password");
+                email = rs.getString("email");
+                phone = rs.getLong("phone");
+                transPassword = rs.getString("transaction_password");
+                age = rs.getByte("age");
+                gender = rs.getString("gender").charAt(0);
+                occupation = rs.getString("occupation");
+                income = rs.getInt("income");
+                martialStatus = rs.getString("martial_status");
+                adhaar = rs.getLong("adhaar");
+                pan = rs.getString("pan");
+                doorNo = rs.getString("door_no");
+                street = rs.getString("street");
+                city = rs.getString("city");
+                state = rs.getString("state");
+                pincode = rs.getInt("pincode");
+
+                address = new Address(doorNo, street, city, state, pincode);
                 
-                address = new AddressBean();
-                address.setDoorNo(rs.getString("door_no"));
-                address.setStreet(rs.getString("street"));
-                address.setCity(rs.getString("city"));
-                address.setState(rs.getString("state"));
-                address.setPincode(rs.getInt("pincode"));
-               
-                customer.setAddress(address);	
+                customer = new Customer(customerId, name, customerPassword, phone, email, age,
+                                        gender, martialStatus, occupation, income, adhaar, pan, 
+                                        transPassword, address);	
             }
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {

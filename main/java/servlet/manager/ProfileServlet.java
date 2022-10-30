@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.ManagerDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -19,7 +19,7 @@ public class ProfileServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		ManagerDAO managerDAO = Factory.getManagerDAO();
 		PrintWriter out = res.getWriter();
-		EmployeeBean manager = null;
+		Employee manager = null;
 		long managerId = -1;
 		
 		try {

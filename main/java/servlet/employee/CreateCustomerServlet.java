@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import constant.RegularAccountType;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
-import model.AddressBean;
-import model.CustomerBean;
-import model.account.RegularAccountBean;
+import model.Address;
+import model.user.Customer;
+import model.account.RegularAccount;
 import util.Factory;
 import util.Util;
 
@@ -25,9 +25,9 @@ public class CreateCustomerServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
         Connection conn = null;
         
-        CustomerBean customer = null;
-        AddressBean address = null;
-        RegularAccountBean account = null;
+        Customer customer = null;
+        Address address = null;
+        RegularAccount account = null;
         
         RegularAccountType type;
         
@@ -88,12 +88,7 @@ public class CreateCustomerServlet extends HttpServlet {
         	
         	// Create new customer.
         	if(!isError) {	
-	            address = new AddressBean();
-	            address.setDoorNo(doorNo);
-	            address.setStreet(street);
-	            address.setCity(city);
-	            address.setState(state);
-	            address.setPincode(pincode);
+	            address = new Address(doorNo, street, city, state, pincode);
 	        	
 	        	type = RegularAccountType.getType(accountType);
 	        	

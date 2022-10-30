@@ -9,19 +9,21 @@ import java.sql.Statement;
 import java.time.LocalDate;
 
 import constant.RegularAccountType;
+import model.Nominee;
 import model.account.*;
 import util.Factory;
 import util.Util;
 
 public class RegularAccountDAO {
-	public RegularAccountBean create(Connection conn, long customerId,
+	public RegularAccount create(Connection conn, long customerId,
 										String customerName, int branchId, 
 										RegularAccountType accountType, int cardType,
-										NomineeBean nominee) throws SQLException {
+										Nominee nominee) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null;
 		ResultSet rs = null;
 		
-		RegularAccountBean account = null;
+		LocalDate today = LocalDate.now();
+		RegularAccount account = null;
 		LocalDate validFromDate, expiryDate;
 		boolean exceptionOccured = false;
 		String msg = "";
@@ -38,12 +40,12 @@ public class RegularAccountDAO {
 			stmt2 = conn.prepareStatement("INSERT INTO regular_account (account_no, type_id, active) VALUES (?, ?, ?)");
 	        stmt3 = conn.prepareStatement("INSERT INTO debit_card (account_no, valid_from, expiry_date, type_id, pin, cvv) VALUES (?, ?, ?, ?, ?, ?)");
 	
-	        balance = (accountType == RegularAccountType.SAVINGS) ? SavingsAccountBean.getMinimumBalance() : CurrentAccountBean.getMinimumBalance();
+	        balance = (accountType == RegularAccountType.SAVINGS) ? SavingsAccount.getMinimumBalance() : CurrentAccount.getMinimumBalance();
 	        
 	        stmt1.setLong(1, customerId);
 	        stmt1.setInt(2, branchId);
 	        stmt1.setFloat(3, balance);
-	        stmt1.setDate(4, Date.valueOf(LocalDate.now()));
+	        stmt1.setDate(4, Date.valueOf(today));
 	        
 	        if(nominee != null)
 	        	stmt1.setLong(5, nominee.getId());
@@ -58,7 +60,7 @@ public class RegularAccountDAO {
 	        stmt2.setBoolean(3, true);
 	        stmt2.executeUpdate();
 	
-	        validFromDate = LocalDate.now().plusDays(10);
+	        validFromDate = today.plusDays(10);
 	        expiryDate = validFromDate.plusYears(3);
 	        pin = Util.genPin(4);
 	        cvv = Util.genPin(3);
@@ -71,23 +73,15 @@ public class RegularAccountDAO {
 	        stmt3.setInt(6, cvv);
 	        stmt3.executeUpdate();
 	        
-	        
 	        switch(accountType) {
-	        	case SAVINGS: account = new SavingsAccountBean(); break;
-	        	case CURRENT: account = new CurrentAccountBean(); break;
+	        	case SAVINGS: account = new SavingsAccount(generatedAccountNo, customerId, customerName,
+	        												nominee, branchId, balance, today, true); break;
+	        	case CURRENT: account = new CurrentAccount(generatedAccountNo, customerId, customerName,
+															nominee, branchId, balance, today, true); break;
 	        }
 	        
-	        account.setAccountNo(generatedAccountNo);
-	        account.setCustomerId(customerId);
-	        account.setCustomerName(customerName);
-	        account.setBranchId(branchId);
-	        account.setBalance(balance);
-	        account.setOpeningDate(LocalDate.now());
-	        account.setNominee(nominee);
-	        account.setIsActive(true);
-	        account.setTypeId(accountType.id);
-	        
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error";
 		} finally {
@@ -113,15 +107,18 @@ public class RegularAccountDAO {
 	}
 	
 	
-	public RegularAccountBean get(long accountNo) throws SQLException {
+	public RegularAccount get(long accountNo) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		
-		RegularAccountBean account = null;
-		boolean exceptionOccured = false;
-		String msg = "";
-		int type_id = -1;
+		RegularAccount account = null;
+		LocalDate openingDate;
+		boolean exceptionOccured = false, isActive;
+		String msg = "", customerName = "";
+		float balance;
+		long customerId;
+		int type_id = -1, branchId;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -134,26 +131,26 @@ public class RegularAccountDAO {
 			if(rs1.next()) {
 				type_id = rs1.getInt("type_id");
 				
-				switch(RegularAccountType.getType(type_id)) {
-					case SAVINGS : account = new SavingsAccountBean(); break;
-					case CURRENT : account = new CurrentAccountBean(); break;
-					default: return null;
-				}
-				
-		        account.setAccountNo(rs1.getLong(1));
-		        account.setCustomerId(rs1.getLong("customer_id"));
-		        account.setBranchId(rs1.getInt("branch_id"));
-		        account.setBalance(rs1.getFloat("balance"));
-		        account.setOpeningDate(rs1.getDate("opening_date").toLocalDate());
-		        account.setIsActive(rs1.getBoolean("active"));
-		        account.setTypeId(type_id);	
+		        customerId= rs1.getLong("customer_id");
+		        branchId = rs1.getInt("branch_id");
+		        balance = rs1.getFloat("balance");
+		        openingDate = rs1.getDate("opening_date").toLocalDate();
+		        isActive = rs1.getBoolean("active");
 		        
-				stmt2.setLong(1, account.getCustomerId());
+				stmt2.setLong(1, customerId);
 				rs2 = stmt2.executeQuery();
 				if(rs2.next())
-					account.setCustomerName(rs2.getString("name"));
+					customerName = rs2.getString("name");
+				
+				// update getting nominee
+				switch(RegularAccountType.getType(type_id)) {
+					case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, isActive); break;
+					case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, isActive); break;
+					default: return null;
+				}
 			}	        
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error";
 		} finally {

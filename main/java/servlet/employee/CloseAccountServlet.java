@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import dao.AccountDAO;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
-import model.account.RegularAccountBean;
+import model.account.RegularAccount;
 import util.Factory;
 import util.Util;
 
@@ -37,7 +37,7 @@ public class CloseAccountServlet extends HttpServlet {
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		
-		RegularAccountBean account = null;
+		RegularAccount account = null;
 		
 		String msg = "";
 		boolean exceptionOccured = false, isError = false, isDeletionSuccessfull = false;

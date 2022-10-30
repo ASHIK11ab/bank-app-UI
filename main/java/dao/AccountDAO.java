@@ -17,8 +17,8 @@ public class AccountDAO {
 			stmt = conn.prepareStatement("DELETE FROM account WHERE account_no = ?");
 			stmt.setLong(1, accountNo);
 			rowsAffected = stmt.executeUpdate();
-			System.out.println(rowsAffected);
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {

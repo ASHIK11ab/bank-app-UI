@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="constant.DepositAccountType" %>
-<%@ page import="model.account.DepositAccountBean" %>
+<%@ page import="model.account.DepositAccount" %>
 <%@ page import="java.time.LocalDate" %>
 <!DOCTYPE html>
 <html>
@@ -83,7 +83,7 @@
 					
 					<h3>Deposit details:</h3>
 					<p>Deposit type: ${ DepositAccountType.getName(requestScope.depositType) }</p>
-					<p>Intrest Rate (% p.a): ${ Math.round(DepositAccountBean.getTypeIntrestRate(DepositAccountType.getType(depositType)) * 100) } %</p>
+					<p>Intrest Rate (% p.a): ${ Math.round(DepositAccount.getTypeIntrestRate(DepositAccountType.getType(depositType)) * 100) } %</p>
 					<p>Period (in months): ${ requestScope.tenureMonths }</p>
 					
 					<c:if test="${ DepositAccountType.getType(depositType) == DepositAccountType.FD }">

@@ -1,10 +1,15 @@
-package model;
+package model.user;
 
-import java.io.Serializable;
-
-public class EmployeeBean extends UserBean implements Serializable {
+public class Employee extends User {
 	private int branchId;
 	private String branchName;
+	
+    public Employee(long id, String name, String password, String email,
+            			long phone, int branchId, String branchName) {
+		super(id, name, password, email, phone);
+		this.branchId = branchId;
+		this.branchName = branchName;
+	}
 	
 	// getters
 	public int getBranchId() {

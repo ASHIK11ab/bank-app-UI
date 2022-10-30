@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import constant.Role;
 import dao.EmployeeDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -29,7 +29,7 @@ public class LoginServlet extends HttpServlet {
 		PrintWriter out;
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
 		
-		EmployeeBean employee = null;
+		Employee employee = null;
 		long id = 0;
 		String password = "";
 				
