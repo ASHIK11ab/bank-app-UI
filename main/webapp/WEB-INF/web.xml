@@ -159,6 +159,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>ViewCardsServlet</servlet-name>
+		<servlet-class>servlet.employee.ViewCardsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ViewCardsServlet</servlet-name>
+		<url-pattern>/employee/cards</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
 	</servlet>
