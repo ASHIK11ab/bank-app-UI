@@ -49,7 +49,7 @@ public class ViewCardsServlet extends HttpServlet {
 			if(!isError) {
 				account = accountDAO.get(accountNo);
 				
-				if(account != null && account.getBranchId() == branchId) {
+				if(account != null) {
 					cards = cardDAO.getAll(accountNo);
 					req.setAttribute("actionType", 1);
 					req.setAttribute("account", account);
@@ -57,7 +57,7 @@ public class ViewCardsServlet extends HttpServlet {
 					req.getRequestDispatcher("/jsp/employee/viewCards.jsp").forward(req, res);
 				} else {
 					isError = true;
-					msg = "Account does not belong to this branch !!!";
+					msg = "Invalid account details !!!";
 				}
 			}
 			
