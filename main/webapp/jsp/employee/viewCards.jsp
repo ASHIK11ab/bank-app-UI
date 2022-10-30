@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="constant.DebitCardType" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
@@ -38,12 +37,9 @@
 						<h2>Linked Cards:</h2>
 						
 						<c:forEach items="${ requestScope.cards }" var="card">
+							<c:set var="card" value="${ card }" scope="request" />
 							<div style="margin-top: 1.2rem; border-top: 2.5px solid #ddd;">
-								<p>Card No: ${ card.getCardNo() }</p>
-								<p>Card Type: ${ DebitCardType.getName(card.getTypeId()) }</p>
-								<p>Valid From: ${ card.getValidFromDate() }</p>
-								<p>Expiry Date: ${ card.getExpiryDate() }</p>
-								<p>Active: <c:out value='${ card.getIsActive() ? "Yes" : "No" }'/></p>
+								<jsp:include page="/jsp/components/card.jsp" />
 							</div>
 						</c:forEach>
 						
