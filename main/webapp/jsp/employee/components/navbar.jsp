@@ -26,7 +26,7 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/employee/cards">view cards</a>
-					<a href="#">manage card activation</a>
+					<a href="/bank-app/employee/cards/card/activation-management">manage card activation</a>
 				</li>
 			</ul>
 		</div>

@@ -168,6 +168,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>CardActivationManagementServlet</servlet-name>
+		<servlet-class>servlet.employee.CardActivationManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CardActivationManagementServlet</servlet-name>
+		<url-pattern>/employee/cards/card/activation-management</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
 	</servlet>
