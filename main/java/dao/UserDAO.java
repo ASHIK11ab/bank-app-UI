@@ -34,7 +34,7 @@ public class UserDAO {
 			}
 
             stmt.setString(1, password);
-            stmt.setLong(1, id);
+            stmt.setLong(2, id);
             stmt.executeUpdate();
             
 		} catch(SQLException e) {
