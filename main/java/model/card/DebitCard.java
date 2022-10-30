@@ -5,19 +5,19 @@ import java.time.LocalDate;
 public class DebitCard {	
 	private long cardNo;
 	private long linkedAccountNo;
-	private LocalDate issueDate;
+	private LocalDate validFromDate;
 	private LocalDate expiryDate;
-	private int typeId;
+	private byte typeId;
 	private boolean isActive;
 	private int pin;
 	private int cvv;
 	
 	
-	public DebitCard(long cardNo, long accountNo, LocalDate issueDate, LocalDate expiryDate,
-						int typeId, boolean isActive, int pin, int cvv) {
+	public DebitCard(long cardNo, long accountNo, LocalDate validFromDate, LocalDate expiryDate,
+						byte typeId, boolean isActive, int pin, int cvv) {
 		this.cardNo = cardNo;
 		this.linkedAccountNo = accountNo;
-		this.issueDate = issueDate;
+		this.validFromDate = validFromDate;
 		this.expiryDate = expiryDate;
 		this.typeId = typeId;
 		this.isActive = isActive;
@@ -34,8 +34,8 @@ public class DebitCard {
 		return linkedAccountNo;
 	}
 	
-	public LocalDate getIssueDate() {
-		return issueDate;
+	public LocalDate getValidFromDate() {
+		return validFromDate;
 	}
 	
 	public LocalDate getExpiryDate() {
@@ -50,7 +50,7 @@ public class DebitCard {
 		return cvv;
 	}
 	
-	public int getTypeId() {
+	public byte getTypeId() {
 		return typeId;
 	}
 	
