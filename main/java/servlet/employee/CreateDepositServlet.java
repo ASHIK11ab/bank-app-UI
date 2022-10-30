@@ -20,10 +20,10 @@ import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
-import model.CustomerBean;
-import model.TransactionBean;
-import model.account.DepositAccountBean;
-import model.account.RegularAccountBean;
+import model.user.Customer;
+import model.Transaction;
+import model.account.DepositAccount;
+import model.account.RegularAccount;
 import util.Factory;
 import util.Util;
 
@@ -49,8 +49,8 @@ public class CreateDepositServlet extends HttpServlet {
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		
-		RegularAccountBean debitFromAccount = null, payoutAccount = null;
-		DepositAccountBean account = null;
+		RegularAccount debitFromAccount = null, payoutAccount = null;
+		DepositAccount account = null;
 		
 		boolean isError = false, exceptionOccured = false, isSufficientBalance = false;
 		String msg = "", customerName, description = "";

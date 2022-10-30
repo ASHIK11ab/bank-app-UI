@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.EmployeeDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -21,7 +21,7 @@ public class EmployeePasswordResetServlet extends HttpServlet {
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
-		LinkedList<EmployeeBean> employees;
+		LinkedList<Employee> employees;
 		int branchId = -1;
 		
 		try {

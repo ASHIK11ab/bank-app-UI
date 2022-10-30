@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import dao.BranchDAO;
 import dao.EmployeeDAO;
 import dao.ManagerDAO;
-import model.BranchBean;
-import model.EmployeeBean;
+import model.Branch;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -25,7 +25,7 @@ public class RemoveEmployeeServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
-		LinkedList<EmployeeBean> employees;
+		LinkedList<Employee> employees;
 		int branchId;
 		
 		try {
@@ -60,7 +60,7 @@ public class RemoveEmployeeServlet extends HttpServlet {
 			employeeId = Long.parseLong(req.getParameter("id"));
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			
-			isDeletionSuccessfull = employeeDAO.delete(employeeId, branchId);
+			isDeletionSuccessfull = employeeDAO.delete(employeeId);
 			
 			if(isDeletionSuccessfull)
 				out.println("<div class='notification success'>" + "employee removed successfully" + "</div>");

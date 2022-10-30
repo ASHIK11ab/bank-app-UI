@@ -15,7 +15,7 @@ import constant.DepositAccountType;
 import dao.AccountDAO;
 import dao.DepositAccountDAO;
 import dao.TransactionDAO;
-import model.account.DepositAccountBean;
+import model.account.DepositAccount;
 import util.Factory;
 import util.Util;
 
@@ -35,7 +35,7 @@ public class CloseDepositServlet extends HttpServlet {
 		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		
-		DepositAccountBean account = null;
+		DepositAccount account = null;
 		
 		LocalDate maturityDate = null;
 		String msg = "", description = "";
@@ -116,7 +116,7 @@ public class CloseDepositServlet extends HttpServlet {
 					description = "Intrest credit for deposit A/C: " + account.getAccountNo();
 					
 					transactionDAO.create(conn, 1, description, bankAccountNo, account.getAccountNo(), intrestAmount, false, true, beforeBalance, account.getBalance());	
-					account.setBalance(account.getBalance() + intrestAmount);
+					account.addAmount(intrestAmount);
 				}
 				
 				// Debit charges for premature closing

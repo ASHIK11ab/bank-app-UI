@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.IntegratedBankDAO;
-import model.IntegratedBankBean;
+import model.IntegratedBank;
 import util.Factory;
 
 public class IntegratedBanksServlet extends HttpServlet {
@@ -24,7 +24,7 @@ public class IntegratedBanksServlet extends HttpServlet {
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<IntegratedBankBean> integratedBanks;
+		LinkedList<IntegratedBank> integratedBanks;
 		
 		try {
 			integratedBanks = integratedBankDAO.getAll();

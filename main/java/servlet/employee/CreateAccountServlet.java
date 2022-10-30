@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import constant.RegularAccountType;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
-import model.CustomerBean;
-import model.account.RegularAccountBean;
+import model.user.Customer;
+import model.account.RegularAccount;
 import util.Factory;
 
 public class CreateAccountServlet extends HttpServlet {
@@ -30,8 +30,8 @@ public class CreateAccountServlet extends HttpServlet {
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		
-		CustomerBean customer = null;
-		RegularAccountBean account = null;
+		Customer customer = null;
+		RegularAccount account = null;
 		RegularAccountType type;
 		String msg = "", customerName;
 		boolean isEligibleForAccount = true;
