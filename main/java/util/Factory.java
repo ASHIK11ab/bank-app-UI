@@ -13,6 +13,7 @@ public class Factory {
 	
 	// DAO
 	private static BranchDAO branchDAO;
+	private static UserDAO userDAO;
 	private static ManagerDAO managerDAO;
 	private static EmployeeDAO employeeDAO;
 	private static CustomerDAO customerDAO;
@@ -22,6 +23,7 @@ public class Factory {
 	private static AccountDAO accountDAO;
 	private static RegularAccountDAO regularAccountDAO;
 	private static DepositAccountDAO depositAccountDAO;
+	private static DebitCardDAO debitCardDAO;
 	
 	public static void init() throws Exception {
 		try {
@@ -38,6 +40,8 @@ public class Factory {
 			regularAccountDAO = new RegularAccountDAO();
 			depositAccountDAO = new DepositAccountDAO();
 			accountDAO = new AccountDAO();
+			userDAO = new UserDAO();
+			debitCardDAO = new DebitCardDAO();
 		} catch(NamingException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -55,6 +59,14 @@ public class Factory {
 	
 	public static ManagerDAO getManagerDAO() {
 		return managerDAO;
+	}
+	
+	public static UserDAO getUserDAO() {
+		return userDAO;
+	}
+	
+	public static DebitCardDAO getDebitCardDAO() {
+		return debitCardDAO;
 	}
 	
 	public static EmployeeDAO getEmployeeDAO() {
