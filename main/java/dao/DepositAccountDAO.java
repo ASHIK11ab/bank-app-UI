@@ -119,10 +119,10 @@ public class DepositAccountDAO {
 		DepositAccount account = null;
 		DepositAccountType type;
 		
-		LocalDate openingDate, recurringDate;
+		LocalDate openingDate, recurringDate = null;
 		long customerId, payoutAccountNo, debitFromAccountNo;
 		float balance, rateOfIntrest;
-		int branchId, typeId, tenureMonths, amountPerMonth;
+		int branchId, typeId, tenureMonths, amountPerMonth = 0;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -142,8 +142,13 @@ public class DepositAccountDAO {
                 branchId = rs1.getInt("branch_id");
                 payoutAccountNo = rs1.getLong("payout_account_no");
                 debitFromAccountNo = rs1.getLong("debit_from_account_no");
-                amountPerMonth = rs1.getInt("amount_per_month");
-                recurringDate = rs1.getDate("recurring_date").toLocalDate();
+                
+                type = DepositAccountType.getType(typeId);
+                
+                if(type == DepositAccountType.RD) {
+                    amountPerMonth = rs1.getInt("amount_per_month");
+                    recurringDate = rs1.getDate("recurring_date").toLocalDate();	
+                }
                 
                 stmt2.setLong(1, customerId);
                 rs2 = stmt2.executeQuery();
@@ -151,7 +156,6 @@ public class DepositAccountDAO {
                 if(rs2.next())
                 	customerName = rs2.getString("name");
                 
-                type = DepositAccountType.getType(typeId);
                 
                 switch(type) {
 		            case RD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
