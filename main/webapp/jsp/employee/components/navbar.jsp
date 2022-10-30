@@ -22,6 +22,15 @@
 			</ul>
 		</div>
 		<div class="sub-nav">
+			<span class="text">cards</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/employee/cards">view cards</a>
+					<a href="#">manage card activation</a>
+				</li>
+			</ul>
+		</div>
+		<div class="sub-nav">
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
