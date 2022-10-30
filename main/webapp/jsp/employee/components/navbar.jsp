@@ -34,7 +34,8 @@
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
-					<a href="#">view profile</a>
+					<a href="/bank-app/employee/profile">view profile</a>
+					<a href="/bank-app/employee/password-reset">reset password</a>
 					<a href="/bank-app/employee/logout">logout</a>
 				</li>
 			</ul>

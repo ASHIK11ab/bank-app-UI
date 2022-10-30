@@ -177,6 +177,24 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>ProfileServlet</servlet-name>
+		<servlet-class>servlet.employee.ProfileServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ProfileServlet</servlet-name>
+		<url-pattern>/employee/profile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>EmployeeSelfPasswordResetServlet</servlet-name>
+		<servlet-class>servlet.employee.PasswordResetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EmployeeSelfPasswordResetServlet</servlet-name>
+		<url-pattern>/employee/password-reset</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>EmployeeLogoutServlet</servlet-name>
 		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
 	</servlet>
