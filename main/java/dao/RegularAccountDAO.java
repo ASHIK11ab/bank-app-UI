@@ -24,12 +24,10 @@ public class RegularAccountDAO {
 		
 		LocalDate today = LocalDate.now();
 		RegularAccount account = null;
-		LocalDate validFromDate, expiryDate;
 		boolean exceptionOccured = false;
 		String msg = "";
 		long generatedAccountNo = -1;
 		float balance = 0;
-		int pin, cvv;
 		
 		try {
 			if(nominee != null)
@@ -59,19 +57,8 @@ public class RegularAccountDAO {
 	        stmt2.setInt(2, accountType.id);
 	        stmt2.setBoolean(3, true);
 	        stmt2.executeUpdate();
-	
-	        validFromDate = today.plusDays(10);
-	        expiryDate = validFromDate.plusYears(3);
-	        pin = Util.genPin(4);
-	        cvv = Util.genPin(3);
 	        
-	        stmt3.setLong(1, generatedAccountNo);
-	        stmt3.setDate(2, Date.valueOf(validFromDate));
-	        stmt3.setDate(3, Date.valueOf(expiryDate));
-	        stmt3.setInt(4, cardType);
-	        stmt3.setInt(5, pin);
-	        stmt3.setInt(6, cvv);
-	        stmt3.executeUpdate();
+	        Factory.getDebitCardDAO().create(conn, generatedAccountNo, (byte) cardType);
 	        
 	        switch(accountType) {
 	        	case SAVINGS: account = new SavingsAccount(generatedAccountNo, customerId, customerName,
