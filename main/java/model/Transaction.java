@@ -11,10 +11,12 @@ public class Transaction {
     private final long fromAccountNo;
     private final long toAccountNo;
     private final float amount;
+    private final float balanceBeforeTransaction;
     private final LocalDateTime dateTime;
 
     public Transaction(long id, int type, long fromAccountNo, long toAccountNo,
-                        float amount, LocalDateTime dateTime, String description) {
+                        float amount, LocalDateTime dateTime, String description,
+                        float balanceBeforeTransaction) {
         this.id = id;
         this.type = type;
         this.description = description;
@@ -22,6 +24,7 @@ public class Transaction {
         this.toAccountNo = toAccountNo;
         this.amount = amount;
         this.dateTime = dateTime;
+        this.balanceBeforeTransaction = balanceBeforeTransaction;
     }
 
 
@@ -33,9 +36,13 @@ public class Transaction {
     public float getAmount() {
         return this.amount;
     }
+    
+    public float getBalanceBeforeTransaction() {
+    	return balanceBeforeTransaction;
+    }
 
     public long getToAccountNo() {
-        return this.fromAccountNo;
+        return this.toAccountNo;
     }
 
     public long getFromAccountNo() {
