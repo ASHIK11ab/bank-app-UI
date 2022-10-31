@@ -168,6 +168,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>EmployeeViewAccountTransactionServlet</servlet-name>
+		<servlet-class>servlet.employee.AccountTransactionHistoryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EmployeeViewAccountTransactionServlet</servlet-name>
+		<url-pattern>/employee/account/transaction-history</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>CardActivationManagementServlet</servlet-name>
 		<servlet-class>servlet.employee.CardActivationManagementServlet</servlet-class>
 	</servlet>
