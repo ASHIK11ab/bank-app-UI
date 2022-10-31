@@ -10,12 +10,13 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedList;
 
 import model.Transaction;
 import util.Factory;
 
 public class TransactionDAO {
-	public Transaction create(Connection conn, int typeId, String description, long fromAccountNo,
+	public long create(Connection conn, int typeId, String description, long fromAccountNo,
 									long toAccountNo, float amount, boolean fromAccountOwnBank,
 									boolean toAccountOwnBank, float fromAccountBeforeBalance,
 									float toAccountBeforeBalance) throws SQLException {
@@ -24,7 +25,6 @@ public class TransactionDAO {
 		
 		LocalDate today = LocalDate.now();
 		LocalTime time = LocalTime.now();
-		Transaction transaction = null;
 		boolean exceptionOccured = false;
 		String msg = "";
 		long transactionId = -1;
@@ -63,10 +63,6 @@ public class TransactionDAO {
                 stmt2.setFloat(3, toAccountBeforeBalance);
                 stmt2.executeUpdate();	
             }
-            
-            transaction = new Transaction(transactionId, typeId, fromAccountNo, toAccountNo, 
-            								amount, LocalDateTime.parse(today.toString() + 'T' + time.toString()),
-            								description);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
@@ -88,6 +84,71 @@ public class TransactionDAO {
 		if(exceptionOccured)
 			throw new SQLException(msg);
 		else
-			return transaction;
+			return transactionId;
+	}
+	
+	
+	public LinkedList<Transaction> getAll(long accountNo, LocalDate fromDate, LocalDate toDate) throws SQLException {
+		Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        LinkedList<Transaction> transactions = new LinkedList<Transaction>(); 
+        Transaction transaction = null;
+        boolean exceptionOccured = false;
+        long transactionId, fromAccountNo, toAccountNo;
+        String description, msg = "";
+        float amount, balanceBeforeTransaction;
+        int typeId;
+        Date date;
+        Time time;
+        LocalDateTime dateTime;
+
+        try {
+            conn = Factory.getDataSource().getConnection();
+            stmt = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND (date BETWEEN ? AND ?)");
+            stmt.setLong(1, accountNo);
+            stmt.setLong(2, accountNo);
+            stmt.setLong(3, accountNo);
+            stmt.setDate(4, Date.valueOf(fromDate));
+            stmt.setDate(5, Date.valueOf(toDate));
+
+            rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                transactionId = rs.getLong("id");
+                typeId = rs.getInt("type_id");
+                description = rs.getString("description");
+                fromAccountNo = rs.getLong("from_account_no");
+                toAccountNo = rs.getLong("to_account_no");
+                amount = rs.getFloat("amount");
+                balanceBeforeTransaction = rs.getFloat("before_balance");
+                date = rs.getDate("date");
+                time = rs.getTime("time");
+                dateTime = LocalDateTime.parse(date.toString() + 'T' + time.toString());
+
+                transaction = new Transaction(transactionId, typeId, fromAccountNo, toAccountNo, amount, dateTime, description, balanceBeforeTransaction);
+                transactions.add(transaction);
+            }
+        }  catch(SQLException e) {
+        	System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+        
+        if(exceptionOccured)
+        	throw new SQLException(msg);
+        else
+        	return transactions;
 	}
 }
