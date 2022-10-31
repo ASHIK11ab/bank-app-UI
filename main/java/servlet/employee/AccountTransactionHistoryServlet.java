@@ -53,6 +53,11 @@ public class AccountTransactionHistoryServlet extends HttpServlet {
 			fromDate = LocalDate.parse(req.getParameter("from-date"));
 			toDate = LocalDate.parse(req.getParameter("to-date"));
 			
+			if(Util.getNoOfDigits(accountNo) != 11 ) {
+				isError = true;
+				msg = "A/C no must be a 11 digit number";
+			}
+			
 	        // Invalid date range.
 	        if(fromDate.isAfter(toDate)) {
 	            isError = true;
