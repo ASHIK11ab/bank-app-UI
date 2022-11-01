@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
+import constant.Constants;
 import constant.DepositAccountType;
 import dao.AccountDAO;
 import dao.DepositAccountDAO;
@@ -40,12 +42,12 @@ public class CloseDepositServlet extends HttpServlet {
 		LocalDate maturityDate = null;
 		String msg = "", description = "";
 		
-		float intrestAmount = 0, beforeBalance, totalAmount;
+		float fromAccountBeforeBalance, toAccountBeforeBalance, totalAmount;
 		boolean exceptionOccured = false, isError = false, prematureClosing = false;
 		
-		long accountNo, bankAccountNo = 1452317983;
+		long accountNo, bankAccountNo = AppCache.getBank().getBankAccountNo();
 		
-		int branchId = -1, actionType = 0, tenureMonths;
+		int branchId = -1, actionType = 0;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
@@ -60,17 +62,16 @@ public class CloseDepositServlet extends HttpServlet {
 			
 			account = depositAccountDAO.get(accountNo);
 			
+			if(account == null || account.getBranchId() != branchId) {
+				isError = true;
+				msg = "account does not exists !!!";
+			}
+			
 			// Get a/c no and display for confirmation
 			if(!isError && actionType == 0) {
-				
-				if(account != null && account.getBranchId() == branchId) {
-					req.setAttribute("actionType", 1);
-					req.setAttribute("accountNo", account.getAccountNo());
-					req.setAttribute("account", account);
-				} else {
-					isError = true;
-					msg = "account does not exist in branch !!!";
-				}
+				req.setAttribute("actionType", 1);
+				req.setAttribute("accountNo", account.getAccountNo());
+				req.setAttribute("account", account);
 			}
 			
 			/* If A/C reached maturity -> close (or) request confirmation for 
@@ -92,52 +93,40 @@ public class CloseDepositServlet extends HttpServlet {
 			   confirmation. */
 			if(!isError && ((actionType == 1 && !prematureClosing) || actionType == 2)) {
 				
-				if(actionType == 2)
-					prematureClosing = true;
-				
-				// update logic to find intrest.
-			
-				intrestAmount = 20;
-				totalAmount = account.getBalance() + intrestAmount;
-				
-				// 500 is debited as charges for premature closing.
-				if(prematureClosing)
-					totalAmount = totalAmount - 500;
-				
-				
-				conn = Factory.getDataSource().getConnection();
-				
-				
-				// Intrest is credited only to fd's on closing, for rd it is credited regularly.
-				if(account.getTypeId() == DepositAccountType.FD.id) {
-					// credit intrest amount to deposit account.
-					beforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);
+				synchronized (account) {
 					
-					description = "Intrest credit for deposit A/C: " + account.getAccountNo();
+					if(actionType == 2)
+						prematureClosing = true;
 					
-					transactionDAO.create(conn, 1, description, bankAccountNo, account.getAccountNo(), intrestAmount, false, true, beforeBalance, account.getBalance());	
-					account.addAmount(intrestAmount);
+					totalAmount = account.getBalance();
+					
+					// Deduct premature closing charges from total amount.
+					if(prematureClosing)
+						totalAmount = totalAmount - Constants.PREMATURE_CLOSING_CHARGES;
+				
+					conn = Factory.getDataSource().getConnection();
+					
+					// Debit charges for premature closing
+					if(prematureClosing) {
+						// credit 500 to bank account.
+						fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, Constants.PREMATURE_CLOSING_CHARGES);
+						toAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 1, Constants.PREMATURE_CLOSING_CHARGES);
+						
+						description = "Premature closing charges on A/C: " + account.getAccountNo();
+						transactionDAO.create(conn, 1, description, account.getAccountNo(), bankAccountNo, Constants.PREMATURE_CLOSING_CHARGES, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+					}
+				
+					// credit amount to payout account and close deposit.
+					fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, totalAmount);
+					toAccountBeforeBalance = accountDAO.updateBalance(conn, account.getPayoutAccountNo(), 1, totalAmount);
+					description = DepositAccountType.getType(account.getTypeId()).toString() + " closing on A/C: " + account.getAccountNo();
+					transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+					
+					accountDAO.delete(conn, account.getAccountNo());
+					
+					out.println(Util.createNotification("Deposit closed and amount credited to payout account successfully", "success"));
+					req.setAttribute("actionType", 0);
 				}
-				
-				// Debit charges for premature closing
-				if(prematureClosing) {
-					// credit 500 to bank account.
-					beforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 1, 500);
-					description = "Premature closing charges on A/C: " + account.getAccountNo();
-					transactionDAO.create(conn, 1, description, account.getAccountNo(), bankAccountNo, 500, true, false, account.getBalance(), beforeBalance);
-				}
-				
-				// credit amount to payout account and close deposit.
-				beforeBalance = accountDAO.updateBalance(conn, account.getPayoutAccountNo(), 1, totalAmount);
-				
-				description = DepositAccountType.getType(account.getTypeId()).toString() + " closing on A/C: " + account.getAccountNo();
-				
-				transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, account.getBalance(), beforeBalance);
-				
-				accountDAO.delete(conn, account.getAccountNo());
-				
-				out.println(Util.createNotification("Deposit closed and amount credited to payout account successfully", "success"));
-				req.setAttribute("actionType", 0);
 			}
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());
