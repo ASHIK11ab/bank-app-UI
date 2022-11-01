@@ -30,7 +30,6 @@ public class TransactionDAO {
 		long transactionId = -1;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
             // Create transaction record.
             stmt1 = conn.prepareStatement("INSERT INTO transaction (type_id, description, from_account_no, to_account_no, amount, date, time) VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt2 = conn.prepareStatement("INSERT INTO account_transaction VALUES (?, ?, ?)");
@@ -88,6 +87,7 @@ public class TransactionDAO {
 	}
 	
 	
+	// Returns list of transactions on a given date range of an account.
 	public LinkedList<Transaction> getAll(long accountNo, LocalDate fromDate, LocalDate toDate) throws SQLException {
 		Connection conn = null;
         PreparedStatement stmt = null;
