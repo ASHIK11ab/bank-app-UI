@@ -41,7 +41,7 @@
 					</select>
 					<label>Martial Status:</label>
 					<select name="martial-status" required>
-						<option value="-1" selected hidden disabled>select gender</option>
+						<option value="-1" selected hidden disabled>select martial status</option>
 						<option value="married">Married</option>
 						<option value="unmarried">Un Married</option>
 					</select>
