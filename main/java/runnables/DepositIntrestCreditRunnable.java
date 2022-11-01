@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import cache.AppCache;
 import constant.Constants;
 import constant.DepositAccountType;
 import dao.AccountDAO;
@@ -52,7 +53,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		// FD -> deposit amount is the amount deposited.
 		// RD -> deposit amount is the monthly installment.
 		int depositAmount = 0, intrestCreditedMonthCnt;
-		long accountNo, bankAccountNo = 10000000052L;
+		long accountNo, bankAccountNo = AppCache.getBank().getBankAccountNo();
 
 		try {
 			while(!exit) {
@@ -103,7 +104,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 								// credit intrest to bank.
 								fromAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);	// deduct from bank account
 								toAccountBeforeBalance = accountDAO.updateBalance(conn, accountNo, 1, intrestAmount);		// credit to deposit account
-								transactionDAO.create(conn, typeId, ("Intrest credit for deposit A/C: " + accountNo), bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+								transactionDAO.create(conn, 1, ("Intrest credit for deposit A/C: " + accountNo), bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 								
 								stmt3.setInt(1, intrestCreditedMonthCnt);
 								stmt3.setLong(2, accountNo);
