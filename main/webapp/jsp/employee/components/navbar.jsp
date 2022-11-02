@@ -32,6 +32,9 @@
 			</ul>
 		</div>
 		<div class="sub-nav">
+			<a href="/bank-app/employee/customer">customer management</a>
+		</div>
+		<div class="sub-nav">
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
