@@ -186,6 +186,33 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>CustomerServlet</servlet-name>
+		<servlet-class>servlet.employee.CustomerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CustomerServlet</servlet-name>
+		<url-pattern>/employee/customer/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
+		<servlet-class>servlet.employee.UpdateCustomerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
+		<url-pattern>/employee/customer/update</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>EmployeeCustomerPasswordResetServlet</servlet-name>
+		<servlet-class>servlet.employee.CustomerPasswordResetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EmployeeCustomerPasswordResetServlet</servlet-name>
+		<url-pattern>/employee/customer/password-reset</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>ProfileServlet</servlet-name>
 		<servlet-class>servlet.employee.ProfileServlet</servlet-class>
 	</servlet>
