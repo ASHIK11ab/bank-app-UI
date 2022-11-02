@@ -5,10 +5,8 @@
 			<span class="text">accounts</span>
 			<ul class="links">
 				<li>
-					<a href="/bank-app/employee/account/view">view account</a>
 					<a href="/bank-app/employee/account/create">create account</a>
-					<a href="/bank-app/employee/account/close">close account</a>
-					<a href="/bank-app/employee/account/transaction-history">account transaction history</a>
+					<a href="/bank-app/employee/account/">account management</a>
 				</li>
 			</ul>
 		</div>

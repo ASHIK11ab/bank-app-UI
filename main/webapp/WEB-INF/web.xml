@@ -120,10 +120,16 @@
 		<servlet-name>EmployeeDashboardServlet</servlet-name>
 		<servlet-class>servlet.employee.DashboardServlet</servlet-class>
 	</servlet>
+	
 	<servlet>
-		<servlet-name>ViewAccountServlet</servlet-name>
-		<servlet-class>servlet.employee.ViewAccountServlet</servlet-class>
+		<servlet-name>EmployeeAccountManagementServlet</servlet-name>
+		<servlet-class>servlet.employee.AccountServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>EmployeeAccountManagementServlet</servlet-name>
+		<url-pattern>/employee/account/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>InitiateAccountCreationServlet</servlet-name>
 		<servlet-class>servlet.employee.InitiateAccountCreationServlet</servlet-class>
@@ -136,10 +142,25 @@
 		<servlet-name>CreateAccountServlet</servlet-name>
 		<servlet-class>servlet.employee.CreateAccountServlet</servlet-class>
 	</servlet>
+	
 	<servlet>
 		<servlet-name>CloseAccountServlet</servlet-name>
 		<servlet-class>servlet.employee.CloseAccountServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>CloseAccountServlet</servlet-name>
+		<url-pattern>/employee/account/close</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RemoveCustomerServlet</servlet-name>
+		<servlet-class>servlet.employee.RemoveCustomerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RemoveCustomerServlet</servlet-name>
+		<url-pattern>/employee/customer/close</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>ViewDepositServlet</servlet-name>
 		<servlet-class>servlet.employee.ViewDepositServlet</servlet-class>
@@ -359,10 +380,6 @@
 		<url-pattern>/employee/dashboard</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>ViewAccountServlet</servlet-name>
-		<url-pattern>/employee/account/view</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
 		<servlet-name>InitiateAccountCreationServlet</servlet-name>
 		<url-pattern>/employee/account/create</url-pattern>
 	</servlet-mapping>
@@ -373,10 +390,6 @@
 	<servlet-mapping>
 		<servlet-name>CreateAccountServlet</servlet-name>
 		<url-pattern>/employee/account/create/existing-customer</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>CloseAccountServlet</servlet-name>
-		<url-pattern>/employee/account/close</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>ViewDepositServlet</servlet-name>
