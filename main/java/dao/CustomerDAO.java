@@ -194,4 +194,69 @@ public class CustomerDAO {
 		else
 			return customer;
  	}
+	
+	
+	public Customer update(long customerId, String name, long phone, String email, 
+							byte age, char gender, String martialStatus,
+				            String occupation, int income, long adhaar, String pan,
+				            Address address) throws SQLException {
+		Connection conn = null;
+		PreparedStatement stmt1 = null, stmt2 = null;
+		
+		Customer customer = null;
+		boolean exceptionOccured = false;
+		String msg = "";
+				
+		try {
+			conn = Factory.getDataSource().getConnection();
+			stmt1 = conn.prepareStatement("UPDATE customer SET name = ?, phone = ?, email = ? WHERE id = ?");
+			stmt2 = conn.prepareStatement("UPDATE customer_info SET age = ?, gender = ?, martial_status = ?, occupation = ?, income = ?, adhaar = ?, pan = ?, door_no = ?, street = ?, city = ?, state = ?, pincode = ? WHERE customer_id = ?");
+			
+			stmt1.setString(1, name);
+			stmt1.setLong(2, phone);
+			stmt1.setString(3, email);
+			stmt1.setLong(4, customerId);
+			
+			stmt1.executeUpdate();
+			
+			stmt2.setInt(1, age);
+			stmt2.setString(2, "" + gender);
+			stmt2.setString(3, martialStatus);
+			stmt2.setString(4, occupation);
+			stmt2.setInt(5, income);
+			stmt2.setLong(6, adhaar);
+			stmt2.setString(7, pan);
+			stmt2.setString(8, address.getDoorNo());
+			stmt2.setString(9, address.getStreet());
+			stmt2.setString(10, address.getCity());
+			stmt2.setString(11, address.getState());
+			stmt2.setInt(12, address.getPincode());
+			stmt2.setLong(13, customerId);
+			stmt2.executeUpdate();
+			
+			// update in cache.
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "internal error";
+		} finally {
+		
+			try {
+				if(stmt1 != null)
+					stmt1.close();
+				if(stmt2 != null)
+					stmt2.close();
+			} catch(SQLException e) { System.out.println(e.getMessage()); }
+			
+			try {
+				if(conn != null)
+					conn.close();
+			} catch(SQLException e) { System.out.println(e.getMessage()); }
+		}
+		
+		if(exceptionOccured)
+			throw new SQLException(msg);
+		else
+			return customer;
+	}
 }
