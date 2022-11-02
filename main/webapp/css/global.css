@@ -132,6 +132,11 @@ a.button.secondary {
 	color: #000;
 }
 
+a.button.danger, button.danger {
+	background-color: #ff1e2f;
+	color: #fff;
+}
+
 
 @keyframes slide-from-top {
 	0% {
