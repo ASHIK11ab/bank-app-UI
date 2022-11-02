@@ -16,11 +16,14 @@
 	<p>Email: ${ customer.getEmail() }<p>
 	
 	<h3>Personal Details:</h3>
-	<p>Gender: ${ customer.getGender() }</p>
+	<p>Gender: ${ customer.getGender().toString().equals("m") ? "male": "female" }</p>
 	<p>Age: ${ customer.getAge() }<p>
 	<p>Occupation: ${ customer.getOccupation() }</p>
 	<p>Income: ${ customer.getIncome() }<p>
 	<p>Martial Status: ${ customer.getMartialStatus() }<p>
 	<p>ADHAAR no: ${ customer.getAdhaar() }</p>
 	<p>PAN no: ${ customer.getPan() }
+	
+	<h3>Address:</h3>
+	<p>${ customer.getAddress() }</p>
 </section>
