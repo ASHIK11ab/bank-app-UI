@@ -15,21 +15,21 @@
 		<div class="wrapper">
 		
 			<c:choose>
-				<c:when test="${ requestScope.customer == null }">
+				<c:when test="${ customer == null }">
 					<h1>View Customer:</h1>
-					<form id="customer-view-form" method="get">
+					<form action="/bank-app/employee/customer/" method="post">
 						<label>Customer Id:</label>
-						<input type="number" placeholder="customer id" id="customer-id-input" required>
+						<input type="number" name="customer-id" placeholder="customer id" required>
 						<button>submit</button>
 					</form>
 				</c:when>
 	
-				<c:when test="${ requestScope.customer != null }">
+				<c:when test="${ customer != null }">
 					<jsp:include page="/jsp/components/customer.jsp" />
-					<a class="button" href="/bank-app/employee/customer/${ requestScope.customer.getId() }/update">
+					<a class="button" href="/bank-app/employee/customer/${ customer.getId() }/update">
 						update customer details
 					</a>
-					<a class="button secondary" href="/bank-app/employee/customer/${ requestScope.customer.getId() }/password-reset">
+					<a class="button secondary" href="/bank-app/employee/customer/${ customer.getId() }/password-reset">
 						reset customer password
 					</a>
 				</c:when>
@@ -37,15 +37,5 @@
 
 		</div>
 	</main>
-	
-	<c:if test="${ requestScope.customer == null }">
-		<script>
-			const customerIdInput = document.getElementById("customer-id-input");
-			
-			document.getElementById("customer-view-form").onsubmit = function() {
-				this.setAttribute("action", "/bank-app/employee/customer/" + customerIdInput.value + "/view");
-			}
-		</script>
-	</c:if>
 </body>
 </html>

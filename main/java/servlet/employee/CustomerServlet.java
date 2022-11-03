@@ -38,9 +38,8 @@ public class CustomerServlet extends HttpServlet {
 			
 			customerId = Long.parseLong(path.split("/")[0]);
 			action = path.split("/")[1];
-			
 			customer = customerDAO.get(customerId);
-			
+
 			if(customer == null) {
 				isError = true;
 				msg = "Invalid customer id !!!";
@@ -81,6 +80,34 @@ public class CustomerServlet extends HttpServlet {
 				req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res);
 				out.close();
 			}
+		}
+	}
+	
+	
+	// Handles the post request and redirects to the view page.
+	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {		
+		PrintWriter out = res.getWriter();
+		
+		boolean exceptionOccured = false, isError = false;
+		String errorMsg = "", redirectURI = "";
+		long customerId;
+		
+		try {
+			customerId = Long.parseLong(req.getParameter("customer-id"));
+			redirectURI = String.format("/bank-app/employee/customer/%d/view", customerId);
+			res.sendRedirect(redirectURI);
+		} catch(NumberFormatException e) {
+			exceptionOccured = true;
+			errorMsg = "internal error";
+		} finally {
+			
+			if(isError || exceptionOccured) {
+				out.println(Util.createNotification(errorMsg, "danger"));
+				req.setAttribute("actionType", 0);
+				req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res);
+			}
+			
+			out.close();
 		}
 	}
 }
