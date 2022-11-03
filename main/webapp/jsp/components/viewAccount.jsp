@@ -24,7 +24,7 @@
 			<c:if test="${ actionType == 0 }">
 				<section>
 					<h1>View Account</h1>
-					<form id="account-view-form" method="get">
+					<form action="/bank-app/${ userType }/account/" method="POST">
 						<label>Account No:</label>
 						
 						<c:choose>
@@ -77,15 +77,5 @@
 			</c:if>
 		</div>
 	</main>
-	
-	<c:if test="${ actionType == 0 }">
-		<script>
-			const accountNoInput = document.getElementById("account-no-input");
-			
-			document.getElementById("account-view-form").onsubmit = function() {
-				this.setAttribute("action", "/bank-app/" + "${ userType}" + "/account/" + accountNoInput.value + "/view");
-			}
-		</script>
-	</c:if>
 </body>
 </html>

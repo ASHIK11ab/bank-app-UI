@@ -64,6 +64,19 @@
 		<servlet-name>BlockUnblockCardServlet</servlet-name>
 		<url-pattern>/customer/card/block-unblock</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>AccountServlet</servlet-name>
+		<servlet-class>servlet.shared.AccountServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AccountServlet</servlet-name>
+		<url-pattern>/employee/account/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AccountServlet</servlet-name>
+		<url-pattern>/customer/account/*</url-pattern>
+	</servlet-mapping>
 	<!-- End of shared servlets -->
 	
 	
@@ -188,15 +201,6 @@
 		<servlet-name>EmployeeDashboardServlet</servlet-name>
 		<servlet-class>servlet.employee.DashboardServlet</servlet-class>
 	</servlet>
-	
-	<servlet>
-		<servlet-name>EmployeeAccountManagementServlet</servlet-name>
-		<servlet-class>servlet.employee.AccountServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmployeeAccountManagementServlet</servlet-name>
-		<url-pattern>/employee/account/*</url-pattern>
-	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>InitiateAccountCreationServlet</servlet-name>
