@@ -1,4 +1,4 @@
-package servlet.employee;
+package servlet.shared;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import cache.AppCache;
 import constant.Constants;
 import constant.DepositAccountType;
+import constant.Role;
 import dao.AccountDAO;
 import dao.DepositAccountDAO;
 import dao.TransactionDAO;
@@ -23,15 +24,8 @@ import util.Util;
 
 
 public class CloseDepositServlet extends HttpServlet {
-	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		req.setAttribute("actionType", 0);
-		req.getRequestDispatcher("/jsp/employee/closeDeposit.jsp").include(req, res);
-	}
-	
-	
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
-		PrintWriter out = res.getWriter();
 		
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
@@ -39,19 +33,17 @@ public class CloseDepositServlet extends HttpServlet {
 		
 		DepositAccount account = null;
 		
-		LocalDate maturityDate = null;
-		String msg = "", description = "";
-		
+		Role role = null;
+		String msg = "", description = "", userType = "", redirectURI = "";
 		float fromAccountBeforeBalance, toAccountBeforeBalance, totalAmount;
-		boolean exceptionOccured = false, isError = false, prematureClosing = false;
-		
-		long accountNo, bankAccountNo = AppCache.getBank().getBankAccountNo();
-		
+		boolean exceptionOccured = false, isError = false, prematureClosing = false, isAccountExists = false;
+		long accountNo = -1, bankAccountNo = AppCache.getBank().getBankAccountNo(), customerId = -1;
 		int branchId = -1, actionType = 0;
 		
 		try {
+			role = (Role) req.getSession(false).getAttribute("role");
+			userType = Role.getName(role);
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
-			
 			actionType = Integer.parseInt(req.getParameter("action-type"));
 			accountNo = Long.parseLong(req.getParameter("account-no"));
 			
@@ -62,41 +54,44 @@ public class CloseDepositServlet extends HttpServlet {
 			
 			account = depositAccountDAO.get(accountNo);
 			
-			if(account == null || account.getBranchId() != branchId) {
-				isError = true;
-				msg = "account does not exists !!!";
-			}
+        	// Access for account differs for customer and employee.
+        	switch(role) {
+	        	case EMPLOYEE: 
+	        					if(account != null && account.getBranchId() == branchId)
+	        						isAccountExists = true;
+	        					break;
+	        	case CUSTOMER: 
+	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
+	        					if(account != null && account.getCustomerId() == customerId)
+	        						isAccountExists = true;
+	        					break;
+	        	default: isAccountExists = false;
+        	}
+        	
+        	if(!isAccountExists) {
+        		isError = true;
+        		msg = "Account not found !!!";
+        	}
 			
-			// Get a/c no and display for confirmation
-			if(!isError && actionType == 0) {
-				req.setAttribute("actionType", 1);
-				req.setAttribute("accountNo", account.getAccountNo());
-				req.setAttribute("account", account);
-			}
-			
-			/* If A/C reached maturity -> close (or) request confirmation for 
-				premature closing */
-			if(!isError && actionType == 1) {
-				
-				maturityDate = account.getOpeningDate().plusMonths(account.getTenureMonths());
-				
+			/* Check whether account has reached maturity */
+			if(!isError) {
 				// Premature closing, request for confirmation.
-				if(LocalDate.now().isBefore(maturityDate)) {
-					req.setAttribute("actionType", 2);
-					req.setAttribute("accountNo", account.getAccountNo());
+				if(LocalDate.now().isBefore(account.getMaturityDate()))
 					prematureClosing = true;
-				}				
 			}
 			
+
+			if(!isError && actionType == 0 && prematureClosing) {
+				req.setAttribute("actionType", 1);
+				req.setAttribute("accountNo", accountNo);
+				req.getRequestDispatcher("/jsp/components/closeDeposit.jsp").forward(req, res);
+			}
 			
 			/* Close deposit only when it has matured or after obtaining
 			   confirmation. */
-			if(!isError && ((actionType == 1 && !prematureClosing) || actionType == 2)) {
+			if(!isError && ((actionType == 0 && !prematureClosing) ||  actionType == 1)) {
 				
 				synchronized (account) {
-					
-					if(actionType == 2)
-						prematureClosing = true;
 					
 					totalAmount = account.getBalance();
 					
@@ -123,9 +118,6 @@ public class CloseDepositServlet extends HttpServlet {
 					transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 					
 					accountDAO.delete(conn, account.getAccountNo());
-					
-					out.println(Util.createNotification("Deposit closed and amount credited to payout account successfully", "success"));
-					req.setAttribute("actionType", 0);
 				}
 			}
 		} catch(ClassCastException e) {
@@ -146,14 +138,18 @@ public class CloseDepositServlet extends HttpServlet {
                     conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
             
+            
 			if(isError || exceptionOccured) {
-				out.println(Util.createNotification(msg, "danger"));
-				doGet(req, res);
-			} else {
-				req.getRequestDispatcher("/jsp/employee/closeDeposit.jsp").include(req, res);
-			}
-			
-			out.close();
+				redirectURI = String.format("/bank-app/%s/deposit/%d/view?msg=%s&status=danger", userType, accountNo, msg);
+				res.sendRedirect(redirectURI);
+			} 
+				// Display success message when the deposit is closed successfully.
+				else
+					if((actionType == 0 && !prematureClosing) ||  actionType == 1) {
+						msg = "Deposit closed and amount credited to payout account successfully";
+						redirectURI = String.format("/bank-app/%s/deposit/?msg=%s&status=success", userType, msg);
+						res.sendRedirect(redirectURI);					
+					}
 		}
 	}
 }
