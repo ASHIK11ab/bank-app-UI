@@ -11,7 +11,7 @@
 	</jsp:include>
 </head>
 <body>
-	<c:set var="userType" value='${ sessionScope.role == Role.EMPLOYEE ? "employee" : "customer" }' />
+	<c:set var="userType" value='${ Role.getName(sessionScope.role) }' />
 	
 	<jsp:include page="/jsp/${ userType }/components/navbar.jsp" />
 	
@@ -32,6 +32,7 @@
 					
 					<form action="/bank-app/${ userType }/account/transaction-history" method="post">
 						<input type="number" name="account-no" value="${ account.getAccountNo() }" class="hidden" required>
+						<input type="number" name="account-category" value="${ accountCategory }" class="hidden" required>
 						
 						<label>From Date:</label>
 						<input type="date" name="from-date" required>
