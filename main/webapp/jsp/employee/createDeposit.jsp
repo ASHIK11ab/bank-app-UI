@@ -7,63 +7,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Create Deposit</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/form.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="create deposit"/>
+	</jsp:include>
 </head>
 <body>
 	<jsp:include page="/jsp/employee/components/navbar.jsp" />
 		
 	<main class="container">
 		<div class="wrapper">
-			<h1><c:out value="${ requestScope.actionType == 0 ? 'Create Deposit:' : 'Confirm details:' }" /></h1>
+			<h1><c:out value="${ actionType == 0 ? 'Create Deposit:' : 'Confirm details:' }" /></h1>
 			
 			<form action="/bank-app/employee/deposit/create" method="post">
 				
-				<input name="action-type" value="${ requestScope.actionType }" class="hidden">
+				<input name="action-type" value="${ actionType }" class="hidden">
 				
 				<!-- Hide form details when showing confirmation page -->
-				<div class="${ (requestScope.actionType == 1) ? 'hidden': '' }">
+				<div class="${ actionType == 1 ? 'hidden': '' }">
 					<label>Select Deposit Type</label>
 					<select name="deposit-type" required id="deposit-type">
 						<option value="-1" selected hidden disabled>select type</option>
 						
 						<option value="${ DepositAccountType.getId(DepositAccountType.FD) }" 
-							<c:out value="${ requestScope.depositType == DepositAccountType.getId(DepositAccountType.FD) ? 'selected' : '' }" /> >Fixed Deposit (FD)</option>
+							<c:out value="${ depositType == DepositAccountType.getId(DepositAccountType.FD) ? 'selected' : '' }" /> >Fixed Deposit (FD)</option>
 						
 						<option value="${ DepositAccountType.getId(DepositAccountType.RD) }"
-							<c:out value="${ requestScope.depositType == DepositAccountType.getId(DepositAccountType.RD) ? 'selected' : '' }" />>Recurring Deposit (RD)</option>
+							<c:out value="${ depositType == DepositAccountType.getId(DepositAccountType.RD) ? 'selected' : '' }" />>Recurring Deposit (RD)</option>
 					
 					</select>
 					
 					<label>Debit From Account No</label>
 					<input type="number" placeholder="A/C no to debit amount from" name="debit-from-account-no" 
-						value="${ requestScope.debitFromAccount.getAccountNo() }" required>
+						value="${ debitFromAccountNo }" required>
 					
 					<label>Payout Account No</label>
 					<input type="number" placeholder="A/C no to credit amount on closure" name="payout-account-no"
-						value="${ requestScope.payoutAccount.getAccountNo() }" required>
+						value="${ payoutAccountNo }" required>
 						
-					<label>Deposit duration in months (Minimum 2 months):</label>
+					<label>Deposit duration in months (2 months to 20 months):</label>
 					<input type="number" placeholder="duration in months (minimum 2 months)" name="tenure-months" 
-						min="2" value="${ requestScope.tenureMonths }" required>	
+						value="${ tenureMonths }" required>	
 						
 					<div id="fd-only" class='hidden'>
 						<label>Amount to deposit (Minimum amount 1000):</label>
 						<input type="number" placeholder="Amount to deposit (minimum 1000 rupees)" name="fd-amount"
-							min="1000" value="${ requestScope.amount }">
+						 value="${ amount }">
 					</div>
 					
 					<div id="rd-only" class='hidden'>
 						<label>Monthly installment (Minimum amount 1000):</label>
 						<input type="number" placeholder="Monthly installment amount (minimum 1000 rupees)" name="rd-amount"
-							min="1000" value="${ requestScope.amount }">
+							 value="${ amount }">
 						
-						<label>Monthly installment date:</label>
+						<label>Monthly installment date (Between 1 to 15 of every month):</label>
 						<input type="number" name="recurring-date" placeholder="Date to debit amount for RD account"
-							value="${ requestScope.recurringDate }">
+							value="${ recurringDate }">
 					</div>
 					<button>Proceed to create deposit</button>
 				</div>
@@ -98,6 +96,7 @@
 					<p>Maturity Date: ${ LocalDate.now().plusMonths(requestScope.tenureMonths) }</p>
 				
 					<button>Create Deposit</button>
+					<a class="button secondary" href="/bank-app/employee/deposit/create">Cancel</a>
 				</c:if>
 			</form>
 			

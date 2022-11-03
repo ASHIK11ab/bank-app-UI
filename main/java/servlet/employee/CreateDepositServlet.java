@@ -9,19 +9,15 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import constant.DepositAccountType;
 import dao.AccountDAO;
-import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
-import model.user.Customer;
-import model.Transaction;
 import model.account.DepositAccount;
 import model.account.RegularAccount;
 import util.Factory;
@@ -44,7 +40,6 @@ public class CreateDepositServlet extends HttpServlet {
 		PrintWriter out = res.getWriter();
 		
 		AccountDAO accountDAO = Factory.getAccountDAO();
-		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
@@ -52,6 +47,7 @@ public class CreateDepositServlet extends HttpServlet {
 		RegularAccount debitFromAccount = null, payoutAccount = null;
 		DepositAccount account = null;
 		
+		LocalDate today = LocalDate.now();
 		boolean isError = false, exceptionOccured = false, isSufficientBalance = false;
 		String msg = "", customerName, description = "";
 		long payoutAccountNo, debitFromAccountNo, customerId;
@@ -78,16 +74,26 @@ public class CreateDepositServlet extends HttpServlet {
 				amount = Integer.parseInt(req.getParameter("rd-amount"));
 				recurringDate = Integer.parseInt(req.getParameter("recurring-date"));
 				
-				if(!isError && !((recurringDate >= 1) && (recurringDate <= 30))) {
+				if(!isError && !((recurringDate >= 1) && (recurringDate <= 15))) {
 					isError = true;
-					msg = "Invalid recurring date";
+					msg = "Monthly installment date should be between 1 to 15";
 				} else {
-	            	nextRecurringDate = LocalDate.now().withDayOfMonth(recurringDate).plusMonths(1);
+	            	nextRecurringDate = today.withDayOfMonth(recurringDate).plusMonths(1);
 				}
 				
 			} else {
 				amount = Integer.parseInt(req.getParameter("fd-amount"));
 			}
+			
+			/* Inorder to display previously inputed values attributes are set
+				even when some error occurs */
+			req.setAttribute("actionType", 1);
+			req.setAttribute("depositType", depositType);
+			req.setAttribute("debitFromAccountNo", debitFromAccountNo);
+			req.setAttribute("payoutAccountNo", payoutAccountNo);
+			req.setAttribute("tenureMonths", tenureMonths);
+			req.setAttribute("amount", amount);
+			req.setAttribute("recurringDate", recurringDate);
 			
 			// Validate account no.
 			if(!isError && (Util.getNoOfDigits(debitFromAccountNo) != 11 || Util.getNoOfDigits(payoutAccountNo) != 11)) {
@@ -100,11 +106,10 @@ public class CreateDepositServlet extends HttpServlet {
 				msg = "Mimimum amount is 1000 !!!";
 			}
 			
-			if(!isError && tenureMonths < 2) {
+			if(!isError && (tenureMonths < 2 || tenureMonths > 20)) {
 				isError = true;
-				msg = "Minimum no of months is 2 !!!";
-			}
-			
+				msg = "Tenure months should be between 2 to 20 !!!";
+			}	
 			
 			// Get deposit account details and ask for confirmation
 			if(!isError && actionType == 0) {
@@ -123,16 +128,12 @@ public class CreateDepositServlet extends HttpServlet {
 				} else {
 					isError = true;
 					msg = "Invalid debit from account details !!!";
-				}				
-		
+				}
+				
+				// request for confirmation
 				if(!isError) {
-					req.setAttribute("actionType", 1);
-					req.setAttribute("depositType", depositType);
 					req.setAttribute("debitFromAccount", debitFromAccount);
-					req.setAttribute("payoutAccount", payoutAccount);
-					req.setAttribute("tenureMonths", tenureMonths);
-					req.setAttribute("amount", amount);
-					req.setAttribute("recurringDate", recurringDate);
+					req.setAttribute("payoutAccount", payoutAccount);					
 					req.getRequestDispatcher("/jsp/employee/createDeposit.jsp").forward(req, res);
 				}
 			}
@@ -144,35 +145,50 @@ public class CreateDepositServlet extends HttpServlet {
 				customerId = debitFromAccount.getCustomerId();
 				customerName = debitFromAccount.getCustomerName();
 				
+				/* Incase of RD if deposit account create date is after 15 th of the month
+					dont debit for RD, set recurring date to next month and create account */
 				conn = Factory.getDataSource().getConnection();
-				stmt = conn.prepareStatement("SELECT balance FROM account WHERE account_no = ?");
-	            
-				stmt.setLong(1, debitFromAccountNo);
-	            rs = stmt.executeQuery();
-
-	            if(rs.next()) {
-	                balance = rs.getFloat("balance");
-	                if(balance >= amount)
-	                    isSufficientBalance = true;
-	            }
-	            
-	            if(isSufficientBalance) {
-	            	// Deduct amount from debit from account.
-	            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
-	            	
-	            	// create deposit account
-	            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
-	            	
-	            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
-	            	
-	            	transactionDAO.create(conn, 1, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
-	            	
+				
+				if(depositType == DepositAccountType.RD.id && today.getDayOfMonth() > 15) {
+					// create deposit account
+	            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, 0, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
+					out.println(Util.createNotification("Deposit created successfully, initial deposit amount will be auto debited on next recurring date", "success"));
 	            	req.setAttribute("account", account);
-	            	req.getRequestDispatcher("/jsp/employee/depositCreationSuccess.jsp").forward(req, res);
-	            } else {
-	            	isError = true;
-	            	msg = "Insufficient balance in debit from account !!!";
-	            }
+	            	req.getRequestDispatcher("/jsp/employee/depositCreationSuccess.jsp").include(req, res);
+				} else {
+					synchronized (debitFromAccount) {
+						
+						stmt = conn.prepareStatement("SELECT balance FROM account WHERE account_no = ?");
+			            
+						stmt.setLong(1, debitFromAccountNo);
+			            rs = stmt.executeQuery();
+		
+			            if(rs.next()) {
+			                balance = rs.getFloat("balance");
+			                if(balance >= amount)
+			                    isSufficientBalance = true;
+			            }
+	            
+			            if(isSufficientBalance) {
+			            	// Deduct amount from debit from account.
+			            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
+			            	
+			            	// create deposit account
+			            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
+			            	
+			            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
+			            	
+			            	transactionDAO.create(conn, 1, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
+			            	
+			            	req.setAttribute("account", account);
+			            	req.getRequestDispatcher("/jsp/employee/depositCreationSuccess.jsp").forward(req, res);
+			            } else {
+			            	isError = true;
+			            	msg = "Insufficient balance in debit from account !!!";
+			            }
+					}
+					// End of synchronised block
+				}
 			}
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());
