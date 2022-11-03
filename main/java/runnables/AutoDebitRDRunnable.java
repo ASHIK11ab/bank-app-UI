@@ -61,7 +61,7 @@ public class AutoDebitRDRunnable implements Runnable {
 						monthlyInstallmentPaid = false;
 						
 						rdAccountNo = rs1.getLong("account_no");
-						monthlyInstallment = rs1.getInt("amount_per_month");
+						monthlyInstallment = rs1.getInt("deposit_amount");
 						debitFromAccountNo = rs1.getLong("debit_from_account_no");
 						
 						rdAccount = depositAccountDAO.get(rdAccountNo);

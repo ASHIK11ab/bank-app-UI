@@ -69,7 +69,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 						stmt2 = conn.prepareStatement("SELECT to_account_no FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ? WHERE account_no = ?");
 						
-						rs1 = stmt1.executeQuery("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.amount_per_month, da.intrest_credited_month_cnt FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no");
+						rs1 = stmt1.executeQuery("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no");
 						
 						// Get all deposit accounts.
 						while(rs1.next()) {
@@ -78,7 +78,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							accountNo = rs1.getLong("account_no");
 							typeId = rs1.getByte("type_id");
 							intrestRate = rs1.getFloat("rate_of_intrest");
-							depositAmount = rs1.getInt("amount_per_month");
+							depositAmount = rs1.getInt("deposit_amount");
 							intrestCreditedMonthCnt = rs1.getInt("intrest_credited_month_cnt");
 														
 							if(typeId == DepositAccountType.RD.id) {
