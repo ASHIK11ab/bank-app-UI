@@ -21,6 +21,7 @@
 	
 <label>Gender:</label>
 <select name="gender" required>
+	<option value="" selected hidden disabled>select gender</option>
 	<option value="m" <c:out value='${ customer.getGender().toString().equals("m") ? "selected" : ""}'/>>
 		Male
 	</option>
@@ -32,7 +33,7 @@
 
 <label>Martial Status:</label>
 <select name="martial-status" required>
-	
+	<option value="" selected hidden disabled>select martial status</option>
 	<option value="married" <c:out value='${ customer.getMartialStatus().equals("married") ? "selected": "" }' />>
 		Married
 	</option>

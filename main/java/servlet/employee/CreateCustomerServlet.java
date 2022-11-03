@@ -34,13 +34,13 @@ public class CreateCustomerServlet extends HttpServlet {
         CustomerDAO customerDAO = Factory.getCustomerDAO();
         RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		
-		String name, email, pan, martialStatus, occupation;
-        String doorNo, street, city, state, msg = "";
+		String name = "", email = "", pan = "", martialStatus = "", occupation = "";
+        String doorNo = "", street = "", city = "", state = "", msg = "";
         boolean isError = false, exceptionOccured = false;
-        long phone, adhaar;
-        int pincode, income, branchId, accountType = -1, cardType = -1;
-        char gender;
-        byte age;
+        long phone = -1, adhaar = -1;
+        int pincode = -1, income = -1, branchId, accountType = -1, cardType = -1;
+        char gender = ' ';
+        byte age = 0;
         
         try {
         	branchId = (Integer) req.getSession(false).getAttribute("branch-id");
@@ -86,6 +86,36 @@ public class CreateCustomerServlet extends HttpServlet {
         		msg = "Invalid pincode";	
         	}
         	
+        	if(!isError && !(occupation.length() >= 3 && occupation.length() <= 20)) {
+        		isError = true;
+        		msg = "Occupation length should be between 3 to 20 characters";
+        	}
+        	
+        	if(!isError && email.length() > 30) {
+        		isError = true;
+        		msg = "Email should be less than 30 characters";
+        	}
+        	
+        	if(!isError && doorNo.length() > 10) {
+        		isError = true;
+        		msg = "door no should be less than 10 characters";
+        	}
+        	
+        	if(!isError && street.length() > 30) {
+        		isError = true;
+        		msg = "street should be less than 30 characters";
+        	}
+        	
+        	if(!isError && city.length() > 15) {
+        		isError = true;
+        		msg = "city should be less than 15 characters";
+        	}
+        	
+        	if(!isError && state.length() > 15) {
+        		isError = true;
+        		msg = "state should be less than 15 characters";
+        	}
+        	
         	// Create new customer.
         	if(!isError) {	
 	            address = new Address(doorNo, street, city, state, pincode);
@@ -104,9 +134,11 @@ public class CreateCustomerServlet extends HttpServlet {
 	        	req.getRequestDispatcher("/jsp/employee/customerCreationSuccess.jsp").forward(req, res);
         	}
         } catch(ClassCastException e) {
+        	System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error !!!";
 		} catch(NumberFormatException e) {
+        	System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error !!!";
 		} catch(SQLException e) {
@@ -120,9 +152,15 @@ public class CreateCustomerServlet extends HttpServlet {
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 			
 			if(isError || exceptionOccured) {
+				// Dummy customer object to prefill the user input values.
+	            address = new Address(doorNo, street, city, state, pincode);
+	            customer = new Customer(-1, name, "", phone, email, age,
+					                    gender, martialStatus, occupation, income, adhaar, pan, 
+					                    "", address);
 				out.println(Util.createNotification(msg, "danger"));
-				req.setAttribute("account-type", accountType);
-    			req.setAttribute("card-type", cardType);
+				req.setAttribute("customer", customer);
+				req.setAttribute("accountType", accountType);
+    			req.setAttribute("cardType", cardType);
     			req.getRequestDispatcher("/jsp/employee/createCustomer.jsp").include(req, res);
 			}
 			
