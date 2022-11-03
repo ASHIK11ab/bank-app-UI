@@ -38,9 +38,9 @@ public class DepositAccountDAO {
 				stmt1 = conn.prepareStatement("INSERT INTO account (customer_id, branch_id, balance, opening_date) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 		
 			if(type == DepositAccountType.FD)
-				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no) VALUES (?, ?, ?, ?, ?, ?)");
+				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposit_amount) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			else
-				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, amount_per_month, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposti_amount, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 	        stmt1.setLong(1, customerId);
 	        stmt1.setInt(2, branchId);
@@ -64,9 +64,9 @@ public class DepositAccountDAO {
             stmt2.setFloat(4, intrestRate);
             stmt2.setInt(5, tenureMonths);
             stmt2.setLong(6, debitFromAccountNo);
+            stmt2.setFloat(7, amount);
             
             if(type == DepositAccountType.RD) {
-            	stmt2.setFloat(7, amount);
             	stmt2.setDate(8, Date.valueOf(recurringDate));            	
             }
             
@@ -79,7 +79,7 @@ public class DepositAccountDAO {
 	            								break;
 	            case FD: account = new DepositAccount(generatedAccountNo, customerId, customerName, nominee, 
 																			branchId, amount, payoutAccountNo, debitFromAccountNo,
-																			tenureMonths, intrestRate, today);
+																			tenureMonths, intrestRate, today, amount);
 	            								break;
             }
 		} catch(SQLException e) {
@@ -122,7 +122,7 @@ public class DepositAccountDAO {
 		LocalDate openingDate, recurringDate = null;
 		long customerId, payoutAccountNo, debitFromAccountNo;
 		float balance, rateOfIntrest;
-		int branchId, typeId, tenureMonths, amountPerMonth = 0;
+		int branchId, typeId, tenureMonths, monthlyInstallment = 0, amountDeposited = 0;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -146,8 +146,10 @@ public class DepositAccountDAO {
                 type = DepositAccountType.getType(typeId);
                 
                 if(type == DepositAccountType.RD) {
-                    amountPerMonth = rs1.getInt("amount_per_month");
+                    monthlyInstallment = rs1.getInt("deposit_amount");
                     recurringDate = rs1.getDate("recurring_date").toLocalDate();	
+                } else {
+                	amountDeposited = rs1.getInt("deposit_amount");
                 }
                 
                 stmt2.setLong(1, customerId);
@@ -160,11 +162,11 @@ public class DepositAccountDAO {
                 switch(type) {
 		            case RD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
 		            															branchId, balance, payoutAccountNo, debitFromAccountNo,
-		            															tenureMonths, rateOfIntrest, openingDate, amountPerMonth, recurringDate);
+		            															tenureMonths, rateOfIntrest, openingDate, monthlyInstallment, recurringDate);
 		            								break;
 		            case FD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
 																				branchId, balance, payoutAccountNo, debitFromAccountNo,
-																				tenureMonths, rateOfIntrest, openingDate);
+																				tenureMonths, rateOfIntrest, openingDate, amountDeposited);
 		            								break;
 	            } 
             }

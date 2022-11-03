@@ -19,7 +19,7 @@ public class DepositAccount extends Account {
     private LocalDate recurringDate;
     
     
- // RD
+    // RD
     public DepositAccount(long accountNo, long customerId, String customerName,
                             Nominee nominee, int branchId, float amount,
                             long payoutAccountNo, long debitFromAccountNo, int tenureMonths,
@@ -40,15 +40,16 @@ public class DepositAccount extends Account {
     public DepositAccount(long accountNo, long customerId, String customerName,
 				            Nominee nominee, int branchId, float amount,
 				            long payoutAccountNo, long debitFromAccountNo, int tenureMonths,
-				            float intrestRate, LocalDate openingDate) {
+				            float intrestRate, LocalDate openingDate, int amountDeposited) {
 		super(accountNo, customerId, customerName, nominee, branchId, 
 				amount, openingDate, DepositAccountType.FD.id);
         this.payoutAccountNo = payoutAccountNo;
         this.intrestRate = intrestRate;
         this.tenureMonths = tenureMonths;
         this.debitFromAccountNo = debitFromAccountNo;
-
-        this.amountPerMonth = 0;
+        // Incase of FD intrest for 1 month is calculated based on the amount deposited.
+        this.amountPerMonth = amountDeposited;
+        
         this.recurringDate = null;
     }
 
