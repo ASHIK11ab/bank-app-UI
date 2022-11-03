@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8"
+	import="constant.DebitCardType"    
+%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
@@ -37,9 +39,12 @@
 						<h2>Linked Cards:</h2>
 						
 						<c:forEach items="${ requestScope.cards }" var="card">
-							<c:set var="card" value="${ card }" scope="request" />
-							<div style="margin-top: 1.2rem; border-top: 2.5px solid #ddd;">
-								<jsp:include page="/jsp/components/card.jsp" />
+							<div style="margin-top: 1.2rem; border-top: 3px solid #ddd;">
+								<p>Card No: ${ card.getCardNo() }</p>
+								<p>Card Type: ${ DebitCardType.getName(card.getTypeId()) }</p>
+								<a class="button" href="/bank-app/employee/card/${ card.getCardNo() }/view">
+									View card
+								</a>
 							</div>
 						</c:forEach>
 						

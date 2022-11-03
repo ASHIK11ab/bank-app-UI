@@ -13,7 +13,6 @@
 		<url-pattern>/customer/account/transaction-history</url-pattern>
 	</servlet-mapping>
 	
-	
 	<servlet>
 		<servlet-name>CloseDepositServlet</servlet-name>
 		<servlet-class>servlet.shared.CloseDepositServlet</servlet-class>
@@ -27,7 +26,6 @@
 		<url-pattern>/customer/deposit/close</url-pattern>
 	</servlet-mapping>
 	
-	
 	<servlet>
 		<servlet-name>DepositServlet</servlet-name>
 		<servlet-class>servlet.shared.DepositServlet</servlet-class>
@@ -39,6 +37,32 @@
 	<servlet-mapping>
 		<servlet-name>DepositServlet</servlet-name>
 		<url-pattern>/customer/deposit/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>CardServlet</servlet-name>
+		<servlet-class>servlet.shared.CardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CardServlet</servlet-name>
+		<url-pattern>/employee/card/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CardServlet</servlet-name>
+		<url-pattern>/customer/card/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>BlockUnblockCardServlet</servlet-name>
+		<servlet-class>servlet.shared.BlockUnblockCardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BlockUnblockCardServlet</servlet-name>
+		<url-pattern>/employee/card/block-unblock</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>BlockUnblockCardServlet</servlet-name>
+		<url-pattern>/customer/card/block-unblock</url-pattern>
 	</servlet-mapping>
 	<!-- End of shared servlets -->
 	
@@ -217,15 +241,6 @@
 	<servlet-mapping>
 		<servlet-name>ViewCardsServlet</servlet-name>
 		<url-pattern>/employee/cards</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>CardActivationManagementServlet</servlet-name>
-		<servlet-class>servlet.employee.CardActivationManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>CardActivationManagementServlet</servlet-name>
-		<url-pattern>/employee/cards/card/activation-management</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>

@@ -49,7 +49,7 @@ public class ViewCardsServlet extends HttpServlet {
 			if(!isError) {
 				account = accountDAO.get(accountNo);
 				
-				if(account != null) {
+				if(account != null && account.getBranchId() == branchId) {
 					cards = cardDAO.getAll(accountNo);
 					req.setAttribute("actionType", 1);
 					req.setAttribute("account", account);
