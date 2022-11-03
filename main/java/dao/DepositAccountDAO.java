@@ -40,7 +40,7 @@ public class DepositAccountDAO {
 			if(type == DepositAccountType.FD)
 				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposit_amount) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			else
-				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposti_amount, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposit_amount, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 	        stmt1.setLong(1, customerId);
 	        stmt1.setInt(2, branchId);
