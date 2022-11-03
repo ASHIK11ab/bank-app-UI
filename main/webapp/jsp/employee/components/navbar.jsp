@@ -24,12 +24,17 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/employee/cards">view cards</a>
-					<a href="/bank-app/employee/cards/card/activation-management">manage card activation</a>
+					<a href="/bank-app/employee/card/">card management</a>
 				</li>
 			</ul>
 		</div>
 		<div class="sub-nav">
-			<a href="/bank-app/employee/customer">customer management</a>
+			<span class="text">customer</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/employee/customer">customer management</a>
+				</li>
+			</ul>
 		</div>
 		<div class="sub-nav">
 			<span class="text">my profile</span>

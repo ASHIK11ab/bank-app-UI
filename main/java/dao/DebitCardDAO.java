@@ -192,7 +192,7 @@ public class DebitCardDAO {
 	}
 	
 	
-	public void setActivationStatus(long cardNo, boolean activationStatus) throws SQLException {
+	public void setCardStatus(long cardNo, boolean activationStatus) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		
