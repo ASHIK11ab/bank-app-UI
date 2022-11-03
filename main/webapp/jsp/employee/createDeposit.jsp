@@ -12,11 +12,20 @@
 	</jsp:include>
 </head>
 <body>
+	<c:set var="fdIntrest" value="${ DepositAccount.getTypeIntrestRate(DepositAccountType.FD) }" />
+	<c:set var="rdIntrest" value="${ DepositAccount.getTypeIntrestRate(DepositAccountType.RD) }" />
+
 	<jsp:include page="/jsp/employee/components/navbar.jsp" />
-		
+	
 	<main class="container">
 		<div class="wrapper">
 			<h1><c:out value="${ actionType == 0 ? 'Create Deposit:' : 'Confirm details:' }" /></h1>
+			
+			<c:if test="${ actionType == 0 }">
+				<h3>Intrest Rates:</h3>
+				<p><span class="bold">Fixed Deposit</span> ${ Math.round(fdIntrest * 100) } % (p.a)</p>
+				<p><span class="bold">Recurring Deposit</span> ${ Math.round(rdIntrest * 100) } % (p.a)</p>
+			</c:if>
 			
 			<form action="/bank-app/employee/deposit/create" method="post">
 				
@@ -70,32 +79,42 @@
 				<c:if test="${ requestScope.actionType == 1 }">
 											
 					<h3>Debit from account Details:</h3>
-					<p>A/C No: ${ requestScope.debitFromAccount.getAccountNo() }</p>
-					<p>Customer Id: ${ requestScope.debitFromAccount.getCustomerId() }</p>
-					<p>Customer Name: ${ requestScope.debitFromAccount.getCustomerName() }</p>
+					<p>A/C No: ${ debitFromAccount.getAccountNo() }</p>
+					<p>Customer Id: ${ debitFromAccount.getCustomerId() }</p>
+					<p>Customer Name: ${ debitFromAccount.getCustomerName() }</p>
 					
 					<h3>Payout account Details:</h3>
-					<p>A/C No: ${ requestScope.payoutAccount.getAccountNo() }</p>
-					<p>Customer Id: ${ requestScope.payoutAccount.getCustomerId() }</p>
-					<p>Customer Name: ${ requestScope.payoutAccount.getCustomerName() }</p>
+					<p>A/C No: ${ payoutAccount.getAccountNo() }</p>
+					<p>Customer Id: ${ payoutAccount.getCustomerId() }</p>
+					<p>Customer Name: ${ payoutAccount.getCustomerName() }</p>
 					
 					<h3>Deposit details:</h3>
-					<p>Deposit type: ${ DepositAccountType.getName(requestScope.depositType) }</p>
+					<p>Deposit type: ${ DepositAccountType.getName(depositType) }</p>
 					<p>Intrest Rate (% p.a): ${ Math.round(DepositAccount.getTypeIntrestRate(DepositAccountType.getType(depositType)) * 100) } %</p>
 					<p>Period (in months): ${ requestScope.tenureMonths }</p>
 					
-					<c:if test="${ DepositAccountType.getType(depositType) == DepositAccountType.FD }">
-						<p>Deposit amount: ${ requestScope.amount }</p>
-					</c:if>
+					<c:choose>
+						<c:when test="${ DepositAccountType.getType(depositType) == DepositAccountType.FD }">
+							<p>Deposit amount: ${ amount }</p>
+							<p>Maturity value: <strong>${ String.format("%.2f", (amount * fdIntrest * tenureMonths) + amount) }</strong></p>
+							<p>Maturity Date: ${ LocalDate.now().plusMonths(tenureMonths) }</p>
+							<p style="color: red; font-weight: 600;">Note:</p>
+							<p>The maturity value is only applicable subject to the condition that the deposit is only closed on maturity.</p>
+						</c:when>
+						
+						<c:when test="${ DepositAccountType.getType(depositType) == DepositAccountType.RD }">
+							<p>Monthly installment amount: ${ amount }</p>
+							<p>Monthly installment debit date: ${ recurringDate } th day of every month</p>
+							<p>Maturity value: <strong>${ String.format("%.2f", ((amount * ((tenureMonths * (tenureMonths + 1)) / 2) * rdIntrest) + amount)) }</strong></p>
+							<p>Maturity Date: ${ LocalDate.now().plusMonths(tenureMonths) }</p>
+							<p style="color: red; font-weight: 600;">Note:</p>
+							<p>The maturity value is only applicable subject to the condition that the deposit is only closed on maturity and all the montly installments are paid on date.</p>
+						</c:when>
+					</c:choose>
 					
-					<c:if test="${ DepositAccountType.getType(depositType) == DepositAccountType.RD }">
-						<p>Monthly installment amount: ${ requestScope.amount }</p>
-						<p>Monthly installment debit date: ${ requestScope.recurringDate } th day of every month</p>
-					</c:if>
+					<p>Premature closing of deposit will lead to deduction of charges</p>
 					
-					<p>Maturity Date: ${ LocalDate.now().plusMonths(requestScope.tenureMonths) }</p>
-				
-					<button>Create Deposit</button>
+					<button>Agree and create Deposit</button>
 					<a class="button secondary" href="/bank-app/employee/deposit/create">Cancel</a>
 				</c:if>
 			</form>

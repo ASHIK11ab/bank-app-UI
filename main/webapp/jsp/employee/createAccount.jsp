@@ -34,7 +34,7 @@
 						<input name="action-type" value="1" class="hidden">
 						
 						<button>Create Account</button>
-						<a type="button" href="/bank-app/employee/account/create">
+						<a class="button secondary" href="/bank-app/employee/account/create">
 							Go back
 						</a>
 					</c:if>
