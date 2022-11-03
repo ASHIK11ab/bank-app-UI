@@ -1,4 +1,48 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">	
+	<!-- Shared servlets -->
+	<servlet>
+		<servlet-name>AccountTransactionServlet</servlet-name>
+		<servlet-class>servlet.shared.AccountTransactionHistoryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AccountTransactionServlet</servlet-name>
+		<url-pattern>/employee/account/transaction-history</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AccountTransactionServlet</servlet-name>
+		<url-pattern>/customer/account/transaction-history</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet>
+		<servlet-name>CloseDepositServlet</servlet-name>
+		<servlet-class>servlet.shared.CloseDepositServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CloseDepositServlet</servlet-name>
+		<url-pattern>/employee/deposit/close</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CloseDepositServlet</servlet-name>
+		<url-pattern>/customer/deposit/close</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet>
+		<servlet-name>DepositServlet</servlet-name>
+		<servlet-class>servlet.shared.DepositServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DepositServlet</servlet-name>
+		<url-pattern>/employee/deposit/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>DepositServlet</servlet-name>
+		<url-pattern>/customer/deposit/*</url-pattern>
+	</servlet-mapping>
+	<!-- End of shared servlets -->
+	
+	
 	<!-- Admin servlets -->
 	<servlet>
 		<servlet-name>AdminLoginServlet</servlet-name>
@@ -162,22 +206,9 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>ViewDepositServlet</servlet-name>
-		<servlet-class>servlet.employee.ViewDepositServlet</servlet-class>
-	</servlet>
-	<servlet>
 		<servlet-name>CreateDepositServlet</servlet-name>
 		<servlet-class>servlet.employee.CreateDepositServlet</servlet-class>
 	</servlet>
-	
-	<servlet>
-		<servlet-name>CloseDepositServlet</servlet-name>
-		<servlet-class>servlet.employee.CloseDepositServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>CloseDepositServlet</servlet-name>
-		<url-pattern>/employee/deposit/close</url-pattern>
-	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>ViewCardsServlet</servlet-name>
@@ -186,15 +217,6 @@
 	<servlet-mapping>
 		<servlet-name>ViewCardsServlet</servlet-name>
 		<url-pattern>/employee/cards</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EmployeeViewAccountTransactionServlet</servlet-name>
-		<servlet-class>servlet.employee.AccountTransactionHistoryServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmployeeViewAccountTransactionServlet</servlet-name>
-		<url-pattern>/employee/account/transaction-history</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
@@ -390,10 +412,6 @@
 	<servlet-mapping>
 		<servlet-name>CreateAccountServlet</servlet-name>
 		<url-pattern>/employee/account/create/existing-customer</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ViewDepositServlet</servlet-name>
-		<url-pattern>/employee/deposit/view</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CreateDepositServlet</servlet-name>
