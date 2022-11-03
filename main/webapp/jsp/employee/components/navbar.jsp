@@ -14,9 +14,8 @@
 			<span class="text">deposits</span>
 			<ul class="links">
 				<li>
-					<a href="/bank-app/employee/deposit/view">view deposit</a>
 					<a href="/bank-app/employee/deposit/create">create deposit</a>
-					<a href="/bank-app/employee/deposit/close">close deposit</a>
+					<a href="/bank-app/employee/deposit/">deposit management</a>
 				</li>
 			</ul>
 		</div>
