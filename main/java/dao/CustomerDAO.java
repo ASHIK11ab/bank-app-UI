@@ -1,11 +1,14 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 
+import constant.AccountCategory;
 import model.Address;
 import model.user.Customer;
 import util.Factory;
@@ -58,7 +61,7 @@ public class CustomerDAO {
             
             customer = new Customer(customerId, name, password, phone, email, age,
 				                    gender, martialStatus, occupation, income, adhaar, pan, 
-				                    transactionPassword, address);
+				                    transactionPassword, address, null);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
@@ -85,7 +88,7 @@ public class CustomerDAO {
 	
 	
 	public boolean delete(long customerId) throws SQLException {
-		Connection conn = Factory.getDataSource().getConnection();
+		Connection conn = null;
 		PreparedStatement stmt = null;
 		
 		String msg = "";
@@ -93,6 +96,7 @@ public class CustomerDAO {
 		int rowsAffected = -1;
 		
 		try {
+			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM customer WHERE id = ?");
 			stmt.setLong(1, customerId);
 			rowsAffected = stmt.executeUpdate();
@@ -128,6 +132,7 @@ public class CustomerDAO {
 		Address address = null;
 		boolean exceptionOccured = false;
 		
+		LocalDate removedDate = null;
         String name, email, pan, martialStatus, occupation;
         String transPassword, customerPassword;
         String doorNo, street, city, state, msg="";
@@ -161,12 +166,13 @@ public class CustomerDAO {
                 city = rs.getString("city");
                 state = rs.getString("state");
                 pincode = rs.getInt("pincode");
-
+                removedDate = (rs.getDate("removed_date") != null) ? rs.getDate("removed_date").toLocalDate() : null;
+                
                 address = new Address(doorNo, street, city, state, pincode);
                 
                 customer = new Customer(customerId, name, customerPassword, phone, email, age,
                                         gender, martialStatus, occupation, income, adhaar, pan, 
-                                        transPassword, address);	
+                                        transPassword, address, removedDate);	
             }
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
@@ -258,5 +264,44 @@ public class CustomerDAO {
 			throw new SQLException(msg);
 		else
 			return customer;
+	}
+	
+	
+	// Customer is removed only when his last account is closed.
+	// sets the remove date of customer to today and prevents from further usage of the customer account.
+	public void removeCustomer(Connection conn, long customerId, long accountNo) throws SQLException {
+		PreparedStatement stmt = null;
+		
+		AccountDAO accountDAO = Factory.getAccountDAO();
+		LocalDate today = LocalDate.now();
+		String msg = "";
+		boolean exceptionOccured = false;
+		
+		try {
+			conn = Factory.getDataSource().getConnection();
+			stmt = conn.prepareStatement("UPDATE customer SET removed_date = ? WHERE id = ?");
+			
+			// closes last account associated with the customer.
+			accountDAO.closeAccount(conn, accountNo, AccountCategory.REGULAR);
+				
+			// set customer status as removed.
+			stmt.setDate(1, Date.valueOf(today));
+			stmt.setLong(2, customerId);
+			stmt.executeUpdate();
+			
+			// update in cache.
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+				
+		if(exceptionOccured)
+			throw new SQLException(msg);
 	}
 }

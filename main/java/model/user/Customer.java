@@ -1,5 +1,7 @@
 package model.user;
 
+import java.time.LocalDate;
+
 import model.Address;
 
 public class Customer extends User {
@@ -12,6 +14,7 @@ public class Customer extends User {
     private String pan;
     private String transPassword;
     private Address address;
+    private LocalDate removedDate;
     
     /* private ArrayList<Beneficiary> ownBankBeneficiaries;
     private ArrayList<Beneficiary> otherBankBeneficiaries;
@@ -30,7 +33,7 @@ public class Customer extends User {
     public Customer(long id, String name, String password, long phone,
                         String email, byte age, char gender, String martialStatus,
                         String occupation, int income, long adhaar, String pan,
-                        String transPassword, Address address) {
+                        String transPassword, Address address, LocalDate removedDate) {
 
         super(id, name, password, email, phone);
         this.age = age;
@@ -42,6 +45,7 @@ public class Customer extends User {
         this.pan = pan;
         this.transPassword = transPassword;
         this.address = address;
+        this.removedDate = removedDate;
         
 //        this.ownBankBeneficiaries = new ArrayList<Beneficiary>();
 //        this.otherBankBeneficiaries = new ArrayList<Beneficiary>();
@@ -140,6 +144,14 @@ public class Customer extends User {
     
     public Address getAddress() {
     	return this.address;
+    }
+    
+    public LocalDate getRemovedDate() {
+    	return removedDate;
+    }
+    
+    public boolean isRemoved() {
+    	return removedDate != null;
     }
     
     // Setters
