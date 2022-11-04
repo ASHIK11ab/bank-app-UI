@@ -5,22 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.annotation.Resource;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import model.UserBean;
+import model.user.User;
 import util.Factory;
 
 public class AdminDAO {
-	public UserBean get(long id) throws SQLException {
+	public User get(long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		UserBean admin = null;
+		User admin = null;
 		long phone;
 		String password;
         String name;
@@ -42,14 +36,10 @@ public class AdminDAO {
                 email = rs.getString("email");
                 phone = rs.getLong("phone");
                 
-                admin = new UserBean();
-                admin.setId(id);
-                admin.setName(name);
-                admin.setPhone(phone);
-                admin.setEmail(email);
-                admin.setPassword(password);
+                admin = new User(id, name, password, email, phone);
             }
         } catch(SQLException e) {
+        	System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = e.getMessage();
         } finally {

@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import dao.BranchDAO;
-import model.BranchBean;
+import model.Branch;
 import util.Factory;
 
 
@@ -32,7 +32,7 @@ public class TransferManagerServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<BranchBean> branches;
+		LinkedList<Branch> branches;
 		
 		try {
 			branches = branchDAO.getAll();
@@ -50,7 +50,7 @@ public class TransferManagerServlet extends HttpServlet {
 		PreparedStatement stmt = null;
 		
 		PrintWriter out = res.getWriter();
-		BranchBean firstBranch = null, secondBranch = null;
+		Branch firstBranch = null, secondBranch = null;
 
 		int firstBranchId = -1, secondBranchId = -1;
 		long firstBranchManagerId = -1, secondBranchManagerId = -1;

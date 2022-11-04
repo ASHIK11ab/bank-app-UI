@@ -14,4 +14,45 @@ public class Util {
 
         return pass;
     }
+    
+    
+    public static int genPin(int digit) {
+        int pin = 0;
+        int val;
+
+        Random random = new Random();
+        for(byte i = 0; i < digit; ++i) {
+            val = random.nextInt(10);
+            // Prevent generating 0 on very first time.
+            if(i == 0 && val == 0) {
+                i--;
+                continue;
+            }
+            pin = (pin * 10) + val;
+        }
+
+        return pin;
+    }
+    
+    
+    public static int getNoOfDigits(long number) {
+    	int digits = 0;
+    	number = Math.abs(number);
+    	
+    	while(number != 0) {
+    		number = number / 10;
+    		digits++;
+    	}
+    	
+    	return digits;
+    }
+    
+    
+    public static String createNotification(String msg, String status) {
+    	String html = "";
+    	html += "<div class='notification " + status + "'>";
+    	html += msg;
+    	html += "</div>";
+    	return html;
+    }
 }

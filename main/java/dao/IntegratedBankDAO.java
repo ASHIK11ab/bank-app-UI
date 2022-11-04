@@ -7,16 +7,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 
-import model.IntegratedBankBean;
+import model.IntegratedBank;
 import util.Factory;
 
 public class IntegratedBankDAO {
-	public void create(String name, String email, String apiURL, long phone) throws SQLException {
+	public IntegratedBank create(String name, String email, String apiURL, long phone) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		IntegratedBankBean integratedBank = null;
+		IntegratedBank integratedBank = null;
 		String msg = "";
 		int bankId = -1;
 		boolean exceptionOccured = false;
@@ -36,97 +36,9 @@ public class IntegratedBankDAO {
                 bankId = rs.getInt(1);
             
             // update in cache.
-            integratedBank = new IntegratedBankBean();
-            integratedBank.setId(bankId);
-            integratedBank.setName(name);
-            integratedBank.setEmail(email);
-            integratedBank.setPhone(phone);
-            integratedBank.setApiURL(apiURL);
+            integratedBank = new IntegratedBank(bankId, name, email, phone, apiURL);
         } catch(SQLException e) {
-            exceptionOccured = true;
-            msg = "internal error";
-        } finally {
-            try {
-                if(rs != null)
-                    rs.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-        }
-		
-		if(exceptionOccured)
-			throw new SQLException(msg);
-	}
-	
-	
-	public boolean delete(int id) throws SQLException {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		
-		boolean exceptionOccured = false;
-		String msg = "";
-		int rowsAffected = 0;
-		
-		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("DELETE FROM banks WHERE id = ?");
-			stmt.setInt(1, id);
-			rowsAffected = stmt.executeUpdate();
-		} catch(SQLException e) {
-            exceptionOccured = true;
-            msg = "internal error";
-        } finally {
-
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-        }
-		
-		if(exceptionOccured)
-			throw new SQLException(msg);
-		
-		return rowsAffected == 1;
-	}
-	
-	
-	public IntegratedBankBean get(int id) throws SQLException {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		IntegratedBankBean integratedBank = null;
-		String msg = "";
-		boolean exceptionOccured = false;
-		
-		try {
-            conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("SELECT * FROM banks WHERE id = ?");
-            stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-            
-            if(rs.next()) {
-	            integratedBank = new IntegratedBankBean();
-	            integratedBank.setId(rs.getInt("id"));
-	            integratedBank.setName(rs.getString("name"));
-	            integratedBank.setEmail(rs.getString("contact_mail"));
-	            integratedBank.setPhone(rs.getLong("contact_phone"));
-	            integratedBank.setApiURL(rs.getString("api_url"));
-            }
-        } catch(SQLException e) {
+        	System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {
@@ -153,15 +65,117 @@ public class IntegratedBankDAO {
 	}
 	
 	
-	public LinkedList<IntegratedBankBean> getAll() throws SQLException {
+	public boolean delete(int id) throws SQLException {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		
+		boolean exceptionOccured = false;
+		String msg = "";
+		int rowsAffected = 0;
+		
+		try {
+			conn = Factory.getDataSource().getConnection();
+			stmt = conn.prepareStatement("DELETE FROM banks WHERE id = ?");
+			stmt.setInt(1, id);
+			rowsAffected = stmt.executeUpdate();
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+		
+		if(exceptionOccured)
+			throw new SQLException(msg);
+		
+		return rowsAffected == 1;
+	}
+	
+	
+	public IntegratedBank get(int id) throws SQLException {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		IntegratedBank integratedBank = null;
+		String msg = "";
+		boolean exceptionOccured = false;
+		
+        long integratedBankPhone;
+        int integratedBankId;
+        String integratedBankName;
+        String integratedBankEmail;
+        String integratedBankApiURL;
+		
+		try {
+            conn = Factory.getDataSource().getConnection();
+            stmt = conn.prepareStatement("SELECT * FROM banks WHERE id = ?");
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
+            
+            if(rs.next()) {
+                integratedBankId = rs.getInt("id");
+                integratedBankName = rs.getString("name");
+                integratedBankPhone = rs.getLong("contact_phone");
+                integratedBankEmail = rs.getString("contact_mail");
+                integratedBankApiURL = rs.getString("api_url");
+
+                integratedBank = new IntegratedBank(integratedBankId, integratedBankName, integratedBankEmail,
+                                                        integratedBankPhone, integratedBankApiURL);
+            }
+        } catch(SQLException e) {
+        	System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            try {
+                if(rs != null)
+                    rs.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+		
+		if(exceptionOccured)
+			throw new SQLException(msg);
+		else
+			return integratedBank;
+	}
+	
+	
+	public LinkedList<IntegratedBank> getAll() throws SQLException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		
-		LinkedList<IntegratedBankBean> integratedBanks = new LinkedList<IntegratedBankBean>();
-		IntegratedBankBean integratedBank = null;
+		LinkedList<IntegratedBank> integratedBanks = new LinkedList<IntegratedBank>();
+		IntegratedBank integratedBank = null;
 		String msg = "";
 		boolean exceptionOccured = false;
+		
+        long integratedBankPhone;
+        int integratedBankId;
+        String integratedBankName;
+        String integratedBankEmail;
+        String integratedBankApiURL;
 		
 		try {
             conn = Factory.getDataSource().getConnection();
@@ -169,16 +183,19 @@ public class IntegratedBankDAO {
             rs = stmt.executeQuery("SELECT * FROM banks");
             
             while(rs.next()) {
-	            integratedBank = new IntegratedBankBean();
-	            integratedBank.setId(rs.getInt("id"));
-	            integratedBank.setName(rs.getString("name"));
-	            integratedBank.setEmail(rs.getString("contact_mail"));
-	            integratedBank.setPhone(rs.getLong("contact_phone"));
-	            integratedBank.setApiURL(rs.getString("api_url"));
+            	integratedBankId = rs.getInt("id");
+                integratedBankName = rs.getString("name");
+                integratedBankPhone = rs.getLong("contact_phone");
+                integratedBankEmail = rs.getString("contact_mail");
+                integratedBankApiURL = rs.getString("api_url");
+
+                integratedBank = new IntegratedBank(integratedBankId, integratedBankName, integratedBankEmail,
+                                                        integratedBankPhone, integratedBankApiURL);
 	            
 	            integratedBanks.add(integratedBank);
             }
         } catch(SQLException e) {
+        	System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {

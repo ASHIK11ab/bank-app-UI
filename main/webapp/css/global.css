@@ -83,3 +83,75 @@ section .title {
 	margin-top: 1rem;
 	font-size: 35px;
 }
+
+.hidden {
+	display: none;
+}
+
+.notification {
+	position: absolute;
+	top: -10rem;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    padding: 20px 25px;
+    border-radius: 10px;
+    animation: slide-from-top 8s;
+}
+
+.notification.success {
+    background-color: #19e719;
+}
+
+.notification.danger {
+	background-color: #ff8686;
+}
+
+table, th, td {
+	border: 2px solid #000;
+	padding: 15px 20px;
+	border-collapse: collapse;
+}
+
+th, td {
+	white-space: nowrap;
+}
+
+a.button {
+	text-decoration: none;
+	color: #fff;
+	background-color: dodgerblue;
+	padding: 15px 20px;
+	font-size: 16px;
+	display: inline-block;
+	border-radius: 12px;
+}
+
+a.button.secondary {
+	background-color: #e2e110;
+	color: #000;
+}
+
+a.button.danger, button.danger {
+	background-color: #ff1e2f;
+	color: #fff;
+}
+
+
+@keyframes slide-from-top {
+	0% {
+		top: -10rem;
+	}
+	
+	10% {
+		top: 2rem;
+	}
+	
+	90% {
+		top: 2rem;
+	}
+	
+	100% {
+		top: -10rem;
+	}
+}

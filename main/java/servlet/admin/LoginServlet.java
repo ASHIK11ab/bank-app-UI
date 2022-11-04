@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import constant.Role;
 import dao.AdminDAO;
-import model.UserBean;
+import model.user.User;
 import util.Factory;
 
 
@@ -37,7 +37,7 @@ public class LoginServlet extends HttpServlet {
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out;
-		UserBean admin;
+		User admin;
 		
 		long id = 0;
 		String password = "";

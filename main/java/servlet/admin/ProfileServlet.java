@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.AdminDAO;
-import model.UserBean;
+import model.user.User;
 import util.Factory;
 
 public class ProfileServlet extends HttpServlet {
@@ -27,7 +27,7 @@ public class ProfileServlet extends HttpServlet {
 		
 		try {
 			long adminId = (Long) req.getSession(false).getAttribute("id");
-			UserBean admin = adminDAO.get(adminId);
+			User admin = adminDAO.get(adminId);
 			req.setAttribute("user", admin);
 			req.getRequestDispatcher("/jsp/admin/profile.jsp").forward(req, res);
 		} catch(ClassCastException e) {

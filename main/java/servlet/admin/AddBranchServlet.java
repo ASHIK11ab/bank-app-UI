@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import dao.BranchDAO;
 import dao.ManagerDAO;
-import model.AddressBean;
-import model.BranchBean;
-import model.EmployeeBean;
+import model.Address;
+import model.Branch;
+import model.user.Employee;
 import util.Factory;
 
 public class AddBranchServlet extends HttpServlet {
@@ -36,9 +36,9 @@ public class AddBranchServlet extends HttpServlet {
 		Connection conn = null;
 		PrintWriter out = res.getWriter();
 		
-		BranchBean branch = null;
-		EmployeeBean manager = null;
-		AddressBean address;
+		Branch branch = null;
+		Employee manager = null;
+		Address address;
 		
 		String name, doorNo, street, city, state;
 		int pincode;
@@ -58,12 +58,7 @@ public class AddBranchServlet extends HttpServlet {
 			managerEmail = req.getParameter("manager-email");
 			managerPhone = Long.parseLong(req.getParameter("manager-phone"));
 			
-			address = new AddressBean();
-            address.setDoorNo(doorNo);
-            address.setStreet(street);
-            address.setCity(city);
-            address.setState(state);
-            address.setPincode(pincode);
+			address = new Address(doorNo, street, city, state, pincode);
 		} catch(NumberFormatException e) {
 			out.println("<div class='notification danger'>" + "invalid input" + "</div>");
 			doGet(req, res);
@@ -77,7 +72,7 @@ public class AddBranchServlet extends HttpServlet {
 			conn = Factory.getDataSource().getConnection();
 			branch = branchDAO.create(conn, name, address);
 			manager = managerDAO.create(conn, branch.getId(), managerName, managerEmail, managerPhone);
-			branch.setManager(manager);
+			branch.assignManager(manager);
 			
 			out.println("<div class='notification success'>" + "branch created successfully" + "</div>");
 			req.setAttribute("branch", branch);

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.EmployeeDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -30,7 +30,7 @@ public class AddEmployeeServlet extends HttpServlet {
 		long phone;
 		int branchId;
 		
-		EmployeeBean employee = null;
+		Employee employee = null;
 		
 		try {
 			name = req.getParameter("employee-name");

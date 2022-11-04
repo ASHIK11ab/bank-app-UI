@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.BranchDAO;
-import model.BranchBean;
+import model.Branch;
 import util.Factory;
 
 
@@ -26,7 +26,7 @@ public class MergeBranchServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<BranchBean> branches = null;
+		LinkedList<Branch> branches = null;
 		
 		try {
 			branches = branchDAO.getAll();
