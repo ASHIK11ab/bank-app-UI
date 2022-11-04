@@ -75,11 +75,11 @@ public class DepositAccountDAO {
             switch(type) {
 	            case RD: account = new DepositAccount(generatedAccountNo, customerId, customerName, nominee, 
 	            															branchId, amount, payoutAccountNo, debitFromAccountNo,
-	            															tenureMonths, intrestRate, today, amount, recurringDate);
+	            															tenureMonths, intrestRate, today, null, amount, recurringDate);
 	            								break;
 	            case FD: account = new DepositAccount(generatedAccountNo, customerId, customerName, nominee, 
 																			branchId, amount, payoutAccountNo, debitFromAccountNo,
-																			tenureMonths, intrestRate, today, amount);
+																			tenureMonths, intrestRate, today, null, amount);
 	            								break;
             }
 		} catch(SQLException e) {
@@ -119,7 +119,7 @@ public class DepositAccountDAO {
 		DepositAccount account = null;
 		DepositAccountType type;
 		
-		LocalDate openingDate, recurringDate = null;
+		LocalDate openingDate, recurringDate = null, closingDate;
 		long customerId, payoutAccountNo, debitFromAccountNo;
 		float balance, rateOfIntrest;
 		int branchId, typeId, tenureMonths, monthlyInstallment = 0, amountDeposited = 0;
@@ -152,6 +152,11 @@ public class DepositAccountDAO {
                 	amountDeposited = rs1.getInt("deposit_amount");
                 }
                 
+		        if(rs1.getDate("closing_date") != null)
+		        	closingDate = rs1.getDate("closing_date").toLocalDate();
+		        else
+		        	closingDate = null;
+		        
                 stmt2.setLong(1, customerId);
                 rs2 = stmt2.executeQuery();
                 
@@ -162,11 +167,11 @@ public class DepositAccountDAO {
                 switch(type) {
 		            case RD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
 		            															branchId, balance, payoutAccountNo, debitFromAccountNo,
-		            															tenureMonths, rateOfIntrest, openingDate, monthlyInstallment, recurringDate);
+		            															tenureMonths, rateOfIntrest, openingDate, closingDate, monthlyInstallment, recurringDate);
 		            								break;
 		            case FD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
 																				branchId, balance, payoutAccountNo, debitFromAccountNo,
-																				tenureMonths, rateOfIntrest, openingDate, amountDeposited);
+																				tenureMonths, rateOfIntrest, openingDate, closingDate, amountDeposited);
 		            								break;
 	            } 
             }

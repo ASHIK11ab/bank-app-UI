@@ -62,9 +62,9 @@ public class RegularAccountDAO {
 	        
 	        switch(accountType) {
 	        	case SAVINGS: account = new SavingsAccount(generatedAccountNo, customerId, customerName,
-	        												nominee, branchId, balance, today, true); break;
+	        												nominee, branchId, balance, today, null, true); break;
 	        	case CURRENT: account = new CurrentAccount(generatedAccountNo, customerId, customerName,
-															nominee, branchId, balance, today, true); break;
+															nominee, branchId, balance, today, null, true); break;
 	        }
 	        
 		} catch(SQLException e) {
@@ -100,7 +100,7 @@ public class RegularAccountDAO {
 		ResultSet rs1 = null, rs2 = null;
 		
 		RegularAccount account = null;
-		LocalDate openingDate;
+		LocalDate openingDate, closingDate;
 		boolean exceptionOccured = false, isActive;
 		String msg = "", customerName = "";
 		float balance;
@@ -124,6 +124,11 @@ public class RegularAccountDAO {
 		        openingDate = rs1.getDate("opening_date").toLocalDate();
 		        isActive = rs1.getBoolean("active");
 		        
+		        if(rs1.getDate("closing_date") != null)
+		        	closingDate = rs1.getDate("closing_date").toLocalDate();
+		        else
+		        	closingDate = null;
+		        
 				stmt2.setLong(1, customerId);
 				rs2 = stmt2.executeQuery();
 				if(rs2.next())
@@ -131,8 +136,8 @@ public class RegularAccountDAO {
 				
 				// update getting nominee
 				switch(RegularAccountType.getType(type_id)) {
-					case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, isActive); break;
-					case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, isActive); break;
+					case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
+					case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
 					default: return null;
 				}
 			}	        
