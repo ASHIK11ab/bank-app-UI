@@ -109,18 +109,18 @@ public class CreateDepositServlet extends HttpServlet {
 			if(!isError && (tenureMonths < 2 || tenureMonths > 20)) {
 				isError = true;
 				msg = "Tenure months should be between 2 to 20 !!!";
-			}	
+			}
 			
 			// Get deposit account details and ask for confirmation
 			if(!isError && actionType == 0) {
 				debitFromAccount = regularAccountDAO.get(debitFromAccountNo);
 				
-				if(debitFromAccount != null) {
+				if(debitFromAccount != null && debitFromAccount.getIsActive() && !debitFromAccount.isClosed()) {
 					if(debitFromAccountNo == payoutAccountNo)
 						payoutAccount = debitFromAccount;
 					else {
 						payoutAccount = regularAccountDAO.get(payoutAccountNo);
-						if(payoutAccount == null) {
+						if(payoutAccount == null || !payoutAccount.getIsActive() || payoutAccount.isClosed()) {
 							isError = true;
 							msg = "Invalid payout account details !!!";
 						}

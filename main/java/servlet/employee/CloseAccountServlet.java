@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.AccountCategory;
 import dao.AccountDAO;
 import dao.RegularAccountDAO;
 import model.account.RegularAccount;
@@ -49,7 +50,7 @@ public class CloseAccountServlet extends HttpServlet {
 			
 			account = regularAccountDAO.get(accountNo);
 			
-			if(account == null || account.getBranchId() != branchId) {
+			if(account == null || account.getBranchId() != branchId || account.isClosed()) {
 				isError = true;
 				msg = "Account does not exist !!!";
 			}
@@ -60,8 +61,8 @@ public class CloseAccountServlet extends HttpServlet {
 					customerId = account.getCustomerId();
 					conn = Factory.getDataSource().getConnection();
 					
-		            // Check whether account is linked with any deposit account(s).
-		            stmt1 = conn.prepareStatement("SELECT account_no from deposit_account WHERE debit_from_account_no = ? OR payout_account_no = ? limit 1");
+		            // Check whether account is linked with any active deposit account(s).
+		            stmt1 = conn.prepareStatement("SELECT da.account_no FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE (da.debit_from_account_no = ? OR da.payout_account_no = ?) AND (a.closing_date != null) limit 1");
 		            stmt1.setLong(1, accountNo);
 		            stmt1.setLong(2, accountNo);
 		            rs1 = stmt1.executeQuery();
@@ -85,8 +86,8 @@ public class CloseAccountServlet extends HttpServlet {
 	                    	req.setAttribute("note", note);
 	                    	req.getRequestDispatcher("/jsp/employee/customerRemovalConfirmationPage.jsp").forward(req, res);
 	                    } else {
-	                    	// Delete account.
-	                    	accountDAO.delete(conn, accountNo);
+	                    	// close account.
+	                    	accountDAO.closeAccount(conn, accountNo, AccountCategory.REGULAR);
 	                    }
 	                }
 				}

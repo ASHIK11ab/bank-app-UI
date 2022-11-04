@@ -26,7 +26,7 @@ public class DepositServlet extends HttpServlet {
 		DepositAccount account = null;
 		
 		Role role = null;
-		boolean isError = false, exceptionOccured = false, isAccountExists = false;
+		boolean isError = false, exceptionOccured = false, isAccessGranted = false;
 		String path = req.getPathInfo(), action = "", msg = "", queryMsg = null, status = null;
 		String [] result;
 		long accountNo = -1, customerId = -1;
@@ -61,17 +61,18 @@ public class DepositServlet extends HttpServlet {
         	switch(role) {
 	        	case EMPLOYEE: 
 	        					if(account != null && account.getBranchId() == branchId)
-	        						isAccountExists = true;
+	        						isAccessGranted = true;
 	        					break;
 	        	case CUSTOMER: 
+	        					// customer cannot access closed account.
 	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-	        					if(account != null && account.getCustomerId() == customerId)
-	        						isAccountExists = true;
+	        					if(account != null && account.getCustomerId() == customerId && !account.isClosed())
+	        						isAccessGranted = true;
 	        					break;
-	        	default: isAccountExists = false;
+	        	default: isAccessGranted = false;
         	}
         	
-        	if(!isAccountExists) {
+        	if(!isAccessGranted) {
         		isError = true;
         		msg = "Account not found !!!";
         	}
@@ -88,9 +89,17 @@ public class DepositServlet extends HttpServlet {
 												req.setAttribute("accountCategory", 1);
 												req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").include(req, res); break;
 					case "close":
-								req.setAttribute("actionType", 0);
-								req.setAttribute("accountNo", accountNo);
-								req.getRequestDispatcher("/jsp/components/closeDeposit.jsp").include(req, res); break;
+								// Only employee has access to a closed account.
+								// prevent closing a closed account.
+								if(account.isClosed()) {
+									isError = true;
+									msg = "Account is aldready closed !!!";
+								} else {
+									req.setAttribute("actionType", 0);
+									req.setAttribute("accountNo", accountNo);
+									req.getRequestDispatcher("/jsp/components/closeDeposit.jsp").include(req, res); break;									
+								}
+								break;
 					default: 
 							isError = true;
 							msg = "page not found !!!";

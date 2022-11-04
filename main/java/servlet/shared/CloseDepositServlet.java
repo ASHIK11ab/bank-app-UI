@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cache.AppCache;
+import constant.AccountCategory;
 import constant.Constants;
 import constant.DepositAccountType;
 import constant.Role;
@@ -57,12 +58,12 @@ public class CloseDepositServlet extends HttpServlet {
         	// Access for account differs for customer and employee.
         	switch(role) {
 	        	case EMPLOYEE: 
-	        					if(account != null && account.getBranchId() == branchId)
+	        					if(account != null && account.getBranchId() == branchId  && !account.isClosed())
 	        						isAccountExists = true;
 	        					break;
 	        	case CUSTOMER: 
 	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-	        					if(account != null && account.getCustomerId() == customerId)
+	        					if(account != null && account.getCustomerId() == customerId  && !account.isClosed())
 	        						isAccountExists = true;
 	        					break;
 	        	default: isAccountExists = false;
@@ -117,7 +118,7 @@ public class CloseDepositServlet extends HttpServlet {
 					description = DepositAccountType.getType(account.getTypeId()).toString() + " closing on A/C: " + account.getAccountNo();
 					transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 					
-					accountDAO.delete(conn, account.getAccountNo());
+					accountDAO.closeAccount(conn, account.getAccountNo(), AccountCategory.DEPOSIT);
 				}
 			}
 		} catch(ClassCastException e) {

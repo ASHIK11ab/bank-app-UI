@@ -25,10 +25,10 @@ public class AccountServlet extends HttpServlet {
 		RegularAccount account = null;
 		
 		Role role = null;
-		boolean isError = false, exceptionOccured = false, pageFound = true;
+		boolean isError = false, exceptionOccured = false, pageFound = true, isAccessGranted = false;
 		String path = req.getPathInfo(), action = "", msg = "", queryMsg = null, status = null;
 		String [] result;
-		long accountNo = -1;
+		long accountNo = -1, customerId = -1;
 		int branchId = -1;
 		
 		queryMsg = req.getParameter("msg");
@@ -55,10 +55,26 @@ public class AccountServlet extends HttpServlet {
 			action = result[1];
 			
 			account = accountDAO.get(accountNo);
-			if(account == null || account.getBranchId() != branchId) {
-				isError = true;
-				msg = "Account not found !!!";
-			}
+			
+        	// Access for account differs for customer and employee.
+        	switch(role) {
+	        	case EMPLOYEE: 
+	        					if(account != null && account.getBranchId() == branchId)
+	        						isAccessGranted = true;
+	        					break;
+	        	case CUSTOMER: 
+	        					// customer cannot access closed account.
+	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
+	        					if(account != null && account.getCustomerId() == customerId && !account.isClosed())
+	        						isAccessGranted = true;
+	        					break;
+	        	default: isAccessGranted = false;
+        	}
+        	
+        	if(!isAccessGranted) {
+        		isError = true;
+        		msg = "Account not found !!!";
+        	}
 			
 			if(!isError) {
 				req.setAttribute("account", account);
@@ -82,8 +98,17 @@ public class AccountServlet extends HttpServlet {
 					
 					switch(action) {
 						case "close":
-									req.setAttribute("accountNo", accountNo);
-									req.getRequestDispatcher("/jsp/employee/closeAccountConfirmation.jsp").include(req, res); break;
+									// Only employee has access to a closed account.
+									// prevent closing a closed account.
+									if(account.isClosed()) {
+										isError = true;
+										msg = "Account is aldready closed !!!";
+									} else {
+										req.setAttribute("actionType", 0);
+										req.setAttribute("accountNo", accountNo);
+										req.getRequestDispatcher("/jsp/employee/closeAccountConfirmation.jsp").include(req, res);								
+									}
+									break;
 						default: pageFound = false;
 					}
 				}

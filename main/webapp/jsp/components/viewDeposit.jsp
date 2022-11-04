@@ -69,9 +69,11 @@
 					Transaction history
 				</a>
 				
-				<a class="button danger" href="/bank-app/${ userType }/deposit/${ account.getAccountNo() }/close">
-					close deposit
-				</a>
+				<c:if test="${ !account.isClosed() }">
+					<a class="button danger" href="/bank-app/${ userType }/deposit/${ account.getAccountNo() }/close">
+						close deposit
+					</a>
+				</c:if>
 			</c:if>
 		</div>
 	</main>
