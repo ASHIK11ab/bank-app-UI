@@ -2,6 +2,7 @@ package servlet.shared;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -20,6 +21,8 @@ import util.Util;
 
 public class BlockUnblockCardServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		
+		Connection conn = null;
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
 		DebitCard card = null;
@@ -89,7 +92,17 @@ public class BlockUnblockCardServlet extends HttpServlet {
 						msg = "Incorrect pin !!!";
 					}
 					
-					// Type 0 - Deactivate, type 1 - activate.
+					if(card.isDeactivated()) {
+						isError = true;
+						msg = "Card is deactivated !!! cannot update card status !!!";
+					}
+					
+					if(!isError && !card.isActivated()) {
+						isError = true;
+						msg = "Card is not activated !!! ask customer to activate card !!!";
+					}
+					
+					// Type 0 - Block, type 1 - Unblock.
 					if(activationType == 0 && !card.getIsActive()) {
 						isError = true;
 						msg = "Card is aldready blocked !!!";
@@ -100,8 +113,10 @@ public class BlockUnblockCardServlet extends HttpServlet {
 						msg = "Card is not blocked, cannot unblock !!!";
 					}
 					
-					if(!isError)
-						cardDAO.setCardStatus(cardNo, (activationType == 0) ? false : true);
+					if(!isError) {
+						conn = Factory.getDataSource().getConnection();
+						cardDAO.setCardActiveStatus(conn, cardNo, (activationType == 0) ? false : true);
+					}
 				}
 			}
 			
@@ -118,6 +133,11 @@ public class BlockUnblockCardServlet extends HttpServlet {
 			msg = e.getMessage();
 		} finally {
 			
+			try {
+				if(conn != null)
+					conn.close();
+			} catch(SQLException e) { System.out.println(e.getMessage()); }
+			
 			if(isError || exceptionOccured) {
 				status = "danger";
 				redirectPage = "block-unblock";
@@ -131,5 +151,4 @@ public class BlockUnblockCardServlet extends HttpServlet {
 			res.sendRedirect(redirectURI);
 		}
 	}
-
 }

@@ -55,12 +55,16 @@
 				
 				<c:if test="${ actionType == 1 }">
 					<section>
+						<c:if test="${ card.isDeactivated() }">
+							<h2 style="color: red">Card Deactivated</h2>
+						</c:if>
+						
 						<h1>Card Details:</h1>
-						<p>Card No: ${ card.getCardNo() }</p>
-						<p>Card Type: ${ DebitCardType.getName(card.getTypeId()) }</p>
-						<p>Linked with account: ${ card.getLinkedAccountNo() }</p>
-						<p>Card Status: <c:out value='${ card.getIsActive() ? "Active" : "Not active" }'/></p>
-						<a class="button" href="/bank-app/${ userType }/card/${ cardNo }/block-unblock">Block / Unblock card</a>
+						<jsp:include page="/jsp/components/card.jsp" />
+						
+						<c:if test="${ card.isActivated() && !card.isDeactivated() }">
+							<a class="button" href="/bank-app/${ userType }/card/${ cardNo }/block-unblock">Block / Unblock card</a>
+						</c:if>
 					</section>
 				</c:if>
 			</form>

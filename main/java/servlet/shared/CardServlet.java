@@ -82,7 +82,7 @@ public class CardServlet extends HttpServlet {
 		        					break;
 		        	case CUSTOMER: 
 		        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-		        					if(account == null || account.getCustomerId() != customerId) {
+		        					if(account == null || account.getCustomerId() != customerId && !card.isDeactivated()) {
 		        						isError = true;
 		        						msg = "Card not found !!!";
 		        					}
@@ -100,9 +100,22 @@ public class CardServlet extends HttpServlet {
 								req.setAttribute("actionType", 1);
 								req.getRequestDispatcher("/jsp/components/viewCard.jsp").include(req, res); break;
 					case "block-unblock":
-								req.setAttribute("actionType", 0);
-								req.setAttribute("cardNo", cardNo);
-								req.getRequestDispatcher("/jsp/components/blockUnblockCard.jsp").include(req, res); break;
+										if(card.isDeactivated()) {
+											isError = true;
+											msg = "card is deactivated !!! cannot block or unblock !!!";
+										}
+										
+										if(!isError && !card.isActivated()) {
+											isError = true;
+											msg = "card is not activated !!! cannot block or unblock !!!";
+										}
+										
+										if(!isError) {
+											req.setAttribute("actionType", 0);
+											req.setAttribute("cardNo", cardNo);
+											req.getRequestDispatcher("/jsp/components/blockUnblockCard.jsp").include(req, res); break;	
+										}
+										break;
 					default: 
 							isError = true;
 							msg = "page not found !!!";
