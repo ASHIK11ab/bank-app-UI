@@ -25,13 +25,20 @@
 				</c:when>
 	
 				<c:when test="${ customer != null }">
+					<c:if test="${ customer.isRemoved() }">
+						<h1 style="color: red">Customer removed</h1>
+					</c:if>
+					
 					<jsp:include page="/jsp/components/customer.jsp" />
-					<a class="button" href="/bank-app/employee/customer/${ customer.getId() }/update">
-						update customer details
-					</a>
-					<a class="button secondary" href="/bank-app/employee/customer/${ customer.getId() }/password-reset">
-						reset customer password
-					</a>
+					
+					<c:if test="${ !customer.isRemoved() }">
+						<a class="button" href="/bank-app/employee/customer/${ customer.getId() }/update">
+							update customer details
+						</a>
+						<a class="button secondary" href="/bank-app/employee/customer/${ customer.getId() }/password-reset">
+							reset customer password
+						</a>
+					</c:if>
 				</c:when>
 			</c:choose>
 

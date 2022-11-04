@@ -156,7 +156,7 @@ public class CreateCustomerServlet extends HttpServlet {
 	            address = new Address(doorNo, street, city, state, pincode);
 	            customer = new Customer(-1, name, "", phone, email, age,
 					                    gender, martialStatus, occupation, income, adhaar, pan, 
-					                    "", address);
+					                    "", address, null);
 				out.println(Util.createNotification(msg, "danger"));
 				req.setAttribute("customer", customer);
 				req.setAttribute("accountType", accountType);

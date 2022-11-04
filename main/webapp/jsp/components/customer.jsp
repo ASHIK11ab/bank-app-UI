@@ -2,7 +2,7 @@
 
 <c:set var="customer" value="${ requestScope.customer }" />
 
-<section>
+<section>	
 	<h2>Customer Details:</h2>
 	<p>Id: ${ customer.getId() }<p>
 	
