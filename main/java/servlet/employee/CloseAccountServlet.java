@@ -13,8 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import constant.AccountCategory;
+import constant.TransactionType;
 import dao.AccountDAO;
 import dao.RegularAccountDAO;
+import dao.TransactionDAO;
 import model.account.RegularAccount;
 import util.Factory;
 import util.Util;
@@ -28,6 +30,7 @@ public class CloseAccountServlet extends HttpServlet {
 		
 		PrintWriter out = res.getWriter();
 		
+		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		
@@ -36,6 +39,7 @@ public class CloseAccountServlet extends HttpServlet {
 		String msg = "";
 		boolean exceptionOccured = false, isError = false, requireConfirmation = false;
 		long accountNo = -1, customerId = -1;
+		float beforeBalance = 0;
 		int branchId, noOfAccounts = -1;
 		
 		try {
@@ -86,6 +90,12 @@ public class CloseAccountServlet extends HttpServlet {
 	                    	req.setAttribute("note", note);
 	                    	req.getRequestDispatcher("/jsp/employee/customerRemovalConfirmationPage.jsp").forward(req, res);
 	                    } else {
+	                    	// If account has balance, credit balance as cash to user, create a transaction record.
+	                    	if(account.getBalance() > 0) {
+	                    		beforeBalance = accountDAO.updateBalance(conn, accountNo, 0, account.getBalance());
+	                    		transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+	                    	}
+	                    	
 	                    	// close account.
 	                    	accountDAO.closeAccount(conn, accountNo, AccountCategory.REGULAR);
 	                    }

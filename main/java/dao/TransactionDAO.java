@@ -16,8 +16,8 @@ import model.Transaction;
 import util.Factory;
 
 public class TransactionDAO {
-	public long create(Connection conn, int typeId, String description, long fromAccountNo,
-									long toAccountNo, float amount, boolean fromAccountOwnBank,
+	public long create(Connection conn, int typeId, String description, Object fromAccountNo,
+									Object toAccountNo, float amount, boolean fromAccountOwnBank,
 									boolean toAccountOwnBank, float fromAccountBeforeBalance,
 									float toAccountBeforeBalance) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null;
@@ -36,8 +36,8 @@ public class TransactionDAO {
             
             stmt1.setInt(1, typeId);
             stmt1.setString(2, description);
-            stmt1.setLong(3, fromAccountNo);
-            stmt1.setLong(4, toAccountNo);
+            stmt1.setObject(3, fromAccountNo);
+            stmt1.setObject(4, toAccountNo);
             stmt1.setFloat(5, amount);
             stmt1.setDate(6, Date.valueOf(today));
             stmt1.setTime(7, Time.valueOf(time));
@@ -49,7 +49,7 @@ public class TransactionDAO {
             
             if(fromAccountOwnBank) {
                 // associate transaction with account.
-                stmt2.setLong(1, fromAccountNo);
+                stmt2.setObject(1, fromAccountNo);
                 stmt2.setLong(2, transactionId);
                 stmt2.setFloat(3, fromAccountBeforeBalance);
                 stmt2.executeUpdate();	
@@ -57,7 +57,7 @@ public class TransactionDAO {
             
             if(toAccountOwnBank) {
                 // associate transaction with account.
-                stmt2.setLong(1, toAccountNo);
+                stmt2.setObject(1, toAccountNo);
                 stmt2.setLong(2, transactionId);
                 stmt2.setFloat(3, toAccountBeforeBalance);
                 stmt2.executeUpdate();	
