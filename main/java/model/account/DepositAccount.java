@@ -23,10 +23,10 @@ public class DepositAccount extends Account {
     public DepositAccount(long accountNo, long customerId, String customerName,
                             Nominee nominee, int branchId, float amount,
                             long payoutAccountNo, long debitFromAccountNo, int tenureMonths,
-                            float intrestRate, LocalDate openingDate, int amountPerMonth,
+                            float intrestRate, LocalDate openingDate, LocalDate closingDate, int amountPerMonth,
                             LocalDate recurringDate) {
 		super(accountNo, customerId, customerName, nominee, branchId, 
-				amount, openingDate, DepositAccountType.RD.id);
+				amount, openingDate, closingDate, DepositAccountType.RD.id);
         this.payoutAccountNo = payoutAccountNo;
         this.intrestRate = intrestRate;
         this.amountPerMonth = amountPerMonth;
@@ -40,9 +40,9 @@ public class DepositAccount extends Account {
     public DepositAccount(long accountNo, long customerId, String customerName,
 				            Nominee nominee, int branchId, float amount,
 				            long payoutAccountNo, long debitFromAccountNo, int tenureMonths,
-				            float intrestRate, LocalDate openingDate, int amountDeposited) {
+				            float intrestRate, LocalDate openingDate, LocalDate closingDate, int amountDeposited) {
 		super(accountNo, customerId, customerName, nominee, branchId, 
-				amount, openingDate, DepositAccountType.FD.id);
+				amount, openingDate, closingDate, DepositAccountType.FD.id);
         this.payoutAccountNo = payoutAccountNo;
         this.intrestRate = intrestRate;
         this.tenureMonths = tenureMonths;

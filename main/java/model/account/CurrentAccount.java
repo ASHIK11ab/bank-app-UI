@@ -11,9 +11,9 @@ public class CurrentAccount extends RegularAccount {
     
     public CurrentAccount(long accountNo, long customerId, String customerName, 
 							Nominee nominee, int branchId, float amount,
-							LocalDate openingDate, boolean activeStatus) {
+							LocalDate openingDate, LocalDate closingDate, boolean activeStatus) {
 		super(accountNo, customerId, customerName, nominee, branchId, 
-				amount, openingDate, RegularAccountType.CURRENT.id, activeStatus);
+				amount, openingDate, closingDate, RegularAccountType.CURRENT.id, activeStatus);
 	}
     
 

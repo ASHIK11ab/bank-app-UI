@@ -13,10 +13,11 @@ public abstract class Account {
     private float balance;
     private int typeId;
     private LocalDate openingDate;
+    private LocalDate closingDate;
     
     
     public Account(long accountNo, long customerId, String customerName, Nominee nominee,
-		            int branchId, float amount, LocalDate openingDate, int typeId) {
+		            int branchId, float amount, LocalDate openingDate, LocalDate closingDate, int typeId) {
 		this.accountNo = accountNo;
 		this.customerId = customerId;
 		this.customerName = customerName;
@@ -24,6 +25,7 @@ public abstract class Account {
 		this.branchId = branchId;
 		this.balance = amount;
 		this.openingDate = openingDate;
+		this.closingDate = closingDate;
 		this.typeId = typeId;
 	}
 
@@ -31,6 +33,14 @@ public abstract class Account {
     // Getters
     public LocalDate getOpeningDate() {
         return this.openingDate;
+    }
+    
+    public LocalDate getClosingDate() {
+    	return this.closingDate;
+    }
+    
+    public boolean isClosed() {
+    	return this.closingDate != null;
     }
     
     public int getTypeId() {

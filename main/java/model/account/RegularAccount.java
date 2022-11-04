@@ -10,8 +10,8 @@ public abstract class RegularAccount extends Account {
     
     public RegularAccount(long accountNo, long customerId, String customerName, 
     						Nominee nominee, int branchId, float amount, 
-    						LocalDate openingDate, int typeId, boolean activeStatus) {
-		super(accountNo, customerId, customerName, nominee, branchId, amount, openingDate, typeId);
+    						LocalDate openingDate, LocalDate closingDate, int typeId, boolean activeStatus) {
+		super(accountNo, customerId, customerName, nominee, branchId, amount, openingDate, closingDate, typeId);
 		this.isActive = activeStatus;
 	}
     
