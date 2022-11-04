@@ -14,8 +14,8 @@ public class DepositAccount extends Account {
     private int tenureMonths;
     private long debitFromAccountNo;
     
-    // Specific to Recurring Deposit.
-    private int amountPerMonth;
+    // FD - initial amount deposited, RD - monthly installment.
+    private int depositAmount;
     private LocalDate recurringDate;
     
     
@@ -23,13 +23,13 @@ public class DepositAccount extends Account {
     public DepositAccount(long accountNo, long customerId, String customerName,
                             Nominee nominee, int branchId, float amount,
                             long payoutAccountNo, long debitFromAccountNo, int tenureMonths,
-                            float intrestRate, LocalDate openingDate, LocalDate closingDate, int amountPerMonth,
+                            float intrestRate, LocalDate openingDate, LocalDate closingDate, int depositAmount,
                             LocalDate recurringDate) {
 		super(accountNo, customerId, customerName, nominee, branchId, 
 				amount, openingDate, closingDate, DepositAccountType.RD.id);
         this.payoutAccountNo = payoutAccountNo;
         this.intrestRate = intrestRate;
-        this.amountPerMonth = amountPerMonth;
+        this.depositAmount = depositAmount;
         this.recurringDate = recurringDate;
         this.tenureMonths = tenureMonths;
         this.debitFromAccountNo = debitFromAccountNo;
@@ -47,8 +47,7 @@ public class DepositAccount extends Account {
         this.intrestRate = intrestRate;
         this.tenureMonths = tenureMonths;
         this.debitFromAccountNo = debitFromAccountNo;
-        // Incase of FD intrest for 1 month is calculated based on the amount deposited.
-        this.amountPerMonth = amountDeposited;
+        this.depositAmount = amountDeposited;
         
         this.recurringDate = null;
     }
@@ -83,8 +82,8 @@ public class DepositAccount extends Account {
     	return debitFromAccountNo;
     }
     
-    public int getAmountPerMonth() {
-    	return amountPerMonth;
+    public int getDepositAmount() {
+    	return depositAmount;
     }
     
     public LocalDate getRecurringDate() {
