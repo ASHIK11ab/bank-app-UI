@@ -40,7 +40,8 @@ public class CustomerServlet extends HttpServlet {
 			action = path.split("/")[1];
 			customer = customerDAO.get(customerId);
 
-			if(customer == null) {
+			// Restrict access other than view access when customer is removed.
+			if(customer == null || (!action.equals("view") && customer.isRemoved())) {
 				isError = true;
 				msg = "Invalid customer id !!!";
 			} else {

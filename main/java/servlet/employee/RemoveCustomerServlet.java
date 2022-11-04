@@ -2,6 +2,7 @@ package servlet.employee;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -9,8 +10,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.TransactionType;
+import dao.AccountDAO;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
+import dao.TransactionDAO;
 import model.account.RegularAccount;
 import model.user.Customer;
 import util.Factory;
@@ -19,12 +23,15 @@ import util.Util;
 
 public class RemoveCustomerServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		PrintWriter out = res.getWriter();
+		Connection conn = null;
 		String msg = "";
 		long accountNo = -1;
 		int branchId;
+		float beforeBalance = 0;
 		boolean exceptionOccured = false, isError = false;
 		
+		TransactionDAO transactionDAO = Factory.getTransactionDAO();
+		AccountDAO accountDAO = Factory.getAccountDAO();
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		
@@ -53,8 +60,15 @@ public class RemoveCustomerServlet extends HttpServlet {
 				customer = customerDAO.get(account.getCustomerId());
 				
 				synchronized (customer) {
-					synchronized(account) {						
-						customerDAO.delete(customer.getId());
+					synchronized(account) {
+						conn = Factory.getDataSource().getConnection();
+                    	// If account has balance, credit balance as cash to user, create a transaction record.
+                    	if(account.getBalance() > 0) {
+                    		beforeBalance = accountDAO.updateBalance(conn, accountNo, 0, account.getBalance());
+                    		transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+                    	}
+                    	
+						customerDAO.removeCustomer(conn, customer.getId(), accountNo);
 					}
 				}
 			}
@@ -70,12 +84,15 @@ public class RemoveCustomerServlet extends HttpServlet {
 			exceptionOccured = true;
 			msg = e.getMessage();
 		} finally {
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+            
 			if(isError || exceptionOccured)
 				res.sendRedirect("/bank-app/employee/account/" + accountNo + "/close?msg=" + msg + "&status=danger");
 			else
-				res.sendRedirect("/bank-app/employee/account?msg=account closed and customer removed successfully&status=success");
-			
-			out.close();
+				res.sendRedirect("/bank-app/employee/account?msg=account closed and customer removed successfully&status=success");			
 		}
 	}
 

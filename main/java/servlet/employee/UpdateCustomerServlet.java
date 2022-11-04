@@ -24,6 +24,7 @@ public class UpdateCustomerServlet extends HttpServlet {
 		Address address;
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		
+		Customer customer = null;
 		boolean isError = false, exceptionOccured = false;
 		String name, email, pan, martialStatus, occupation;
         String doorNo, street, city, state, msg = "";
@@ -71,8 +72,10 @@ public class UpdateCustomerServlet extends HttpServlet {
 				isError = true;
         		msg = "Invalid pincode";	
         	}
-        	        	
-        	if(customerDAO.get(customerId) == null) {
+        	
+        	customer = customerDAO.get(customerId);
+        	
+        	if(!isError && (customer == null || customer.isRemoved())) {
         		isError = true;
         		msg = "Invalid customer details !!!";
         	}

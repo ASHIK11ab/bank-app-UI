@@ -37,7 +37,7 @@ public class CustomerPasswordResetServlet extends HttpServlet {
 			
 			customer = customerDAO.get(customerId);
 			
-			if(!isError && customer == null) {
+			if(!isError && (customer == null || customer.isRemoved())) {
 				isError = true;
 				msg = "Invalid customer id !!!";
 			}
