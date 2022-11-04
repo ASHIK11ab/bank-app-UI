@@ -6,8 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.LinkedList;
 
 import constant.AccountCategory;
+import model.card.DebitCard;
+import util.Factory;
 
 public class AccountDAO {
 	public boolean delete(Connection conn, long accountNo) throws SQLException {
@@ -92,6 +95,8 @@ public class AccountDAO {
 	public void closeAccount(Connection conn, long accountNo, AccountCategory category) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		
+		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
+		LinkedList<DebitCard> linkedCards = null;
 		LocalDate today = LocalDate.now();
 		String msg = "";
 		boolean exceptionOccured = false;
@@ -109,6 +114,11 @@ public class AccountDAO {
 				stmt2.setLong(1, accountNo);
 				stmt2.executeUpdate();
 			}
+			
+			// deactivate all linked cards
+			linkedCards = cardDAO.getAll(accountNo);
+			for(DebitCard card : linkedCards)
+				cardDAO.deactivateCard(conn, card.getCardNo());
 			
 			// update in cache.
 		} catch(SQLException e) {
