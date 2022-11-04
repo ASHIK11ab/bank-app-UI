@@ -32,15 +32,8 @@ public class DepositAccountDAO {
 		long generatedAccountNo = -1;
 		
 		try {
-			if(nominee != null)
-				stmt1 = conn.prepareStatement("INSERT INTO account (customer_id, branch_id, balance, opening_date, nominee_id) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);	
-			else
-				stmt1 = conn.prepareStatement("INSERT INTO account (customer_id, branch_id, balance, opening_date) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-		
-			if(type == DepositAccountType.FD)
-				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposit_amount) VALUES (?, ?, ?, ?, ?, ?, ?)");
-			else
-				stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposit_amount, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+			stmt1 = conn.prepareStatement(AccountDAO.ACCOUNT_CREATION_QUERY, Statement.RETURN_GENERATED_KEYS);
+			stmt2 = conn.prepareStatement("INSERT INTO deposit_account (account_no, type_id, payout_account_no, rate_of_intrest, tenure_months, debit_from_account_no, deposit_amount, recurring_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
 	        stmt1.setLong(1, customerId);
 	        stmt1.setInt(2, branchId);
@@ -49,6 +42,8 @@ public class DepositAccountDAO {
 	        
 	        if(nominee != null)
 	        	stmt1.setLong(5, nominee.getId());
+	        else
+	        	stmt1.setObject(5, null);
 	        
 	        stmt1.executeUpdate();
 	        rs1 = stmt1.getGeneratedKeys();
@@ -66,9 +61,10 @@ public class DepositAccountDAO {
             stmt2.setLong(6, debitFromAccountNo);
             stmt2.setFloat(7, amount);
             
-            if(type == DepositAccountType.RD) {
+            if(type == DepositAccountType.RD)
             	stmt2.setDate(8, Date.valueOf(recurringDate));            	
-            }
+            else
+            	stmt2.setObject(8, null);
             
             stmt2.executeUpdate();
             

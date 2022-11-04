@@ -13,6 +13,8 @@ import model.card.DebitCard;
 import util.Factory;
 
 public class AccountDAO {
+	static final String ACCOUNT_CREATION_QUERY = "INSERT INTO account (customer_id, branch_id, balance, opening_date, nominee_id) VALUES (?, ?, ?, ?, ?)";
+	
 	public boolean delete(Connection conn, long accountNo) throws SQLException {
 		PreparedStatement stmt = null;
 		

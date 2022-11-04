@@ -22,6 +22,7 @@ public class RegularAccountDAO {
 		PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null;
 		ResultSet rs = null;
 		
+		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
 		LocalDate today = LocalDate.now();
 		RegularAccount account = null;
 		boolean exceptionOccured = false;
@@ -30,13 +31,8 @@ public class RegularAccountDAO {
 		float balance = 0;
 		
 		try {
-			if(nominee != null)
-				stmt1 = conn.prepareStatement("INSERT INTO account (customer_id, branch_id, balance, opening_date, nominee_id) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);	
-			else
-				stmt1 = conn.prepareStatement("INSERT INTO account (customer_id, branch_id, balance, opening_date) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);	
-
+			stmt1 = conn.prepareStatement(AccountDAO.ACCOUNT_CREATION_QUERY, Statement.RETURN_GENERATED_KEYS);
 			stmt2 = conn.prepareStatement("INSERT INTO regular_account (account_no, type_id, active) VALUES (?, ?, ?)");
-	        stmt3 = conn.prepareStatement("INSERT INTO debit_card (account_no, valid_from, expiry_date, type_id, pin, cvv) VALUES (?, ?, ?, ?, ?, ?)");
 	
 	        balance = (accountType == RegularAccountType.SAVINGS) ? SavingsAccount.getMinimumBalance() : CurrentAccount.getMinimumBalance();
 	        
@@ -47,6 +43,8 @@ public class RegularAccountDAO {
 	        
 	        if(nominee != null)
 	        	stmt1.setLong(5, nominee.getId());
+	        else
+	        	stmt1.setObject(5, null);
 	        
 	        stmt1.executeUpdate();
 	        rs = stmt1.getGeneratedKeys();
@@ -58,7 +56,7 @@ public class RegularAccountDAO {
 	        stmt2.setBoolean(3, true);
 	        stmt2.executeUpdate();
 	        
-	        Factory.getDebitCardDAO().create(conn, generatedAccountNo, (byte) cardType);
+	        cardDAO.create(conn, generatedAccountNo, (byte) cardType);
 	        
 	        switch(accountType) {
 	        	case SAVINGS: account = new SavingsAccount(generatedAccountNo, customerId, customerName,
@@ -82,8 +80,6 @@ public class RegularAccountDAO {
 			        stmt1.close();
 			    if(stmt2 != null)
 			        stmt2.close();
-			    if(stmt3 != null)
-			        stmt3.close();
 			} catch(SQLException e) { System.out.println(e.getMessage()); }
 		}
 		
