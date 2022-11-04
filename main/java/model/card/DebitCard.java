@@ -7,6 +7,8 @@ public class DebitCard {
 	private long linkedAccountNo;
 	private LocalDate validFromDate;
 	private LocalDate expiryDate;
+	private LocalDate activatedDate;
+	private LocalDate deactivatedDate;
 	private byte typeId;
 	private boolean isActive;
 	private int pin;
@@ -14,7 +16,8 @@ public class DebitCard {
 	
 	
 	public DebitCard(long cardNo, long accountNo, LocalDate validFromDate, LocalDate expiryDate,
-						byte typeId, boolean isActive, int pin, int cvv) {
+						byte typeId, boolean isActive, int pin, int cvv,
+						LocalDate activatedDate, LocalDate deactivatedDate) {
 		this.cardNo = cardNo;
 		this.linkedAccountNo = accountNo;
 		this.validFromDate = validFromDate;
@@ -23,6 +26,8 @@ public class DebitCard {
 		this.isActive = isActive;
 		this.pin = pin;
 		this.cvv = cvv;
+		this.activatedDate = activatedDate;
+		this.deactivatedDate = deactivatedDate;
 	}
 	
 	// Getters
@@ -40,6 +45,22 @@ public class DebitCard {
 	
 	public LocalDate getExpiryDate() {
 		return expiryDate;
+	}
+	
+	public LocalDate getActivatedDate() {
+		return activatedDate;
+	}
+	
+	public LocalDate getDeactivatedDate() {
+		return deactivatedDate;
+	}
+	
+	public boolean isActivated() {
+		return activatedDate != null;
+	}
+	
+	public boolean isDeactivated() {
+		return deactivatedDate != null;
 	}
 	
 	public int getPin() {

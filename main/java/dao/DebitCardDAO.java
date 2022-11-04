@@ -13,7 +13,7 @@ import model.card.DebitCard;
 import util.Factory;
 import util.Util;
 
-public class DebitCardDAO {
+public class DebitCardDAO {	
 	public DebitCard create(Connection conn, long linkedAccountNo, byte typeId) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -22,7 +22,7 @@ public class DebitCardDAO {
 		LocalDate today = LocalDate.now(), validFromDate, expiryDate;
 		long cardNo = -1;
 		int pin, cvv;
-		boolean exceptionOccured = false, isActive = false;
+		boolean exceptionOccured = false;
 		String msg = "";
 		
 		try {
@@ -46,7 +46,8 @@ public class DebitCardDAO {
             if(rs.next())
             	cardNo = rs.getLong("card_no");
             
-            card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, isActive, pin, cvv);
+            // On creation, card is not activated and active status is false.
+            card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, false, pin, cvv, null, null);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
@@ -77,7 +78,7 @@ public class DebitCardDAO {
 		ResultSet rs = null;
 		
 		DebitCard card = null;
-		LocalDate validFromDate, expiryDate;
+		LocalDate validFromDate, expiryDate, activatedDate, deactivatedDate;
 		long linkedAccountNo;
 		byte typeId;
 		int pin, cvv;
@@ -98,8 +99,10 @@ public class DebitCardDAO {
                 pin = rs.getInt("pin");
                 cvv = rs.getInt("cvv");
                 isActive = rs.getBoolean("is_active");
+                activatedDate = (rs.getDate("activated_date") != null) ? rs.getDate("activated_date").toLocalDate() : null;
+                deactivatedDate = (rs.getDate("deactivated_date") != null) ? rs.getDate("deactivated_date").toLocalDate() : null;
                 
-                card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, isActive, pin, cvv);
+                card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, isActive, pin, cvv, activatedDate, deactivatedDate);
             }
             
 		} catch(SQLException e) {
@@ -138,7 +141,7 @@ public class DebitCardDAO {
 		
 		LinkedList<DebitCard> cards = new LinkedList<DebitCard>(); 
 		DebitCard card = null;
-		LocalDate validFromDate, expiryDate;
+		LocalDate validFromDate, expiryDate, activatedDate, deactivatedDate;
 		long cardNo;
 		byte typeId;
 		int pin, cvv;
@@ -159,8 +162,10 @@ public class DebitCardDAO {
                 pin = rs.getInt("pin");
                 cvv = rs.getInt("cvv");
                 isActive = rs.getBoolean("is_active");
+                activatedDate = (rs.getDate("activated_date") != null) ? rs.getDate("activated_date").toLocalDate() : null;
+                deactivatedDate = (rs.getDate("deactivated_date") != null) ? rs.getDate("deactivated_date").toLocalDate() : null;
                 
-                card = new DebitCard(cardNo, accountNo, validFromDate, expiryDate, typeId, isActive, pin, cvv);
+                card = new DebitCard(cardNo, accountNo, validFromDate, expiryDate, typeId, isActive, pin, cvv, activatedDate, deactivatedDate);
                 cards.add(card);
             }
             
@@ -192,8 +197,7 @@ public class DebitCardDAO {
 	}
 	
 	
-	public void setCardStatus(long cardNo, boolean activationStatus) throws SQLException {
-		Connection conn = null;
+	public void setCardActiveStatus(Connection conn, long cardNo, boolean activeStatus) throws SQLException {
 		PreparedStatement stmt = null;
 		
 		boolean exceptionOccured = false;
@@ -202,7 +206,7 @@ public class DebitCardDAO {
 		try {
 			conn = Factory.getDataSource().getConnection();
             stmt = conn.prepareStatement("UPDATE debit_card SET is_active = ? WHERE card_no = ?");
-            stmt.setBoolean(1, activationStatus);
+            stmt.setBoolean(1, activeStatus);
             stmt.setLong(2, cardNo);
             stmt.executeUpdate();
             
@@ -224,5 +228,52 @@ public class DebitCardDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
+	}
+	
+	
+	// internal method
+	private void _setCardActivationStatus(Connection conn, long cardNo, boolean activationStatus) throws SQLException {
+		PreparedStatement stmt = null;
+		
+		boolean exceptionOccured = false;
+		String msg = "";
+		
+		try {			
+			if(activationStatus == true)
+				stmt = conn.prepareStatement("UPDATE debit_card SET activated_date = ? WHERE card_no = ?");
+			else
+				stmt = conn.prepareStatement("UPDATE debit_card SET deactivated_date = ? WHERE card_no = ?");
+			
+			
+            stmt.setDate(1, Date.valueOf(LocalDate.now()));
+            stmt.setLong(2, cardNo);
+            stmt.executeUpdate();
+            
+            // Once activated or deactivated update card status respectively.
+            setCardActiveStatus(conn, cardNo, activationStatus);
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {            
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+		
+		if(exceptionOccured)
+			throw new SQLException(msg);
+	}
+	
+	
+	// public interface
+	public void activateCard(Connection conn, long cardNo) throws SQLException {
+		_setCardActivationStatus(conn, cardNo, true);
+	}
+	
+	
+	public void deactivateCard(Connection conn, long cardNo) throws SQLException {
+		_setCardActivationStatus(conn, cardNo, false);
 	}
 }
