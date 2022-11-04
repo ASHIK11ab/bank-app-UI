@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.ManagerDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 public class ManagerPasswordResetServlet extends HttpServlet {
@@ -26,7 +26,7 @@ public class ManagerPasswordResetServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<EmployeeBean> managers;
+		LinkedList<Employee> managers;
 		
 		try {
 			managers = managerDAO.getAll();

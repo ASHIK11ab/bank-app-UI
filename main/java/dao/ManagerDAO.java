@@ -7,26 +7,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 
-import javax.annotation.Resource;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import model.EmployeeBean;
-import model.UserBean;
+import model.user.Employee;
 import util.Factory;
 import util.Util;
 
 public class ManagerDAO {
 	// Create a new manager account and assign to branch.
-	public EmployeeBean create(Connection conn, int branchId, String managerName, 
+	public Employee create(Connection conn, int branchId, String managerName, 
 								String managerEmail, long managerPhone) throws SQLException {
 		BranchDAO branchDAO = Factory.getBranchDAO();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		EmployeeBean manager = null;
+		Employee manager = null;
 		String managerPassword = Util.genPassword(), msg = "", branchName;
 		boolean exceptionOccured = false;
 		long managerId = 0;
@@ -47,17 +40,11 @@ public class ManagerDAO {
 	        if(rs.next()) {
 	            managerId = rs.getLong(1);
 	            
-	            manager = new EmployeeBean();
-	            manager.setId(managerId);
-	            manager.setName(managerName);
-	            manager.setEmail(managerEmail);
-	            manager.setPhone(managerPhone);
-	            manager.setPassword(managerPassword);
-	            manager.setBranchId(branchId);
-	            branchName = branchDAO.get(branchId).getName();
-	            manager.setBranchName(branchName);
+	            branchName = branchDAO.get(branchId).name;
+	            manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branchId, branchName);
 	        }
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "error assigning manager";
 		} finally {
@@ -79,14 +66,20 @@ public class ManagerDAO {
 	}
 	
 	
-	public EmployeeBean get(long id) throws SQLException {
+	public Employee get(long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		EmployeeBean manager = null;
+		Employee manager = null;
 		boolean exceptionOccured = false;
 		String msg = "", branchName = "";
+		
+		long phone;
+		String password;
+        String name;
+        String email;
+        int branchId;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -95,18 +88,19 @@ public class ManagerDAO {
 			rs = stmt.executeQuery();
 			
 			if(rs.next()) {
-				manager = new EmployeeBean();
-				manager.setId(rs.getLong("id"));
-				manager.setName(rs.getString("name"));
-				manager.setPhone(rs.getLong("phone"));
-				manager.setEmail(rs.getString("email"));
-				manager.setPassword(rs.getString("password"));
-				manager.setBranchId(rs.getInt("branch_id"));
+                name = rs.getString("name");
+                password = rs.getString("password");
+                email = rs.getString("email");
+                phone = rs.getLong("phone");
+                branchId = rs.getInt("branch_id");
 				
-				branchName = Factory.getBranchDAO().get(manager.getBranchId()).getName();
-				manager.setBranchName(branchName);
+                // Get from cache
+				branchName = Factory.getBranchDAO().get(branchId).name;
+				
+				manager = new Employee(id, name, password, email, phone, branchId, branchName);
 			}
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error";
 		} finally {
@@ -134,15 +128,21 @@ public class ManagerDAO {
 	}
 	
 	
-	public LinkedList<EmployeeBean> getAll() throws SQLException {
+	public LinkedList<Employee> getAll() throws SQLException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		
-		LinkedList<EmployeeBean> managers = new LinkedList<EmployeeBean>();
-		EmployeeBean manager = null;
+		LinkedList<Employee> managers = new LinkedList<Employee>();
+		Employee manager = null;
 		boolean exceptionOccured = false;
 		String msg = "", branchName = "";
+		
+		long phone, id;
+		String password;
+        String name;
+        String email;
+        int branchId;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -150,22 +150,22 @@ public class ManagerDAO {
 			rs = stmt.executeQuery("SELECT * FROM manager");
 			
 			while(rs.next()) {
-				manager = new EmployeeBean();
-				manager.setId(rs.getLong("id"));
-				manager.setName(rs.getString("name"));
-				manager.setPhone(rs.getLong("phone"));
-				manager.setEmail(rs.getString("email"));
-				manager.setPassword(rs.getString("password"));
-				manager.setBranchId(rs.getInt("branch_id"));
+				id = rs.getLong("id");
+                name = rs.getString("name");
+                password = rs.getString("password");
+                email = rs.getString("email");
+                phone = rs.getLong("phone");
+                branchId = rs.getInt("branch_id");
 				
+                // Get from cache
 				if(branchName.equals(""))
-					branchName = Factory.getBranchDAO().get(manager.getBranchId()).getName();
+					branchName = Factory.getBranchDAO().get(branchId).name;
 					
-				manager.setBranchName(branchName);
-				
+				manager = new Employee(id, name, password, email, phone, branchId, branchName);				
 				managers.add(manager);
 			}
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error";
 		} finally {
@@ -204,6 +204,7 @@ public class ManagerDAO {
 			stmt.setLong(1,  id);
 			stmt.executeUpdate();
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "Error removing manager";
 		} finally {

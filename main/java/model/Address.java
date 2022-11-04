@@ -1,15 +1,21 @@
 package model;
 
-import java.io.Serializable;
 
-public class AddressBean implements Serializable {
-	private static final long serialVersionUID = -4698064057144376402L;
+public class Address {
 	
 	private String doorNo;
     private String street;
     private String city;
     private String state;
     private int pincode;
+    
+    public Address(String doorNo, String street, String city, String state, int pincode) {
+        this.doorNo = doorNo;
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.pincode = pincode;
+    }
 
     public String getDoorNo() {
         return this.doorNo;

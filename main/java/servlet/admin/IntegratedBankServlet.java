@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.IntegratedBankDAO;
-import model.IntegratedBankBean;
+import model.IntegratedBank;
 import util.Factory;
 
 public class IntegratedBankServlet extends HttpServlet {
@@ -22,7 +22,7 @@ public class IntegratedBankServlet extends HttpServlet {
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		IntegratedBankBean integratedBank = null;
+		IntegratedBank integratedBank = null;
 		int id;
 		
 		try {

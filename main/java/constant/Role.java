@@ -5,4 +5,8 @@ public enum Role {
 	MANAGER,
 	EMPLOYEE,
 	CUSTOMER;
+	
+	public static String getName(Role role) {
+		return role.toString().toLowerCase();
+	}
 }

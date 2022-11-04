@@ -8,7 +8,7 @@
 		username="user1"
 		password="pass1"
 		
-		maxTotal="5"
-		maxIdle="1"
+		maxTotal="20"
+		maxIdle="5"
 	/>
 </Context>

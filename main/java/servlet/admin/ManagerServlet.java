@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import dao.ManagerDAO;
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -27,7 +27,7 @@ public class ManagerServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException , IOException {
 		PrintWriter out = res.getWriter();
 		long managerId;
-		EmployeeBean manager;
+		Employee manager;
 		
 		try {
 			managerId = Long.parseLong(req.getPathInfo().substring(1));

@@ -7,19 +7,19 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 
-import model.EmployeeBean;
+import model.user.Employee;
 import util.Factory;
 import util.Util;
 
 
 public class EmployeeDAO {
-	public EmployeeBean create(int branchId, String name, String email, long phone) throws SQLException {
+	public Employee create(int branchId, String name, String email, long phone) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
 		long employeeId = -1;
-		EmployeeBean employee = null;
+		Employee employee = null;
 		boolean exceptionOccured = false;
 		String password = Util.genPassword(), branchName = "", msg = "";
 
@@ -37,18 +37,13 @@ public class EmployeeDAO {
 
             if(rs.next()) {
                 employeeId = rs.getLong(1);
-                employee = new EmployeeBean();
-                employee.setId(employeeId);
-                employee.setName(name);
-                employee.setPassword(password);
-                employee.setPhone(phone);
-                employee.setEmail(email);
-                employee.setBranchId(branchId);
-
-                branchName = Factory.getBranchDAO().get(branchId).getName();
-                employee.setBranchName(branchName);
+             
+                branchName = Factory.getBranchDAO().get(branchId).name;
+                
+                employee = new Employee(employeeId, name, password, email, phone, branchId, branchName);
             }
         } catch(SQLException e) {
+        	System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "Internal error";
         } finally {
@@ -75,16 +70,21 @@ public class EmployeeDAO {
 	}
 	
 	
-	public LinkedList<EmployeeBean> getAll(int branchId) throws SQLException {
+	public LinkedList<Employee> getAll(int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		LinkedList<EmployeeBean> employees = new LinkedList<EmployeeBean>();
-		EmployeeBean employee = null;
+		LinkedList<Employee> employees = new LinkedList<Employee>();
+		Employee employee = null;
 		
 		boolean exceptionOccured = false;
 		String branchName = "", msg = "";
+		
+		long phone, id;
+		String password;
+        String name;
+        String email;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -93,22 +93,22 @@ public class EmployeeDAO {
 			rs = stmt.executeQuery();
 			
 			while(rs.next()) {
-                employee = new EmployeeBean();
-                employee.setId(rs.getLong("id"));
-                employee.setName(rs.getString("name"));
-                employee.setPassword(rs.getString("password"));
-                employee.setPhone(rs.getLong("phone"));
-                employee.setEmail(rs.getString("email"));
-                employee.setBranchId(branchId);
-                	
-                if(branchName.equals(""))
-                	branchName = Factory.getBranchDAO().get(branchId).getName();
-                
-                employee.setBranchName(branchName);
+				id = rs.getLong("id");
+                name = rs.getString("name");
+                password = rs.getString("password");
+                email = rs.getString("email");
+                phone = rs.getLong("phone");
+				
+                // Get from cache
+				if(branchName.equals(""))
+					branchName = Factory.getBranchDAO().get(branchId).name;
+					
+				employee = new Employee(id, name, password, email, phone, branchId, branchName);	
                 
                 employees.add(employee);
 			}
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "Internal error";
         } finally {
@@ -135,15 +135,21 @@ public class EmployeeDAO {
 	}
 	
 	
-	public EmployeeBean get(long id) throws SQLException {
+	public Employee get(long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		EmployeeBean employee = null;
+		Employee employee = null;
 		
 		boolean exceptionOccured = false;
 		String branchName = "", msg = "";
+		
+		long phone;
+		int branchId;
+		String password;
+        String name;
+        String email;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
@@ -151,21 +157,19 @@ public class EmployeeDAO {
 			stmt.setLong(1, id);
 			rs = stmt.executeQuery();
 			
-			while(rs.next()) {
-                employee = new EmployeeBean();
-                employee.setId(rs.getLong("id"));
-                employee.setName(rs.getString("name"));
-                employee.setPassword(rs.getString("password"));
-                employee.setPhone(rs.getLong("phone"));
-                employee.setEmail(rs.getString("email"));
-                employee.setBranchId(rs.getInt("branch_id"));
+			if(rs.next()) {
+                name = rs.getString("name");
+                password = rs.getString("password");
+                email = rs.getString("email");
+                phone = rs.getLong("phone");
+                branchId = rs.getInt("branch_id");
                 	
-                if(branchName.equals(""))
-                	branchName = Factory.getBranchDAO().get(employee.getBranchId()).getName();
+                branchName = Factory.getBranchDAO().get(branchId).name;
                 
-                employee.setBranchName(branchName);
+                employee = new Employee(id, name, password, email, phone, branchId, branchName);
 			}
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "Internal error";
         } finally {
@@ -192,7 +196,7 @@ public class EmployeeDAO {
 	}
 	
 	
-	public boolean delete(long id, int branchId) throws SQLException {
+	public boolean delete(long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 				
@@ -202,11 +206,11 @@ public class EmployeeDAO {
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("DELETE FROM employee WHERE id = ? AND branch_id = ?");
+			stmt = conn.prepareStatement("DELETE FROM employee WHERE id = ?");
 			stmt.setLong(1, id);
-			stmt.setInt(2, branchId);
 			rowsAffected = stmt.executeUpdate();
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "Internal error";
         } finally {
