@@ -10,6 +10,7 @@ import java.util.Collection;
 import cache.AppCache;
 import model.Address;
 import model.Branch;
+import util.Factory;
 
 
 public class BranchDAO {
@@ -102,5 +103,54 @@ public class BranchDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
+	}
+	
+	
+	public Branch update(int branchId, String name, Address address) throws SQLException {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		Branch branch = null;
+		String msg = null;
+		boolean exceptionOccured = false;
+				
+		try {
+			conn = Factory.getDataSource().getConnection();
+            stmt = conn.prepareStatement("UPDATE branch SET name = ?, door_no = ?, street = ?, city = ?, state = ?, pincode = ? WHERE id = ?");
+            stmt.setString(1, name);
+            stmt.setString(2, address.getDoorNo());
+            stmt.setString(3, address.getStreet());
+            stmt.setString(4, address.getCity());
+            stmt.setString(5, address.getState());
+            stmt.setLong(6, address.getPincode());
+            stmt.setInt(7, branchId);
+
+            stmt.executeUpdate();
+
+            branch = this.get(branchId);
+            branch.setName(name);
+            branch.setAddress(address);
+        } catch(SQLException e) {
+        	System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "Error updating branch details";
+        } finally {
+
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+            
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+		
+		if(exceptionOccured)
+			throw new SQLException(msg);
+		else
+			return branch;
 	}
 }
