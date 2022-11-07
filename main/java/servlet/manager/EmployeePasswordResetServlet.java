@@ -7,14 +7,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
+import javax.lang.model.element.Element;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.Role;
 import dao.EmployeeDAO;
+import dao.UserDAO;
 import model.user.Employee;
 import util.Factory;
+import util.Util;
 
 
 public class EmployeePasswordResetServlet extends HttpServlet {
@@ -40,13 +44,17 @@ public class EmployeePasswordResetServlet extends HttpServlet {
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		Connection conn = null;
-		PreparedStatement stmt = null;
 		
+		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
+		UserDAO userDAO = Factory.getUserDAO();
+		
+		Employee employee = null;
 		PrintWriter out = res.getWriter();
+		
+		boolean isError = false, exceptionOccured = false;
 		long employeeId = -1;
-		String newPassword = "";
-		int rowsAffectedCnt = 0, branchId = -1;
+		String newPassword = "", msg = "";
+		int branchId = -1;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
@@ -54,44 +62,42 @@ public class EmployeePasswordResetServlet extends HttpServlet {
 			newPassword = req.getParameter("password");
 			
 			if(newPassword.length() < 8 || newPassword.length() > 15) {
-				out.println("<div class='notification danger'>" + "Password should be within 8 to 15 characters !!!" + "</div>");
-				doGet(req, res);
-				out.close();
-				return;
+				isError = true;
+				msg = "Password should be within 8 to 15 characters !!!";
 			}
 			
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("UPDATE employee SET password = ? WHERE id = ? AND branch_id = ?");
-			
-			stmt.setString(1, newPassword);
-			stmt.setLong(2, employeeId);
-			stmt.setInt(3, branchId);
-			rowsAffectedCnt = stmt.executeUpdate();
-			
-			if(rowsAffectedCnt == 0)
-				out.println("<div class='notification danger'>" + "invalid employee selected !!!" + "</div>");
-			else
-				out.println("<div class='notification success'>" + "password reset successfull" + "</div>");
+			if(!isError) {
+				employee = employeeDAO.get(employeeId, branchId);
+				
+				if(employee != null) {
+					synchronized(employee) {
+						userDAO.updatePassword(employeeId, newPassword, Role.EMPLOYEE, (byte) 0);
+						out.println(Util.createNotification("password reset successfull", "success"));
+					}
+				} else {
+					isError = true;
+					msg = "Employee does not exist !!!";
+				}
+			}
 			
 		} catch(ClassCastException e) {
-			out.println("<div class='notification danger'>" + "internal error !!!" + "</div>");
+			System.out.print(e.getMessage());
+			exceptionOccured = true;
+			msg = "internal error !!!";
 		} catch(NumberFormatException e) {
-			out.println("<div class='notification danger'>" + "invalid input !!!" + "</div>");
+			System.out.print(e.getMessage());
+			exceptionOccured = true;
+			msg = "internal error !!!";
 		} catch(SQLException e) {
-			out.println("<div class='notification danger'>" + e.getMessage() + "</div>");
+			exceptionOccured = true;
+			msg = e.getMessage();
 		} finally {
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            doGet(req, res);
-            out.close();
+			
+			if(isError || exceptionOccured)
+				out.println(Util.createNotification(msg, "danger"));
+			
+			doGet(req, res);
+			out.close();
 		}
 	}
 }

@@ -5,8 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.LinkedList;
 
+import org.postgresql.sspi.NTDSAPIWrapper;
+
+import cache.AppCache;
+import model.Branch;
 import model.user.Employee;
 import util.Factory;
 import util.Util;
@@ -135,38 +140,43 @@ public class EmployeeDAO {
 	}
 	
 	
-	public Employee get(long id) throws SQLException {
+	public Employee get(long id, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
 		Employee employee = null;
+		Branch branch = Factory.getBranchDAO().get(branchId);
 		
 		boolean exceptionOccured = false;
 		String branchName = "", msg = "";
 		
 		long phone;
-		int branchId;
 		String password;
         String name;
         String email;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("SELECT * FROM employee WHERE id = ?");
-			stmt.setLong(1, id);
-			rs = stmt.executeQuery();
+			employee = branch.getEmployee(id);
 			
-			if(rs.next()) {
-                name = rs.getString("name");
-                password = rs.getString("password");
-                email = rs.getString("email");
-                phone = rs.getLong("phone");
-                branchId = rs.getInt("branch_id");
-                	
-                branchName = Factory.getBranchDAO().get(branchId).name;
-                
-                employee = new Employee(id, name, password, email, phone, branchId, branchName);
+			if(employee == null) {
+				conn = Factory.getDataSource().getConnection();
+				stmt = conn.prepareStatement("SELECT * FROM employee WHERE id = ? AND branch_id = ?");
+				stmt.setLong(1, id);
+				stmt.setInt(2, branchId);
+				rs = stmt.executeQuery();
+				
+				if(rs.next()) {
+	                name = rs.getString("name");
+	                password = rs.getString("password");
+	                email = rs.getString("email");
+	                phone = rs.getLong("phone");
+	                branchName = branch.name;
+	                
+	                employee = new Employee(id, name, password, email, phone, branchId, branchName);
+	                // add to cache.
+	                branch.addEmployee(employee);
+				}
 			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
@@ -196,7 +206,7 @@ public class EmployeeDAO {
 	}
 	
 	
-	public boolean delete(long id) throws SQLException {
+	public boolean delete(long id, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 				
@@ -209,6 +219,8 @@ public class EmployeeDAO {
 			stmt = conn.prepareStatement("DELETE FROM employee WHERE id = ?");
 			stmt.setLong(1, id);
 			rowsAffected = stmt.executeUpdate();
+			// update in cache if exists.
+			AppCache.getBank().getBranch(branchId).removeEmployee(id);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;

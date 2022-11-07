@@ -37,23 +37,34 @@ public class PasswordResetServlet extends HttpServlet {
 		Employee employee = null;
 		boolean exceptionOccured = false, isError = false;
 		long employeeId = -1;
+		int branchId;
 		String oldPassword = "", newPassword = "", msg = "";
 		
 		try {
+			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			employeeId = (Long) req.getSession(false).getAttribute("id");
 			oldPassword = req.getParameter("old-password");
 			newPassword = req.getParameter("new-password");
 			
-			employee = employeeDAO.get(employeeId);
-			
-			if(!employee.getPassword().equals(oldPassword)) {
-				isError = true;
-				msg = "Incorrect old password";
-			}
 			
 			if(newPassword.length() < 8 || newPassword.length() > 15) {
 				isError = true;
 				msg = "Password should be within 8 to 15 characters !!!";
+			}
+			
+			if(!isError) {
+				
+				employee = employeeDAO.get(employeeId, branchId);
+				
+				if(employee == null) {
+					isError = true;
+					msg = "Invalid employee details !!!";
+				}
+			}
+			
+			if(!isError && !employee.getPassword().equals(oldPassword)) {
+				isError = true;
+				msg = "Incorrect old password";
 			}
 			
 			if(!isError) {

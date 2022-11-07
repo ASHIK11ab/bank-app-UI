@@ -18,6 +18,7 @@ import dao.ManagerDAO;
 import model.Branch;
 import model.user.Employee;
 import util.Factory;
+import util.Util;
 
 
 public class RemoveEmployeeServlet extends HttpServlet {
@@ -52,6 +53,7 @@ public class RemoveEmployeeServlet extends HttpServlet {
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
 		PrintWriter out = res.getWriter();
 		
+		Employee employee = null;
 		long employeeId = -1;
 		int branchId = -1;
 		boolean isDeletionSuccessfull = false;
@@ -60,12 +62,19 @@ public class RemoveEmployeeServlet extends HttpServlet {
 			employeeId = Long.parseLong(req.getParameter("id"));
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			
-			isDeletionSuccessfull = employeeDAO.delete(employeeId);
+			employee = employeeDAO.get(employeeId, branchId);
 			
-			if(isDeletionSuccessfull)
-				out.println("<div class='notification success'>" + "employee removed successfully" + "</div>");
-			else
-				out.println("<div class='notification danger'>" + "error removing employee" + "</div>");
+			// Ensure that employee belongs to the branch.
+			if(employee != null) {
+				isDeletionSuccessfull = employeeDAO.delete(employeeId, branchId);
+				
+				if(isDeletionSuccessfull)
+					out.println("<div class='notification success'>" + "employee removed successfully" + "</div>");
+				else
+					out.println("<div class='notification danger'>" + "error removing employee" + "</div>");
+			} else {
+				out.println(Util.createNotification("employee does not exist !!!", "danger"));
+			}
 			
 		} catch(NumberFormatException e) {
 			out.println("<div class='notification danger'>" + "invalid input" + "</div>");
