@@ -4,11 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Merge Branches</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/form.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="Merge branches" />
+	</jsp:include>
 </head>
 <body>
 
@@ -17,24 +15,34 @@
 	<main class="container">
 		<section>
 			<h1>Merge Branches</h1>
-			<form action="/bank-app/admin/branches/merge" method="post">
+			
+			<c:choose>
+				<c:when test="${ branches.size() == 1 }">
+					<h3 style="color: red">Only 1 branch exists in bank !!!</h3>
+				</c:when>
 				
-				<jsp:include page="/jsp/components/genericDropdown.jsp">
-					<jsp:param name="labelName" value="Base branch:" />
-					<jsp:param name="name" value="base-branch-id" />
-					<jsp:param name="placeholderOptionText" value="select branch" />
-					<jsp:param name="displayId" value="${ false }" />
-				</jsp:include>
-				
-				<jsp:include page="/jsp/components/genericDropdown.jsp">
-					<jsp:param name="labelName" value="Target branch:" />
-					<jsp:param name="name" value="target-branch-id" />
-					<jsp:param name="placeholderOptionText" value="select branch" />
-					<jsp:param name="displayId" value="${ false }" />
-				</jsp:include>
-				
-				<button>merge branches</button>
-			</form>
+				<c:when test="${ branches.size() > 1 }">
+					<c:set var="values" value="${ branches }" scope="request" />
+					<form action="/bank-app/admin/branches/merge" method="post">
+						
+						<jsp:include page="/jsp/components/genericDropdown.jsp">
+							<jsp:param name="labelName" value="Base branch:" />
+							<jsp:param name="name" value="base-branch-id" />
+							<jsp:param name="placeholderOptionText" value="select branch" />
+							<jsp:param name="displayId" value="${ false }" />
+						</jsp:include>
+						
+						<jsp:include page="/jsp/components/genericDropdown.jsp">
+							<jsp:param name="labelName" value="Target branch:" />
+							<jsp:param name="name" value="target-branch-id" />
+							<jsp:param name="placeholderOptionText" value="select branch" />
+							<jsp:param name="displayId" value="${ false }" />
+						</jsp:include>
+						
+						<button>merge branches</button>
+					</form>
+				</c:when>
+			</c:choose>
 		</section>
 	</main>
 </body>

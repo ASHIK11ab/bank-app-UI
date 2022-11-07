@@ -4,14 +4,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Manager: ${ requestScope.manager.getName() }</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="Manager details" />
+	</jsp:include>
 </head>
-<body>
-	<c:set var="manager" value="${ requestScope.manager }" />
-	
+<body>	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
 	
 	<main class="container">
@@ -31,6 +28,10 @@
 			<section>
 				<h2 class="title">Branch details:</h2>
 				<p>Branch Name: ${ manager.getBranchName() }</p>
+			</section>
+			<section>
+				<a class="button" href="/bank-app/admin/managers/manager/${ manager.getId() }/edit">Edit details</a>
+				<a class="button secondary" href="/bank-app/admin/managers/manager/${ manager.getId() }/password-reset">Reset password</a>
 			</section>
 		</div>
 	</main>

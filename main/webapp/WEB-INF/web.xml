@@ -98,13 +98,23 @@
 		<servlet-class>servlet.admin.BranchServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>AddBranchServlet</servlet-name>
-		<servlet-class>servlet.admin.AddBranchServlet</servlet-class>
+		<servlet-name>CreateBranchServlet</servlet-name>
+		<servlet-class>servlet.admin.CreateBranchServlet</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>MergeBranchServlet</servlet-name>
 		<servlet-class>servlet.admin.MergeBranchServlet</servlet-class>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>EditBranchServlet</servlet-name>
+		<servlet-class>servlet.admin.EditBranchServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EditBranchServlet</servlet-name>
+		<url-pattern>/admin/branches/branch/edit</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>ManagersServlet</servlet-name>
 		<servlet-class>servlet.admin.ManagersServlet</servlet-class>
@@ -317,7 +327,7 @@
 		<url-pattern>/admin/branches/branch/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>AddBranchServlet</servlet-name>
+		<servlet-name>CreateBranchServlet</servlet-name>
 		<url-pattern>/admin/branches/branch/create</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>

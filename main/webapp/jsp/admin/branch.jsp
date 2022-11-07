@@ -4,11 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>${ requestScope.branch.getName() } branch</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/admin/branch.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="${ branch.getName() } branch" />
+	</jsp:include>
 </head>
 <body>
 	
@@ -23,6 +21,8 @@
 				<h2 class="title">Branch details:</h2>
 				<p>Name: ${ branch.getName() }</p>
 				<p>Address: ${ branch.getAddress() }</p>
+				
+				<a class="button" href="/bank-app/admin/branches/branch/${ branch.getId() }/edit">Edit</a>
 			</section>
 			<section class="manager-section">
 				<h2 class="title">Manager details:</h2>
@@ -33,8 +33,8 @@
 				</c:if>
 				
 				<p>Name: ${ manager.getName() }</p>
-				<p>Email: ${ manager.getEmail() }</p>
-				<p>Phone: ${ manager.getPhone() }</p>
+				<a class="button" href="/bank-app/admin/managers/manager/${ manager.getId() }/view">View manager</a>
+				<a class="button secondary" href="/bank-app/admin/branches/branch/${ branch.getId() }/assign-manager">Assign new manager</a>
 			</section>
 		</div>
 	</main>
