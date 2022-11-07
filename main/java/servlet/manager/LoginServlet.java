@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,8 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import cache.AppCache;
 import constant.Role;
 import dao.ManagerDAO;
+import model.Branch;
 import model.user.Employee;
 import util.Factory;
 
@@ -20,6 +23,9 @@ import util.Factory;
 public class LoginServlet extends HttpServlet {
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		Collection<Branch> branches = Factory.getBranchDAO().getAll();
+		req.setAttribute("branches", branches);
+		req.setAttribute("forRole", Role.MANAGER);
 		req.setAttribute("title", "Manager Login");
 		req.setAttribute("actionURL", req.getRequestURI());
 		req.getRequestDispatcher("/jsp/components/loginForm.jsp").forward(req, res);
@@ -32,9 +38,11 @@ public class LoginServlet extends HttpServlet {
 		
 		Employee manager = null;
 		long id = 0;
+		int branchId;
 		String password = "";
 				
 		try {
+			branchId = Integer.parseInt(req.getParameter("branch-id"));
 			id = Long.parseLong(req.getParameter("id"));
 			password = req.getParameter("password");
 		} catch(NumberFormatException e) {
@@ -44,7 +52,7 @@ public class LoginServlet extends HttpServlet {
 		}
 		
 		try {
-			manager = managerDAO.get(id);    
+			manager = managerDAO.get(id, branchId); 
 		} catch(SQLException e) {
 			out = res.getWriter();
 			res.setStatus(500);

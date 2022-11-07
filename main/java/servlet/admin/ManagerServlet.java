@@ -27,11 +27,14 @@ public class ManagerServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException , IOException {
 		PrintWriter out = res.getWriter();
 		long managerId;
+		int branchId;
 		Employee manager;
 		
 		try {
 			managerId = Long.parseLong(req.getPathInfo().substring(1));
-			manager = managerDAO.get(managerId);
+			branchId = Integer.parseInt(req.getParameter("branch-id"));
+			
+			manager = managerDAO.get(managerId, branchId);
 			
 			if(manager == null) {
 				res.setStatus(404);

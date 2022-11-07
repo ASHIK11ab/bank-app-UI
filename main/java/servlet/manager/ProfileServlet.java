@@ -21,11 +21,13 @@ public class ProfileServlet extends HttpServlet {
 		PrintWriter out = res.getWriter();
 		Employee manager = null;
 		long managerId = -1;
+		int branchId;
 		
 		try {
+			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			managerId = (Long) req.getSession(false).getAttribute("id");
 			
-			manager = managerDAO.get(managerId);
+			manager = managerDAO.get(managerId, branchId);
 			req.setAttribute("manager", manager);
 			req.getRequestDispatcher("/jsp/manager/profile.jsp").forward(req, res);
 			

@@ -70,7 +70,7 @@ public class PasswordResetServlet extends HttpServlet {
 			if(!isError) {
 				
 				synchronized (employee) {					
-					Factory.getUserDAO().updatePassword(employeeId, newPassword, Role.EMPLOYEE, (byte) 0);
+					Factory.getUserDAO().updatePassword(employeeId, newPassword, Role.EMPLOYEE, (byte) 0, branchId);
 				}
 				
 				out.println(Util.createNotification("Password reset successfull", "success"));

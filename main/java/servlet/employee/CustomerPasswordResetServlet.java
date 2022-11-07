@@ -49,7 +49,7 @@ public class CustomerPasswordResetServlet extends HttpServlet {
 			
 			if(!isError) {
 				synchronized (customer) {					
-					userDAO.updatePassword(customerId, password, Role.CUSTOMER, (byte) 0);
+					userDAO.updatePassword(customerId, password, Role.CUSTOMER, (byte) 0, -1);
 				}
 			}
 			
