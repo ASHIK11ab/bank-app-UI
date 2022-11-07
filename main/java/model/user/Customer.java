@@ -155,6 +155,10 @@ public class Customer extends User {
     }
     
     // Setters
+    public void setRemovedDate(LocalDate removedDate) {
+    	this.removedDate = removedDate;
+    }
+    
     public void setAge(byte age) {
     	this.age = age;
     }
