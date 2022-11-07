@@ -13,6 +13,7 @@ import model.Address;
 import model.Bank;
 import model.Branch;
 import model.IntegratedBank;
+import model.user.Employee;
 import runnables.AutoDebitRDRunnable;
 import runnables.DepositIntrestCreditRunnable;
 import util.Factory;
@@ -80,14 +81,18 @@ public class AppListener implements ServletContextListener {
         String city;
         String state;
         
+        Employee manager = null;
+        long managerId, managerPhone;
+        String managerName, managerEmail, managerPassword;
+        
         try {
             conn = Factory.getDataSource().getConnection();
             stmt1 = conn.prepareStatement("SELECT * FROM bank");
-            stmt2 = conn.prepareStatement("SELECT * FROM branch");
+            stmt2 = conn.prepareStatement("SELECT b.id, b.name, b.door_no, b.street, b.city, b.state, b.pincode, m.id as manager_id, m.name as manager_name, m.password as manager_password, m.phone as manager_phone, m.email as manager_email FROM branch b JOIN manager m ON b.id = m.branch_id");
             stmt3 = conn.prepareStatement("SELECT * FROM banks");
 
             rs1 = stmt1.executeQuery();
-            if(rs1.next() == true) {
+            if(rs1.next()) {
                 bankName = rs1.getString("name");
                 bankContactEmail = rs1.getString("support_email");
                 bankContactPhone = rs1.getLong("support_phone");
@@ -96,35 +101,45 @@ public class AppListener implements ServletContextListener {
                 
                 // Cache bank
                 bank = new Bank(bankName, bankContactEmail, bankContactPhone, bankWebsiteURL, bankAccountNo);
+
+	            rs2 = stmt2.executeQuery();
+	            // Cache branches.
+	            while(rs2.next()) {
+	                branchId = rs2.getInt("id");
+	                branchName = rs2.getString("name");
+	                doorNo = rs2.getString("door_no");
+	                street = rs2.getString("street");
+	                city = rs2.getString("city");
+	                state = rs2.getString("state");
+	                pincode = rs2.getInt("pincode");
+	                
+	                managerId = rs2.getLong("manager_id");
+	                managerName = rs2.getString("manager_name");
+	                managerEmail = rs2.getString("manager_email");
+	                managerPhone = rs2.getLong("manager_phone");
+	                managerPassword = rs2.getString("manager_password");
+	                
+	                branch = new Branch(branchId, branchName, new Address(doorNo, street, city, state, pincode));
+	                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branchId, branchName);
+	                branch.assignManager(manager);
+	                
+	                bank.addBranch(branch);
+	            }
+
+	            rs3 = stmt3.executeQuery();
+	            while(rs3.next()) {
+	                integratedBankId = rs3.getInt("id");
+	                integratedBankName = rs3.getString("name");
+	                integratedBankPhone = rs3.getLong("contact_phone");
+	                integratedBankEmail = rs3.getString("contact_mail");
+	                integratedBankApiURL = rs3.getString("api_url");
+	
+	                integratedBank = new IntegratedBank(integratedBankId, integratedBankName, integratedBankEmail,
+	                                                        integratedBankPhone, integratedBankApiURL);
+	                bank.addIntegratedBank(integratedBank);
+	            }
+	            
                 AppCache.cacheBank(bank);
-            }
-
-            rs2 = stmt2.executeQuery();
-            // Cache branches.
-            while(rs2.next()) {
-                branchId = rs2.getInt("id");
-                branchName = rs2.getString("name");
-                doorNo = rs2.getString("door_no");
-                street = rs2.getString("street");
-                city = rs2.getString("city");
-                state = rs2.getString("state");
-                pincode = rs2.getInt("pincode");
-
-                branch = new Branch(branchId, branchName, new Address(doorNo, street, city, state, pincode));
-                AppCache.cacheBranch(branch);
-            }
-
-            rs3 = stmt3.executeQuery();
-            while(rs3.next()) {
-                integratedBankId = rs3.getInt("id");
-                integratedBankName = rs3.getString("name");
-                integratedBankPhone = rs3.getLong("contact_phone");
-                integratedBankEmail = rs3.getString("contact_mail");
-                integratedBankApiURL = rs3.getString("api_url");
-
-                integratedBank = new IntegratedBank(integratedBankId, integratedBankName, integratedBankEmail,
-                                                        integratedBankPhone, integratedBankApiURL);
-                AppCache.cacheIntegratedBank(integratedBank);
             }
         } catch(SQLException e) {
             System.out.println(e);
