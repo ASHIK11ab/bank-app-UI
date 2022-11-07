@@ -16,13 +16,8 @@ import util.Factory;
 
 
 public class BranchServlet extends HttpServlet {
-	private BranchDAO branchDAO;
-	
-	public void init() {
-		branchDAO = Factory.getBranchDAO();
-	}
-	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		BranchDAO branchDAO = Factory.getBranchDAO();
 		PrintWriter out = res.getWriter();
 		int branchId;
 		Branch branch = null;
@@ -42,9 +37,6 @@ public class BranchServlet extends HttpServlet {
 		} catch(NumberFormatException e) {
 			res.setStatus(500);
 			out.println("<h1>Internal error</h1>");
-		} catch(SQLException e) {
-			res.setStatus(500);
-			out.println("<h1>Internal error</h1>");		
 		} finally {			
 			out.close();
 		}

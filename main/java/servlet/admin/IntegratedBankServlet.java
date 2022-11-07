@@ -37,7 +37,7 @@ public class IntegratedBankServlet extends HttpServlet {
 				req.getRequestDispatcher("/jsp/admin/integratedBank.jsp").forward(req, res);				
 			}
 			
-		} catch(SQLException e) {
+		} catch(NumberFormatException e) {
 			res.setStatus(500);
 			res.getWriter().println("<h1>Internal server error</h1>");
 		}

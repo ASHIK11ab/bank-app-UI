@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,32 +19,20 @@ import model.user.Employee;
 import util.Factory;
 
 public class AssignManagerServlet extends HttpServlet {
-	private static final long serialVersionUID = 1533366166730604989L;
-	private ManagerDAO managerDAO;
-	private BranchDAO branchDAO;
-	
-	public void init() {
-		managerDAO = Factory.getManagerDAO();
-		branchDAO = Factory.getBranchDAO();
-	}
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<Branch> branches;
-		
-		try {
-			branches = branchDAO.getAll();
-			req.setAttribute("values", branches);
-			req.getRequestDispatcher("/jsp/admin/assignManager.jsp").include(req, res);
-		} catch(SQLException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal error</h1>");
-		}
-		
+		BranchDAO branchDAO = Factory.getBranchDAO();
+		Collection<Branch> branches = branchDAO.getAll();
+		req.setAttribute("values", branches);
+		req.getRequestDispatcher("/jsp/admin/assignManager.jsp").include(req, res);
 	}
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		ManagerDAO managerDAO = Factory.getManagerDAO();
+		BranchDAO branchDAO = Factory.getBranchDAO();
+		
 		Connection conn = null;
 		PrintWriter out = res.getWriter();
 		String name, email;
@@ -56,7 +44,6 @@ public class AssignManagerServlet extends HttpServlet {
 		long oldBranchManagerId = -1;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
 			name = req.getParameter("manager-name");
 			phone = Long.parseLong(req.getParameter("manager-phone"));
 			email = req.getParameter("manager-email");
@@ -67,6 +54,7 @@ public class AssignManagerServlet extends HttpServlet {
 			if(branch == null) {
 				out.println("<div class='notification danger'>" + "invalid branch !!!" + "</div>");
 			} else {
+				conn = Factory.getDataSource().getConnection();
 				oldBranchManagerId = branch.getManager().getId();
 				// Remove old manager and assign new manager.
 				

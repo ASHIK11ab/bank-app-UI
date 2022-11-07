@@ -3,6 +3,7 @@ package servlet.admin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import javax.servlet.ServletException;
@@ -25,33 +26,20 @@ public class RemoveIntegratedBankServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<IntegratedBank> integratedBanks;
-		
-		try {
-			integratedBanks = integratedBankDAO.getAll();
-			req.setAttribute("values", integratedBanks);
-			req.getRequestDispatcher("/jsp/admin/removeIntegratedBank.jsp").include(req, res);
-		} catch(SQLException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal server error</h1>");
-		}
+		Collection<IntegratedBank> integratedBanks = integratedBankDAO.getAll();
+		req.setAttribute("values", integratedBanks);
+		req.getRequestDispatcher("/jsp/admin/removeIntegratedBank.jsp").include(req, res);
 	}
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
-		int integratedBankId;
-		boolean status = false;
+		int integratedBankId;		
 		
 		try {
 			integratedBankId = Integer.parseInt(req.getParameter("bank-id"));
-			status = integratedBankDAO.delete(integratedBankId);
-			
-			if(status)
-				out.println("<div class='notification success'>" + "integrated bank deleted successfully" + "</div>");
-			else
-				out.println("<div class='notification danger'>" + "invalid bank selected" + "</div>");
-		
+			integratedBankDAO.delete(integratedBankId);
+			out.println("<div class='notification success'>" + "integrated bank deleted successfully" + "</div>");
 		} catch(NumberFormatException e) {
 			out.println("<div class='notification danger'>" + "invalid input" + "</div>");
 		} catch(SQLException e) {

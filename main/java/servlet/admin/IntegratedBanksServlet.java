@@ -1,11 +1,9 @@
 package servlet.admin;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,15 +22,10 @@ public class IntegratedBanksServlet extends HttpServlet {
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<IntegratedBank> integratedBanks;
+		Collection<IntegratedBank> integratedBanks;
 		
-		try {
-			integratedBanks = integratedBankDAO.getAll();
-			req.setAttribute("integratedBanks", integratedBanks);
-			req.getRequestDispatcher("/jsp/admin/integratedBanks.jsp").forward(req, res);
-		} catch(SQLException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal server error</h1>");
-		}
+		integratedBanks = integratedBankDAO.getAll();
+		req.setAttribute("integratedBanks", integratedBanks);
+		req.getRequestDispatcher("/jsp/admin/integratedBanks.jsp").forward(req, res);
 	}
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import javax.servlet.ServletException;
@@ -26,16 +27,9 @@ public class MergeBranchServlet extends HttpServlet {
 	
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		LinkedList<Branch> branches = null;
-		
-		try {
-			branches = branchDAO.getAll();
-			req.setAttribute("values", branches);
-			req.getRequestDispatcher("/jsp/admin/mergeBranch.jsp").include(req, res);
-		} catch(SQLException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal error</h1>");
-		}
+		Collection<Branch> branches = branchDAO.getAll();
+		req.setAttribute("values", branches);
+		req.getRequestDispatcher("/jsp/admin/mergeBranch.jsp").include(req, res);
 	}
 	
 	
