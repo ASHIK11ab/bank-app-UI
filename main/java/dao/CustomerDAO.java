@@ -8,8 +8,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
+import cache.AppCache;
 import constant.AccountCategory;
 import model.Address;
+import model.Bank;
 import model.user.Customer;
 import util.Factory;
 import util.Util;
@@ -100,6 +102,8 @@ public class CustomerDAO {
 			stmt = conn.prepareStatement("DELETE FROM customer WHERE id = ?");
 			stmt.setLong(1, customerId);
 			rowsAffected = stmt.executeUpdate();
+			// remove from cache if exists
+			AppCache.getBank().removeCustomer(customerId);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
@@ -128,6 +132,7 @@ public class CustomerDAO {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
+		Bank bank = AppCache.getBank();
 		Customer customer = null;
 		Address address = null;
 		boolean exceptionOccured = false;
@@ -142,38 +147,46 @@ public class CustomerDAO {
         byte age;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("SELECT * FROM customer c JOIN customer_info c_info ON c.id = c_info.customer_id WHERE c.id = ?");
-            stmt.setLong(1, customerId);
-            
-            rs = stmt.executeQuery();
-            
-            if(rs.next()) {
-                name = rs.getString("name");
-                customerPassword = rs.getString("password");
-                email = rs.getString("email");
-                phone = rs.getLong("phone");
-                transPassword = rs.getString("transaction_password");
-                age = rs.getByte("age");
-                gender = rs.getString("gender").charAt(0);
-                occupation = rs.getString("occupation");
-                income = rs.getInt("income");
-                martialStatus = rs.getString("martial_status");
-                adhaar = rs.getLong("adhaar");
-                pan = rs.getString("pan");
-                doorNo = rs.getString("door_no");
-                street = rs.getString("street");
-                city = rs.getString("city");
-                state = rs.getString("state");
-                pincode = rs.getInt("pincode");
-                removedDate = (rs.getDate("removed_date") != null) ? rs.getDate("removed_date").toLocalDate() : null;
-                
-                address = new Address(doorNo, street, city, state, pincode);
-                
-                customer = new Customer(customerId, name, customerPassword, phone, email, age,
-                                        gender, martialStatus, occupation, income, adhaar, pan, 
-                                        transPassword, address, removedDate);	
-            }
+			// try getting from cache.
+			customer = bank.getCustomer(customerId);
+			
+			// load customer from DB if not found in cache.
+			if(customer == null) {
+				conn = Factory.getDataSource().getConnection();
+	            stmt = conn.prepareStatement("SELECT * FROM customer c JOIN customer_info c_info ON c.id = c_info.customer_id WHERE c.id = ?");
+	            stmt.setLong(1, customerId);
+	            
+	            rs = stmt.executeQuery();
+	            
+	            if(rs.next()) {
+	                name = rs.getString("name");
+	                customerPassword = rs.getString("password");
+	                email = rs.getString("email");
+	                phone = rs.getLong("phone");
+	                transPassword = rs.getString("transaction_password");
+	                age = rs.getByte("age");
+	                gender = rs.getString("gender").charAt(0);
+	                occupation = rs.getString("occupation");
+	                income = rs.getInt("income");
+	                martialStatus = rs.getString("martial_status");
+	                adhaar = rs.getLong("adhaar");
+	                pan = rs.getString("pan");
+	                doorNo = rs.getString("door_no");
+	                street = rs.getString("street");
+	                city = rs.getString("city");
+	                state = rs.getString("state");
+	                pincode = rs.getInt("pincode");
+	                removedDate = (rs.getDate("removed_date") != null) ? rs.getDate("removed_date").toLocalDate() : null;
+	                
+	                address = new Address(doorNo, street, city, state, pincode);
+	                
+	                customer = new Customer(customerId, name, customerPassword, phone, email, age,
+	                                        gender, martialStatus, occupation, income, adhaar, pan, 
+	                                        transPassword, address, removedDate);	
+	                // add to cache
+	                bank.addCustomer(customer);
+	            }
+			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
@@ -209,6 +222,7 @@ public class CustomerDAO {
 		Connection conn = null;
 		PreparedStatement stmt1 = null, stmt2 = null;
 		
+		Bank bank = AppCache.getBank();
 		Customer customer = null;
 		boolean exceptionOccured = false;
 		String msg = "";
@@ -240,7 +254,22 @@ public class CustomerDAO {
 			stmt2.setLong(13, customerId);
 			stmt2.executeUpdate();
 			
-			// update in cache.
+			// update in cache if customer object exists.
+			customer = bank.getCustomer(customerId);
+			
+			if(customer != null) {
+				customer.setName(name);
+				customer.setPhone(phone);
+				customer.setEmail(email);
+				customer.setAge(age);
+				customer.setGender(gender);
+				customer.setMartialStatus(martialStatus);
+				customer.setOccupation(occupation);
+				customer.setIncome(income);
+				customer.setAdhaar(adhaar);
+				customer.setPan(pan);
+				customer.setAddress(address);
+			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
@@ -272,6 +301,7 @@ public class CustomerDAO {
 	public void removeCustomer(Connection conn, long customerId, long accountNo) throws SQLException {
 		PreparedStatement stmt = null;
 		
+		Customer customer = null;
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		LocalDate today = LocalDate.now();
 		String msg = "";
@@ -289,7 +319,11 @@ public class CustomerDAO {
 			stmt.setLong(2, customerId);
 			stmt.executeUpdate();
 			
-			// update in cache.
+			// update in cache if exists.
+			customer = AppCache.getBank().getCustomer(customerId);
+			if(customer != null) 
+				customer.setRemovedDate(today);
+			
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
