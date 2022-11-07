@@ -18,7 +18,7 @@
 			
 			<c:forEach items="${ requestScope.managers }" var="manager" varStatus="loop">
 				<div class="item">
-					<a href="/bank-app/admin/managers/manager/${ manager.getId() }">
+					<a href="/bank-app/admin/managers/manager/${ manager.getId() }?branch-id=${ manager.getBranchId() }">
 						${ loop.index + 1}. ${ manager.getName() }
 					</a>
 				</div>
