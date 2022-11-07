@@ -46,7 +46,7 @@ public class AdminDAO {
 	                email = rs.getString("email");
 	                phone = rs.getLong("phone");
 	                
-	                admin = new User(id, name, password, email, phone, null);
+	                admin = new User(id, name, password, email, phone);
 	                // update in cache.
 	                AppCache.cacheAdmin(admin);
 	            }

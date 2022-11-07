@@ -155,6 +155,9 @@ public class EmployeeDAO {
 		String password;
         String name;
         String email;
+        
+        if(branch == null)
+        	return null;
 		
 		try {
 			employee = branch.getEmployee(id);

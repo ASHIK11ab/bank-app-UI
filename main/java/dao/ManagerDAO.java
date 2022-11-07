@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 
+import cache.AppCache;
+import model.Branch;
 import model.user.Employee;
 import util.Factory;
 import util.Util;
@@ -66,11 +68,12 @@ public class ManagerDAO {
 	}
 	
 	
-	public Employee get(long id) throws SQLException {
+	public Employee get(long id, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
+		Branch branch = AppCache.getBranch(branchId);
 		Employee manager = null;
 		boolean exceptionOccured = false;
 		String msg = "", branchName = "";
@@ -79,25 +82,34 @@ public class ManagerDAO {
 		String password;
         String name;
         String email;
-        int branchId;
+        
+        if(branch == null)
+        	return null;
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("SELECT * FROM manager WHERE id = ?");
-			stmt.setLong(1, id);
-			rs = stmt.executeQuery();
+			manager = branch.getManager();
+			if(manager != null && manager.getId() != id)
+				return null;
 			
-			if(rs.next()) {
-                name = rs.getString("name");
-                password = rs.getString("password");
-                email = rs.getString("email");
-                phone = rs.getLong("phone");
-                branchId = rs.getInt("branch_id");
+			// load from DB if not found in cache.
+			if(manager == null) {
+				conn = Factory.getDataSource().getConnection();
+				stmt = conn.prepareStatement("SELECT * FROM manager WHERE id = ? AND branch_id = ?");
+				stmt.setLong(1, id);
+				stmt.setInt(2, branchId);
+				rs = stmt.executeQuery();
 				
-                // Get from cache
-				branchName = Factory.getBranchDAO().get(branchId).name;
-				
-				manager = new Employee(id, name, password, email, phone, branchId, branchName);
+				if(rs.next()) {
+	                name = rs.getString("name");
+	                password = rs.getString("password");
+	                email = rs.getString("email");
+	                phone = rs.getLong("phone");
+					
+	                // Get from cache
+					branchName = Factory.getBranchDAO().get(branchId).name;
+					
+					manager = new Employee(id, name, password, email, phone, branchId, branchName);
+				}
 			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
@@ -202,7 +214,7 @@ public class ManagerDAO {
 		try {
 			stmt = conn.prepareStatement("DELETE FROM manager WHERE id = ?");
 			stmt.setLong(1,  id);
-			stmt.executeUpdate();
+			stmt.executeUpdate();			
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
