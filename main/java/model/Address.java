@@ -58,6 +58,28 @@ public class Address {
     	this.pincode = pincode;
     }
     
+    
+    @Override
+    public boolean equals(Object obj) throws ClassCastException {
+    	System.out.println("in address equals");
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Address target = (Address) obj;
+        
+        if(this.doorNo == target.doorNo && this.street.equals(target.street) && this.city.equals(target.city)
+        		&& this.state.equals(target.state) && this.pincode == target.pincode)
+        	return true;
+        else
+        	return false;
+    }
+    
+    
     public String toString() {
         String repr = "";
         repr += "\nNo: " + this.doorNo + ", " + this.street;

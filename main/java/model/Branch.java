@@ -115,15 +115,33 @@ public class Branch {
     public int getId() {
         return this.id;
     }
+    
+    // setters
+    public void setName(String name) {
+    	this.name = name;
+    }
+    
+    public void setAddress(Address address) {
+    	this.address = address;
+    }
 
 
-    public String toString() {
-        String repr = "";
-        repr += "\n-----------------";
-        repr += "\nBranch details  :\n";
-        repr += "-----------------";
-        repr += "\nBranch Name     : " + this.name;
-        repr += "\nAddress         : " + this.address;
-        return repr;
+    @Override
+    public boolean equals(Object obj) throws ClassCastException {
+    	System.out.println("in branch equals");
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Branch target = (Branch) obj;
+        
+        if(this.name.equals(target.name) && this.address.equals(target.address))
+        	return true;
+        else
+        	return false;
     }
 }
