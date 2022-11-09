@@ -142,9 +142,6 @@ public class CreateEditBranchServlet extends HttpServlet {
 								synchronized (branch) {									
 									branchDAO.createUpdate(conn, name, address, (byte) 1, branch.getId());
 								}
-							else {
-								System.out.println("no up req");
-							}
 							
 							res.sendRedirect(String.format("/bank-app/admin/branches/%d/view?msg=branch details updated successfully&status=success", branch.getId()));
 							break;

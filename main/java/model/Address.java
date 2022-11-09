@@ -71,7 +71,7 @@ public class Address {
         
         Address target = (Address) obj;
         
-        return (this.doorNo == target.getDoorNo() && this.street.equals(target.getStreet()) && this.city.equals(target.getCity())
+        return (this.doorNo.equals(target.getDoorNo()) && this.street.equals(target.getStreet()) && this.city.equals(target.getCity())
         		&& this.state.equals(target.getState()) && this.pincode == target.getPincode());
     }
     
