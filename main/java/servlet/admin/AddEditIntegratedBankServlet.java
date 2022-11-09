@@ -76,7 +76,9 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 	        				
 	        				// only update in DB when data is changed.
 	        				if(!bank.equals(temp)) {
-	        					integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
+	        					synchronized (bank) {									
+	        						integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
+								}
 	        				}
 	        				
 	        				msg = "bank details updated successfully";
