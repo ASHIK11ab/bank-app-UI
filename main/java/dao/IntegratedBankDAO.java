@@ -12,7 +12,7 @@ import model.IntegratedBank;
 import util.Factory;
 
 public class IntegratedBankDAO {
-	public IntegratedBank create(String name, String email, String apiURL, long phone) throws SQLException {
+	public IntegratedBank createUpdate(String name, String email, String apiURL, long phone, byte type, int id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -24,17 +24,32 @@ public class IntegratedBankDAO {
 		
 		try {
             conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("INSERT INTO banks (name, contact_mail, contact_phone, api_url) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            
+            // add
+            if(type == 0)
+            	stmt = conn.prepareStatement("INSERT INTO banks (name, contact_mail, contact_phone, api_url) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            else
+            	stmt = conn.prepareStatement("UPDATE banks SET name = ?, contact_mail = ?, contact_phone = ?, api_url = ? WHERE id = ?");
+            	
             stmt.setString(1, name);
             stmt.setString(2, email);
             stmt.setLong(3, phone);
             stmt.setString(4, apiURL);
+            
+            // update
+            if(type == 1)
+            	stmt.setInt(5, id);
+            
             stmt.executeUpdate();
 
-            rs = stmt.getGeneratedKeys();
+            if(type == 0) {
+                rs = stmt.getGeneratedKeys();
 
-            if(rs.next())
-                bankId = rs.getInt(1);
+                if(rs.next())
+                    bankId = rs.getInt(1);	
+            } else {
+            	bankId = id;
+            }
             
             // update in cache.
             integratedBank = new IntegratedBank(bankId, name, email, phone, apiURL);
