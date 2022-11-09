@@ -60,8 +60,7 @@ public class Address {
     
     
     @Override
-    public boolean equals(Object obj) throws ClassCastException {
-    	System.out.println("in address equals");
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -72,11 +71,8 @@ public class Address {
         
         Address target = (Address) obj;
         
-        if(this.doorNo == target.doorNo && this.street.equals(target.street) && this.city.equals(target.city)
-        		&& this.state.equals(target.state) && this.pincode == target.pincode)
-        	return true;
-        else
-        	return false;
+        return (this.doorNo == target.getDoorNo() && this.street.equals(target.getStreet()) && this.city.equals(target.getCity())
+        		&& this.state.equals(target.getState()) && this.pincode == target.getPincode());
     }
     
     

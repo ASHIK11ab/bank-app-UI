@@ -127,7 +127,7 @@ public class Branch {
 
 
     @Override
-    public boolean equals(Object obj) throws ClassCastException {
+    public boolean equals(Object obj) {
     	System.out.println("in branch equals");
         if (obj == null) {
             return false;
@@ -139,9 +139,6 @@ public class Branch {
         
         Branch target = (Branch) obj;
         
-        if(this.name.equals(target.name) && this.address.equals(target.address))
-        	return true;
-        else
-        	return false;
+        return (this.name.equals(target.getName()) && this.address.equals(target.getAddress()));
     }
 }

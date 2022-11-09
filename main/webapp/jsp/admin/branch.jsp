@@ -12,7 +12,7 @@
 	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
 
-	<c:set var="branch" value="${ requestScope.branch }" />
+	<c:set var="branch" value="${ branch }" />
 	<c:set var="manager" value="${ branch.getManager() }" />
 	
 	<main class="container">
@@ -22,19 +22,19 @@
 				<p>Name: ${ branch.getName() }</p>
 				<p>Address: ${ branch.getAddress() }</p>
 				
-				<a class="button" href="/bank-app/admin/branches/branch/${ branch.getId() }/edit">Edit</a>
+				<a class="button" href="/bank-app/admin/branches/${ branch.getId() }/edit">Edit</a>
 			</section>
 			<section class="manager-section">
 				<h2 class="title">Manager details:</h2>
 				<p>Id: ${ manager.getId() }</p>
 				
-				<c:if test="${ requestScope.displayManagerPassword }">
+				<c:if test="${ displayManagerPassword }">
 					<p>Password: ${ manager.getPassword() }<p>
 				</c:if>
 				
 				<p>Name: ${ manager.getName() }</p>
-				<a class="button" href="/bank-app/admin/managers/manager/${ manager.getId() }/view">View manager</a>
-				<a class="button secondary" href="/bank-app/admin/branches/branch/${ branch.getId() }/assign-manager">Assign new manager</a>
+				<a class="button" href="/bank-app/admin/managers/${ manager.getId() }/view">View manager</a>
+				<a class="button secondary" href="/bank-app/admin/branches/${ branch.getId() }/assign-manager">Assign new manager</a>
 			</section>
 		</div>
 	</main>

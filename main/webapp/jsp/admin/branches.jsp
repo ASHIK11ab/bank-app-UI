@@ -19,7 +19,7 @@
 
 			<c:forEach items="${ branches }" var="branch" varStatus="loop">			
 				<div class="item">
-					<a href="/bank-app/admin/branches/branch/${ branch.getId() }/view">
+					<a href="/bank-app/admin/branches/${ branch.getId() }/view">
 						${ loop.index + 1 }. ${ branch.getName() } Branch
 					</a>
 				</div>

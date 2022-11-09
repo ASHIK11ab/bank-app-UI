@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
 import dao.BranchDAO;
 import dao.ManagerDAO;
 import model.Address;
@@ -18,12 +19,7 @@ import model.user.Employee;
 import util.Factory;
 import util.Util;
 
-public class CreateBranchServlet extends HttpServlet {
-	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		req.getRequestDispatcher("/jsp/admin/createBranch.jsp").include(req, res);
-	}
-	
+public class CreateEditBranchServlet extends HttpServlet {
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		BranchDAO branchDAO = Factory.getBranchDAO();
@@ -32,12 +28,13 @@ public class CreateBranchServlet extends HttpServlet {
 		Connection conn = null;
 		PrintWriter out = res.getWriter();
 		
-		Branch branch = null;
+		Branch branch = null, temp = null;
 		Employee manager = null;
 		Address address = null;
 		
 		String name = "", doorNo = "", street = "", city = "", state = "";
-		int pincode;
+		int pincode, branchId = -1;
+		byte type = -1;
 		String managerName = "", managerEmail = "";
 		long managerPhone = 0;
 		
@@ -45,16 +42,13 @@ public class CreateBranchServlet extends HttpServlet {
 		String msg = "";
 		
 		try {
+			type = Byte.parseByte(req.getParameter("type"));
 			name = req.getParameter("name");
 			doorNo = req.getParameter("door-no");
 			street = req.getParameter("street");
 			city = req.getParameter("city");
 			state = req.getParameter("state");
 			pincode = Integer.parseInt(req.getParameter("pincode"));
-			
-			managerName = req.getParameter("manager-name");
-			managerEmail = req.getParameter("manager-email");
-			managerPhone = Long.parseLong(req.getParameter("manager-phone"));
 			
 			address = new Address(doorNo, street, city, state, pincode);
 			
@@ -88,33 +82,76 @@ public class CreateBranchServlet extends HttpServlet {
 				msg = "Invalid pincode !!!";
 			}
 			
-			if(!isError && Util.getNoOfDigits(managerPhone) != 10 ) {
-				isError = true;
-				msg = "Phone number should be 10 digits !!!";
+			// Validate manager input only on branch creation, since manager details is
+			// not editable from this view.
+			if(type == 0) {
+				
+				managerName = req.getParameter("manager-name");
+				managerEmail = req.getParameter("manager-email");
+				managerPhone = Long.parseLong(req.getParameter("manager-phone"));
+				
+				if(!isError && Util.getNoOfDigits(managerPhone) != 10 ) {
+					isError = true;
+					msg = "Phone number should be 10 digits !!!";
+				}
+				
+				if(!isError && managerEmail.length() > 30) {
+					isError = true;
+					msg = "Email should be less than 30 characters !!!";
+				}
+				
+				if(!isError && managerName.length() > 20) {
+					isError = true;
+					msg = "Manager name should be less than 20 characters !!!";
+				}
 			}
 			
-			if(!isError && managerEmail.length() > 30) {
-				isError = true;
-				msg = "Email should be less than 30 characters !!!";
-			}
-			
-			if(!isError && managerName.length() > 20) {
-				isError = true;
-				msg = "Manager name should be less than 20 characters !!!";
+			// edit
+			if(type == 1) {
+				branchId = Integer.parseInt(req.getParameter("branch-id"));
+				branch = branchDAO.get(branchId);
+				if(branch == null) {
+					isError = true;
+					msg = "Branch does not exist !!!";
+				}
 			}
 			
 			if(!isError) {
 				/* connection is created and passed to DAO's to prevent the usage
 				of multiple connections for doing one operation */
 				conn = Factory.getDataSource().getConnection();
-				branch = branchDAO.create(conn, name, address);
-				manager = managerDAO.create(conn, branch.getId(), managerName, managerEmail, managerPhone);
-				branch.assignManager(manager);
 				
-				out.println(Util.createNotification("branch created successfully", "success"));
-				req.setAttribute("branch", branch);
-				req.setAttribute("displayManagerPassword", true);
-				req.getRequestDispatcher("/jsp/admin/branch.jsp").include(req, res);
+				switch(type) {
+					// create
+					case 0: 
+							branch = branchDAO.createUpdate(conn, name, address, (byte) 0, -1);
+							manager = managerDAO.create(conn, branch.getId(), managerName, managerEmail, managerPhone);
+							branch.assignManager(manager);
+							
+							out.println(Util.createNotification("branch created successfully", "success"));
+							req.setAttribute("branch", branch);
+							req.setAttribute("displayManagerPassword", true);
+							req.getRequestDispatcher("/jsp/admin/branch.jsp").include(req, res);
+							break;
+					// edit
+					case 1: 
+							temp = new Branch(-1, name, address);
+							
+							// update in DB only when data has changed.
+							if(!branch.equals(temp))
+								synchronized (branch) {									
+									branchDAO.createUpdate(conn, name, address, (byte) 1, branch.getId());
+								}
+							else {
+								System.out.println("no up req");
+							}
+							
+							res.sendRedirect(String.format("/bank-app/admin/branches/%d/view?msg=branch details updated successfully&status=success", branch.getId()));
+							break;
+					default: 
+							isError = true;
+							msg = "Page not found !!!";
+				}
 			}
 		} catch(NumberFormatException e) {
 			System.out.println(e.getMessage());
@@ -133,13 +170,17 @@ public class CreateBranchServlet extends HttpServlet {
             
             if(isError || exceptionOccured) {
             	out.println(Util.createNotification(msg, "danger"));
+            	
+            	// create dummy object to store user input values
+            	temp = new Branch(branchId, name, address);
 
-            	req.setAttribute("branchName", name);
-            	req.setAttribute("address", address);
+            	req.setAttribute("type", type);
+            	req.setAttribute("branchId", branchId);
+            	req.setAttribute("branch", temp);
 				req.setAttribute("name", managerName);
 				req.setAttribute("email", managerEmail);
 				req.setAttribute("phone", managerPhone);
-            	doGet(req, res);
+            	req.getRequestDispatcher("/jsp/admin/createEditBranch.jsp").include(req, res);
             }
             
 			out.close();

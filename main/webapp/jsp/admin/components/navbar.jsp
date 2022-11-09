@@ -6,7 +6,7 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/admin/branches">view branches</a>
-					<a href="/bank-app/admin/branches/branch/create">create branch</a>
+					<a href="/bank-app/admin/branches/create">create branch</a>
 					<a href="/bank-app/admin/branches/merge">merge branches</a>
 				</li>
 			</ul>

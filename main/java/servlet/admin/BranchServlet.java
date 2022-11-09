@@ -40,6 +40,12 @@ public class BranchServlet extends HttpServlet {
 			return;
 		}
 		
+		if(path.equals("/create")) {
+			req.setAttribute("type", 0);
+			req.getRequestDispatcher("/jsp/admin/createEditBranch.jsp").forward(req, res);
+			return;
+		}
+		
 		try {
 			path = path.substring(1);
 			result = path.split("/");
@@ -65,11 +71,9 @@ public class BranchServlet extends HttpServlet {
 											req.getRequestDispatcher("/jsp/admin/assignManager.jsp").forward(req, res);
 											break;
 					case "edit":
+								req.setAttribute("type", 1);
 								req.setAttribute("branchId", branchId);
-								req.setAttribute("branchName", branch.getName());
-								req.setAttribute("inputBranchName", branch.getName());
-								req.setAttribute("address", branch.getAddress());
-								req.getRequestDispatcher("/jsp/admin/editBranch.jsp").forward(req, res);
+								req.getRequestDispatcher("/jsp/admin/createEditBranch.jsp").forward(req, res);
 								break;
 					default: isError = true;
 							 msg = "page not found !!!";
