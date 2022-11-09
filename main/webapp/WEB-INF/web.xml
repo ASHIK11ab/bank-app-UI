@@ -135,22 +135,47 @@
 		<servlet-name>ManagerPasswordResetServlet</servlet-name>
 		<servlet-class>servlet.admin.ManagerPasswordResetServlet</servlet-class>
 	</servlet>
+	
 	<servlet>
 		<servlet-name>IntegratedBanksServlet</servlet-name>
 		<servlet-class>servlet.admin.IntegratedBanksServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>IntegratedBanksServlet</servlet-name>
+		<url-pattern>/admin/integrated-banks</url-pattern>	
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>IntegratedBankServlet</servlet-name>
 		<servlet-class>servlet.admin.IntegratedBankServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>IntegratedBankServlet</servlet-name>
+		<url-pattern>/admin/integrated-banks/*</url-pattern>	
+	</servlet-mapping>
+	
 	<servlet>
-		<servlet-name>AddIntegratedBankServlet</servlet-name>
-		<servlet-class>servlet.admin.AddIntegratedBankServlet</servlet-class>
+		<servlet-name>AddEditIntegratedBankServlet</servlet-name>
+		<servlet-class>servlet.admin.AddEditIntegratedBankServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>AddEditIntegratedBankServlet</servlet-name>
+		<url-pattern>/admin/integrated-banks/bank/add</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AddEditIntegratedBankServlet</servlet-name>
+		<url-pattern>/admin/integrated-banks/bank/edit</url-pattern>
+	</servlet-mapping>	
+	
 	<servlet>
 		<servlet-name>RemoveIntegratedBankServlet</servlet-name>
 		<servlet-class>servlet.admin.RemoveIntegratedBankServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>RemoveIntegratedBankServlet</servlet-name>
+		<url-pattern>/admin/integrated-banks/bank/delete</url-pattern>
+	</servlet-mapping>
+		
 	<servlet>
 		<servlet-name>AdminProfileServlet</servlet-name>
 		<servlet-class>servlet.admin.ProfileServlet</servlet-class>
@@ -354,22 +379,7 @@
 		<servlet-name>ManagerPasswordResetServlet</servlet-name>
 		<url-pattern>/admin/managers/manager/password-reset</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>IntegratedBanksServlet</servlet-name>
-		<url-pattern>/admin/integrated-banks</url-pattern>	
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>IntegratedBankServlet</servlet-name>
-		<url-pattern>/admin/integrated-banks/bank/*</url-pattern>	
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AddIntegratedBankServlet</servlet-name>
-		<url-pattern>/admin/integrated-banks/bank/create</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>RemoveIntegratedBankServlet</servlet-name>
-		<url-pattern>/admin/integrated-banks/bank/delete</url-pattern>
-	</servlet-mapping>
+	
 	<servlet-mapping>
 		<servlet-name>AdminProfileServlet</servlet-name>
 		<url-pattern>/admin/profile</url-pattern>

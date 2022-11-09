@@ -1,6 +1,7 @@
 package servlet.admin;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 
 import javax.servlet.ServletException;
@@ -11,21 +12,24 @@ import javax.servlet.http.HttpServletResponse;
 import dao.IntegratedBankDAO;
 import model.IntegratedBank;
 import util.Factory;
+import util.Util;
 
 public class IntegratedBanksServlet extends HttpServlet {
-	private static final long serialVersionUID = 4635541717523887476L;
-	
-	private IntegratedBankDAO integratedBankDAO;
-	
-	public void init() {
-		integratedBankDAO = Factory.getIntegratedBankDAO();
-	}
-	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		Collection<IntegratedBank> integratedBanks;
+		PrintWriter out = res.getWriter();
+		IntegratedBankDAO integratedBankDAO = Factory.getIntegratedBankDAO();
+		String queryMsg = "", status = "";
 		
+		queryMsg = req.getParameter("msg");
+		status = req.getParameter("status");
+		
+		// Display notification if exists.
+		if(queryMsg != null && status != null)
+			out.println(Util.createNotification(queryMsg, status));
+		
+		Collection<IntegratedBank> integratedBanks;
 		integratedBanks = integratedBankDAO.getAll();
 		req.setAttribute("integratedBanks", integratedBanks);
-		req.getRequestDispatcher("/jsp/admin/integratedBanks.jsp").forward(req, res);
+		req.getRequestDispatcher("/jsp/admin/integratedBanks.jsp").include(req, res);
 	}
 }

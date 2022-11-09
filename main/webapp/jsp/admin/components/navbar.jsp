@@ -16,7 +16,7 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/admin/integrated-banks">view integrated banks</a>
-					<a href="/bank-app/admin/integrated-banks/bank/create">add integrated bank</a>
+					<a href="/bank-app/admin/integrated-banks/add">add integrated bank</a>
 					<a href="/bank-app/admin/integrated-banks/bank/delete">remove integrated bank</a>
 				</li>
 			</ul>
