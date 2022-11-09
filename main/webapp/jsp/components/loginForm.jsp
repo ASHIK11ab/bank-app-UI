@@ -34,10 +34,6 @@
 					<label for="password">password:</label>
 					<input type="password" id="password" name="password" required maxlength="15">
 					
-					<c:if test="${ requestScope.error != null }">
-						<span class='error'>${ requestScope.error }</span>
-					</c:if>
-					
 					<button>Login</button>		
 				</form>
 			</section>
