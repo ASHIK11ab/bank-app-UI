@@ -25,7 +25,7 @@ public class BranchDAO {
 	
 	
 	// Adds a new branch to DB.
-	public Branch create(Connection conn, String name, Address address) throws SQLException {
+	public Branch createUpdate(Connection conn, String name, Address address, byte type, int id) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -35,28 +35,42 @@ public class BranchDAO {
 		int branchId = 0;
 				
 		try {
-            stmt = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, name);
+			if(type == 0)
+				stmt = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			else
+	            stmt = conn.prepareStatement("UPDATE branch SET name = ?, door_no = ?, street = ?, city = ?, state = ?, pincode = ? WHERE id = ?");
+
+			stmt.setString(1, name);
             stmt.setString(2, address.getDoorNo());
             stmt.setString(3, address.getStreet());
             stmt.setString(4, address.getCity());
             stmt.setString(5, address.getState());
             stmt.setLong(6, address.getPincode());
-
+            
+            if(type == 1)
+            	stmt.setInt(7, id);
+            
             stmt.executeUpdate();
-            rs = stmt.getGeneratedKeys();
-
-            if(rs.next()) {
-                branchId = rs.getInt(1);
+            
+            if(type == 0) {
+	            rs = stmt.getGeneratedKeys();
+	
+	            if(rs.next()) {
+	                branchId = rs.getInt(1);
+	            }
+	            branch = new Branch(branchId, name, address);
+	            AppCache.getBank().addBranch(branch);
+            } else {
+            	branchId = id;
+            	branch = AppCache.getBranch(branchId);
+            	branch.setName(name);
+            	branch.setAddress(address);
             }
-
-            branch = new Branch(branchId, name, address);
-            // add to cache.
-            AppCache.getBank().addBranch(branch);;
+            
         } catch(SQLException e) {
         	System.out.println(e.getMessage());
             exceptionOccured = true;
-            msg = "Error adding branch";
+            msg = "Internal error";
         } finally {
             try {
                 if(rs != null)
@@ -103,54 +117,5 @@ public class BranchDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
-	}
-	
-	
-	public Branch update(int branchId, String name, Address address) throws SQLException {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		Branch branch = null;
-		String msg = null;
-		boolean exceptionOccured = false;
-				
-		try {
-			conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("UPDATE branch SET name = ?, door_no = ?, street = ?, city = ?, state = ?, pincode = ? WHERE id = ?");
-            stmt.setString(1, name);
-            stmt.setString(2, address.getDoorNo());
-            stmt.setString(3, address.getStreet());
-            stmt.setString(4, address.getCity());
-            stmt.setString(5, address.getState());
-            stmt.setLong(6, address.getPincode());
-            stmt.setInt(7, branchId);
-
-            stmt.executeUpdate();
-
-            branch = this.get(branchId);
-            branch.setName(name);
-            branch.setAddress(address);
-        } catch(SQLException e) {
-        	System.out.println(e.getMessage());
-            exceptionOccured = true;
-            msg = "Error updating branch details";
-        } finally {
-
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-        }
-		
-		if(exceptionOccured)
-			throw new SQLException(msg);
-		else
-			return branch;
 	}
 }
