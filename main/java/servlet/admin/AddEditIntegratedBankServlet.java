@@ -71,7 +71,14 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 	        		case 0: bank = integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 0, -1); 
 	        				msg = "bank created successfully";
 	        				break;
-	        		case 1: integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
+	        		case 1: 
+	        				temp = new IntegratedBank(bankId, name, email, phone, apiURL);
+	        				
+	        				// only update in DB when data is changed.
+	        				if(!bank.equals(temp)) {
+	        					integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
+	        				}
+	        				
 	        				msg = "bank details updated successfully";
 	        				break;
 	        		default:

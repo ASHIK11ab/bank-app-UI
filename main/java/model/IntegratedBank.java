@@ -37,4 +37,20 @@ public class IntegratedBank {
     public String getApiURL() {
         return this.apiURL;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        IntegratedBank target = (IntegratedBank) obj;
+        
+        return (this.name.equals(target.name) && this.email.equals(target.getEmail()) &&
+        			this.phone == target.getPhone() && this.apiURL.equals(target.getApiURL()));
+    }
 }
