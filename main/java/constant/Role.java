@@ -1,7 +1,5 @@
 package constant;
 
-import org.apache.tomcat.util.collections.CaseInsensitiveKeyMap;
-
 public enum Role {
 	ADMIN,
 	MANAGER,

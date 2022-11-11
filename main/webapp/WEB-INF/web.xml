@@ -86,6 +86,36 @@
 		<servlet-name>PasswordResetServlet</servlet-name>
 		<url-pattern>/password-reset</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ProfileServlet</servlet-name>
+		<servlet-class>servlet.shared.ProfileServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ProfileServlet</servlet-name>
+		<url-pattern>/admin/profile/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProfileServlet</servlet-name>
+		<url-pattern>/manager/profile/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProfileServlet</servlet-name>
+		<url-pattern>/employee/profile/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProfileServlet</servlet-name>
+		<url-pattern>/customer/profile/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>LogoutServlet</servlet-name>
+		<servlet-class>servlet.shared.LogoutServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LogoutServlet</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
 	<!-- End of shared servlets -->
 	
 	
@@ -196,15 +226,6 @@
 		<servlet-name>RemoveIntegratedBankServlet</servlet-name>
 		<url-pattern>/admin/integrated-banks/bank/delete</url-pattern>
 	</servlet-mapping>
-		
-	<servlet>
-		<servlet-name>AdminProfileServlet</servlet-name>
-		<servlet-class>servlet.admin.ProfileServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>AdminLogoutServlet</servlet-name>
-		<servlet-class>servlet.admin.LogoutServlet</servlet-class>
-	</servlet>
 	<!-- End of admin servlets -->
 	
 	
@@ -232,10 +253,6 @@
 	<servlet>
 		<servlet-name>RemoveEmployeeServlet</servlet-name>
 		<servlet-class>servlet.manager.RemoveEmployeeServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>ManagerProfileServlet</servlet-name>
-		<servlet-class>servlet.manager.ProfileServlet</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>EmployeePasswordResetServlet</servlet-name>
@@ -331,15 +348,6 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>ProfileServlet</servlet-name>
-		<servlet-class>servlet.employee.ProfileServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ProfileServlet</servlet-name>
-		<url-pattern>/employee/profile</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
 		<servlet-name>EmployeeSelfPasswordResetServlet</servlet-name>
 		<servlet-class>servlet.employee.PasswordResetServlet</servlet-class>
 	</servlet>
@@ -381,15 +389,6 @@
 		<servlet-name>TransferManagerServlet</servlet-name>
 		<url-pattern>/admin/managers/transfer</url-pattern>
 	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>AdminProfileServlet</servlet-name>
-		<url-pattern>/admin/profile</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AdminLogoutServlet</servlet-name>
-		<url-pattern>/admin/logout</url-pattern>
-	</servlet-mapping>
 	<!-- End of admin servlet mappings -->
 	
 	
@@ -417,10 +416,6 @@
 	<servlet-mapping>
 		<servlet-name>RemoveEmployeeServlet</servlet-name>
 		<url-pattern>/manager/employees/employee/remove</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ManagerProfileServlet</servlet-name>
-		<url-pattern>/manager/profile</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>EmployeePasswordResetServlet</servlet-name>
