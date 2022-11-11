@@ -30,7 +30,7 @@
 				<p>Branch Name: ${ manager.getBranchName() }</p>
 			</section>
 			<section>
-				<a class="button secondary" href="/bank-app/admin/managers/manager/${ manager.getId() }/password-reset">Reset password</a>
+				<a class="button secondary" href="/bank-app/admin/managers/${ manager.getId() }/password-reset?branch-id=${ manager.getBranchId() }">Reset password</a>
 			</section>
 		</div>
 	</main>

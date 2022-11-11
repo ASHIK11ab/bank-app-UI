@@ -33,7 +33,7 @@
 				</c:if>
 				
 				<p>Name: ${ manager.getName() }</p>
-				<a class="button" href="/bank-app/admin/managers/${ manager.getId() }/view">View manager</a>
+				<a class="button" href="/bank-app/admin/managers/${ manager.getId() }/view?branch-id=${ manager.getBranchId() }">View manager</a>
 				<a class="button secondary" href="/bank-app/admin/branches/${ branch.getId() }/assign-manager">Assign new manager</a>
 			</section>
 		</div>

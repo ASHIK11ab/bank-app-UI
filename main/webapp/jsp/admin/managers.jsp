@@ -4,10 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Managers</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="All managers" />
+	</jsp:include>
 </head>
 <body>	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
@@ -18,7 +17,7 @@
 			
 			<c:forEach items="${ requestScope.managers }" var="manager" varStatus="loop">
 				<div class="item">
-					<a href="/bank-app/admin/managers/manager/${ manager.getId() }?branch-id=${ manager.getBranchId() }">
+					<a href="/bank-app/admin/managers/${ manager.getId() }/view?branch-id=${ manager.getBranchId() }">
 						${ loop.index + 1}. ${ manager.getName() }
 					</a>
 				</div>

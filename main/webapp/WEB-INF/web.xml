@@ -77,6 +77,15 @@
 		<servlet-name>AccountServlet</servlet-name>
 		<url-pattern>/customer/account/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PasswordResetServlet</servlet-name>
+		<servlet-class>servlet.shared.PasswordResetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PasswordResetServlet</servlet-name>
+		<url-pattern>/password-reset</url-pattern>
+	</servlet-mapping>
 	<!-- End of shared servlets -->
 	
 	
@@ -125,10 +134,20 @@
 		<servlet-name>ManagersServlet</servlet-name>
 		<servlet-class>servlet.admin.ManagersServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>ManagersServlet</servlet-name>
+		<url-pattern>/admin/managers</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
-		<servlet-name>ManagerServlet</servlet-name>
-		<servlet-class>servlet.admin.ManagerServlet</servlet-class>
+		<servlet-name>AdminManagerServlet</servlet-name>
+		<servlet-class>servlet.admin.AdminManagerServlet</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminManagerServlet</servlet-name>
+		<url-pattern>/admin/managers/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>AssignManagerServlet</servlet-name>
 		<servlet-class>servlet.admin.AssignManagerServlet</servlet-class>
@@ -136,10 +155,6 @@
 	<servlet>
 		<servlet-name>TransferManagerServlet</servlet-name>
 		<servlet-class>servlet.admin.TransferManagerServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>ManagerPasswordResetServlet</servlet-name>
-		<servlet-class>servlet.admin.ManagerPasswordResetServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -357,14 +372,7 @@
 		<servlet-name>MergeBranchServlet</servlet-name>
 		<url-pattern>/admin/branches/merge</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ManagersServlet</servlet-name>
-		<url-pattern>/admin/managers</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ManagerServlet</servlet-name>
-		<url-pattern>/admin/managers/manager/*</url-pattern>
-	</servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>AssignManagerServlet</servlet-name>
 		<url-pattern>/admin/managers/manager/assign</url-pattern>
@@ -372,10 +380,6 @@
 	<servlet-mapping>
 		<servlet-name>TransferManagerServlet</servlet-name>
 		<url-pattern>/admin/managers/transfer</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ManagerPasswordResetServlet</servlet-name>
-		<url-pattern>/admin/managers/manager/password-reset</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
@@ -488,6 +492,10 @@
 		<url-pattern>/login/*</url-pattern>
 	</filter-mapping>
 	
+	<filter-mapping>
+		<filter-name>AuthenticationFilter</filter-name>
+		<url-pattern>/password-reset</url-pattern>
+	</filter-mapping>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
 		<url-pattern>/admin/*</url-pattern>
