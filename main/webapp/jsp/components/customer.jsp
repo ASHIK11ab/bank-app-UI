@@ -3,7 +3,6 @@
 <c:set var="customer" value="${ requestScope.customer }" />
 
 <section>	
-	<h2>Customer Details:</h2>
 	<p>Id: ${ customer.getId() }<p>
 	
 	<c:if test="${ requestScope.displayPassword }">

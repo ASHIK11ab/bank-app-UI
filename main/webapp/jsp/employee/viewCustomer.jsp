@@ -29,6 +29,7 @@
 						<h1 style="color: red">Customer removed</h1>
 					</c:if>
 					
+					<h2>Customer Details:</h2>
 					<jsp:include page="/jsp/components/customer.jsp" />
 					
 					<c:if test="${ !customer.isRemoved() }">
