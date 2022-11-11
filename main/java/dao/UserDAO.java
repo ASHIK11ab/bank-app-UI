@@ -59,7 +59,7 @@ public class UserDAO {
             }
             
             // if user exists in cache, update.
-            if(user != null)
+            if((role != Role.CUSTOMER && user != null) || (role == Role.CUSTOMER && customer != null))
             	if(role == Role.CUSTOMER) {
             		if(type == 0)
             			customer.setPassword(password);
