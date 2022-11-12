@@ -8,8 +8,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
+import cache.AppCache;
+import constant.AccountCategory;
 import constant.DepositAccountType;
 import model.account.DepositAccount;
+import model.user.Customer;
+import model.Branch;
 import model.Nominee;
 import util.Factory;
 
@@ -23,6 +27,7 @@ public class DepositAccountDAO {
 		ResultSet rs1 = null;
 		
 		DepositAccountType type = DepositAccountType.getType(depositType);
+		Customer customer = null;
 		DepositAccount account = null;
 		
 		LocalDate today = LocalDate.now();
@@ -78,6 +83,15 @@ public class DepositAccountDAO {
 																			tenureMonths, intrestRate, today, null, amount);
 	            								break;
             }
+            
+			// update in cache if exists.
+			customer = AppCache.getBank().getCustomer(customerId);
+			
+			if(customer != null) {
+				synchronized (customer) {
+					customer.addAccountBranchMapping(AccountCategory.DEPOSIT, depositType, generatedAccountNo, branchId);
+				}
+			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
@@ -103,7 +117,7 @@ public class DepositAccountDAO {
 	}
 	
 	
-	public DepositAccount get(long accountNo) throws SQLException {
+	public DepositAccount get(long accountNo, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
@@ -111,6 +125,7 @@ public class DepositAccountDAO {
 		boolean exceptionOccured = false;
 		String msg = "", customerName = "";
 		
+		Branch branch = AppCache.getBranch(branchId);
 		Nominee nominee = null;
 		DepositAccount account = null;
 		DepositAccountType type;
@@ -118,59 +133,79 @@ public class DepositAccountDAO {
 		LocalDate openingDate, recurringDate = null, closingDate;
 		long customerId, payoutAccountNo, debitFromAccountNo;
 		float balance, rateOfIntrest;
-		int branchId, typeId, tenureMonths, monthlyInstallment = 0, amountDeposited = 0;
+		int typeId, tenureMonths, monthlyInstallment = 0, amountDeposited = 0;
+		
+		if(branch == null) {
+			return null;
+		}
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
-            stmt1 = conn.prepareStatement("SELECT * FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no WHERE a.account_no = ?");
-            stmt2 = conn.prepareStatement("SELECT name FROM customer WHERE id = ?");
-            
-            stmt1.setLong(1, accountNo);
-            rs1 = stmt1.executeQuery();
-            
-            if(rs1.next()) {
-            	customerId = rs1.getLong("customer_id");
-                typeId = rs1.getInt("type_id");
-                tenureMonths = rs1.getInt("tenure_months");
-                openingDate = rs1.getDate("opening_date").toLocalDate();
-                balance = rs1.getFloat("balance");
-                rateOfIntrest = rs1.getFloat("rate_of_intrest");
-                branchId = rs1.getInt("branch_id");
-                payoutAccountNo = rs1.getLong("payout_account_no");
-                debitFromAccountNo = rs1.getLong("debit_from_account_no");
-                
-                type = DepositAccountType.getType(typeId);
-                
-                if(type == DepositAccountType.RD) {
-                    monthlyInstallment = rs1.getInt("deposit_amount");
-                    recurringDate = rs1.getDate("recurring_date").toLocalDate();	
-                } else {
-                	amountDeposited = rs1.getInt("deposit_amount");
-                }
-                
-		        if(rs1.getDate("closing_date") != null)
-		        	closingDate = rs1.getDate("closing_date").toLocalDate();
-		        else
-		        	closingDate = null;
-		        
-                stmt2.setLong(1, customerId);
-                rs2 = stmt2.executeQuery();
-                
-                if(rs2.next())
-                	customerName = rs2.getString("name");
-                
-                
-                switch(type) {
-		            case RD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
-		            															branchId, balance, payoutAccountNo, debitFromAccountNo,
-		            															tenureMonths, rateOfIntrest, openingDate, closingDate, monthlyInstallment, recurringDate);
-		            								break;
-		            case FD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
-																				branchId, balance, payoutAccountNo, debitFromAccountNo,
-																				tenureMonths, rateOfIntrest, openingDate, closingDate, amountDeposited);
-		            								break;
-	            } 
-            }
+			account = (DepositAccount) branch.getAccount(AccountCategory.DEPOSIT, accountNo);
+			
+			// Load from DB when not found in cache.
+			if(account == null) {
+				conn = Factory.getDataSource().getConnection();
+	            stmt1 = conn.prepareStatement("SELECT * FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no WHERE a.account_no = ? AND a.branch_id = ?");
+	            stmt2 = conn.prepareStatement("SELECT name FROM customer WHERE id = ?");
+	            
+	            stmt1.setLong(1, accountNo);
+	            stmt1.setInt(2, branchId);
+	            rs1 = stmt1.executeQuery();
+	            
+	            if(rs1.next()) {
+	            	customerId = rs1.getLong("customer_id");
+	                typeId = rs1.getInt("type_id");
+	                tenureMonths = rs1.getInt("tenure_months");
+	                openingDate = rs1.getDate("opening_date").toLocalDate();
+	                balance = rs1.getFloat("balance");
+	                rateOfIntrest = rs1.getFloat("rate_of_intrest");
+	                branchId = rs1.getInt("branch_id");
+	                payoutAccountNo = rs1.getLong("payout_account_no");
+	                debitFromAccountNo = rs1.getLong("debit_from_account_no");
+	                
+	                type = DepositAccountType.getType(typeId);
+	                
+	                if(type == DepositAccountType.RD) {
+	                    monthlyInstallment = rs1.getInt("deposit_amount");
+	                    recurringDate = rs1.getDate("recurring_date").toLocalDate();	
+	                } else {
+	                	amountDeposited = rs1.getInt("deposit_amount");
+	                }
+	                
+			        if(rs1.getDate("closing_date") != null)
+			        	closingDate = rs1.getDate("closing_date").toLocalDate();
+			        else
+			        	closingDate = null;
+			        
+	                stmt2.setLong(1, customerId);
+	                rs2 = stmt2.executeQuery();
+	                
+	                if(rs2.next())
+	                	customerName = rs2.getString("name");
+	                
+	                
+	                switch(type) {
+			            case RD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
+			            															branchId, balance, payoutAccountNo, debitFromAccountNo,
+			            															tenureMonths, rateOfIntrest, openingDate, closingDate, monthlyInstallment, recurringDate);
+			            								break;
+			            case FD: account = new DepositAccount(accountNo, customerId, customerName, nominee, 
+																					branchId, balance, payoutAccountNo, debitFromAccountNo,
+																					tenureMonths, rateOfIntrest, openingDate, closingDate, amountDeposited);
+			            								break;
+		            }
+	                
+	                // Add to cache.
+	                branch.addAccount(AccountCategory.DEPOSIT, -1, account);
+	                System.out.println("fetched from db deposit account");
+	            }
+			} else {
+				System.out.println("served from cache. deposit account");
+			}
+		} catch(ClassCastException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "internal error";		
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;

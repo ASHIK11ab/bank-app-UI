@@ -8,8 +8,11 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.LinkedList;
 
+import cache.AppCache;
 import constant.AccountCategory;
+import model.account.Account;
 import model.card.DebitCard;
+import model.user.Customer;
 import util.Factory;
 
 public class AccountDAO {
@@ -94,10 +97,53 @@ public class AccountDAO {
 	}
 	
 	
-	public void closeAccount(Connection conn, long accountNo, AccountCategory category) throws SQLException {
+	// Returns branch id associated with an account.
+	public int getBranchId(Connection conn, long accountNo) throws SQLException {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		int branchId = -1;
+		
+		String msg = "";
+		boolean exceptionOccured = false;
+		
+		try {
+			stmt = conn.prepareStatement("SELECT branch_id FROM account WHERE account_no = ?");
+			stmt.setLong(1, accountNo);
+			
+			rs = stmt.executeQuery();
+			
+			if(rs.next())
+				branchId = rs.getInt("branch_id");
+			
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            try {
+                if(rs != null)
+                    rs.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+            
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+				
+		if(exceptionOccured)
+			throw new SQLException(msg);
+		else
+			return branchId;
+	}
+	
+	
+	public void closeAccount(Connection conn, Account account, AccountCategory category) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
+		
+		Customer customer = null;
 		LinkedList<DebitCard> linkedCards = null;
 		LocalDate today = LocalDate.now();
 		String msg = "";
@@ -107,22 +153,31 @@ public class AccountDAO {
 			stmt1 = conn.prepareStatement("UPDATE account SET closing_date = ? WHERE account_no = ?");
 			
 			stmt1.setDate(1, Date.valueOf(today));
-			stmt1.setLong(2, accountNo);
+			stmt1.setLong(2, account.getAccountNo());
 			stmt1.executeUpdate();
 			
 			// category 0 - regular account, update active status to false.
 			if(category == AccountCategory.REGULAR) {
 				stmt2 = conn.prepareStatement("UPDATE regular_account SET active = false WHERE account_no = ?");
-				stmt2.setLong(1, accountNo);
+				stmt2.setLong(1, account.getAccountNo());
 				stmt2.executeUpdate();
 			}
 			
 			// deactivate all linked cards
-			linkedCards = cardDAO.getAll(accountNo);
+			linkedCards = cardDAO.getAll(account.getAccountNo());
 			for(DebitCard card : linkedCards)
 				cardDAO.deactivateCard(conn, card.getCardNo());
 			
 			// update in cache.
+			account.setClosingDate(today);
+			
+			customer = AppCache.getBank().getCustomer(account.getCustomerId());
+			
+			if(customer != null) {
+				synchronized (customer) {
+					customer.removeAccountBranchMapping(category, account.getAccountNo());
+				}
+			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
