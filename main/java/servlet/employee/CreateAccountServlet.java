@@ -13,8 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import constant.RegularAccountType;
+import constant.TransactionType;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
+import dao.TransactionDAO;
 import model.user.Customer;
 import model.account.RegularAccount;
 import util.Factory;
@@ -28,6 +30,7 @@ public class CreateAccountServlet extends HttpServlet {
 		
 		PrintWriter out = res.getWriter();
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
+		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		
 		Customer customer = null;
@@ -96,6 +99,7 @@ public class CreateAccountServlet extends HttpServlet {
                 	customerName = req.getParameter("customer-name");
                 	account = accountDAO.create(conn, customerId, customerName,
 													branchId, type, cardType, null);
+            		transactionDAO.create(conn, TransactionType.CASH.id, ("Deposit to A/C: " + account.getAccountNo()), null, account.getAccountNo(), account.getBalance(), false, true, 0, 0);
 					req.setAttribute("account", account);
 					req.getRequestDispatcher("/jsp/employee/accountCreationSuccess.jsp").forward(req, res);
                 } else {

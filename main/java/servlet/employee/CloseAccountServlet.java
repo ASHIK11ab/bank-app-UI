@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
 import constant.AccountCategory;
 import constant.TransactionType;
 import dao.AccountDAO;
@@ -47,16 +48,16 @@ public class CloseAccountServlet extends HttpServlet {
 			accountNo = Long.parseLong(req.getParameter("account-no"));
 			
 			if(Util.getNoOfDigits(accountNo) != 11 ) {
-				out.println(Util.createNotification("A/C no must be a 11 digit number", "danger"));
-				doGet(req, res);
-				out.close();
+				isError = true;
+				msg = "A/C no must be a 11 digit number";
 			}
 			
-			account = regularAccountDAO.get(accountNo);
-			
-			if(account == null || account.getBranchId() != branchId || account.isClosed()) {
-				isError = true;
-				msg = "Account does not exist !!!";
+			if(!isError) {
+				account = regularAccountDAO.get(accountNo, branchId);
+				if(account == null || account.isClosed()) {
+					isError = true;
+					msg = "Account does not exist !!!";
+				}
 			}
 			
 			// Close account.
@@ -66,7 +67,7 @@ public class CloseAccountServlet extends HttpServlet {
 					conn = Factory.getDataSource().getConnection();
 					
 		            // Check whether account is linked with any active deposit account(s).
-		            stmt1 = conn.prepareStatement("SELECT da.account_no FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE (da.debit_from_account_no = ? OR da.payout_account_no = ?) AND (a.closing_date != null) limit 1");
+		            stmt1 = conn.prepareStatement("SELECT da.account_no FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE (da.debit_from_account_no = ? OR da.payout_account_no = ?) AND (a.closing_date IS NULL) limit 1");
 		            stmt1.setLong(1, accountNo);
 		            stmt1.setLong(2, accountNo);
 		            rs1 = stmt1.executeQuery();
@@ -75,7 +76,8 @@ public class CloseAccountServlet extends HttpServlet {
 	                	isError = true;
 	                	msg = "Account is linked with deposit account(s) cannot close account !!!";
 	                } else {
-	    				stmt2 = conn.prepareStatement("select count(*) as count from account WHERE customer_id = ?");
+	                	// get number of opened accounts for customer
+	    				stmt2 = conn.prepareStatement("select count(*) as count from account WHERE customer_id = ? AND closing_date IS NULL");
 	                    stmt2.setLong(1, customerId);
 	                    rs2 = stmt2.executeQuery();
 	                    
@@ -94,10 +96,11 @@ public class CloseAccountServlet extends HttpServlet {
 	                    	if(account.getBalance() > 0) {
 	                    		beforeBalance = accountDAO.updateBalance(conn, accountNo, 0, account.getBalance());
 	                    		transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+	                    		account.deductAmount(beforeBalance);
 	                    	}
 	                    	
 	                    	// close account.
-	                    	accountDAO.closeAccount(conn, accountNo, AccountCategory.REGULAR);
+	                    	accountDAO.closeAccount(conn, account, AccountCategory.REGULAR);
 	                    }
 	                }
 				}

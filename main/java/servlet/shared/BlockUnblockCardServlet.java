@@ -10,11 +10,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.AccountCategory;
 import constant.Role;
+import dao.CustomerDAO;
 import dao.DebitCardDAO;
 import dao.RegularAccountDAO;
 import model.account.RegularAccount;
 import model.card.DebitCard;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
@@ -23,9 +26,12 @@ public class BlockUnblockCardServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		
 		Connection conn = null;
+		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
+		
 		DebitCard card = null;
+		Customer customer = null;
 		RegularAccount account = null;
 		
 		Role role = null;
@@ -46,12 +52,12 @@ public class BlockUnblockCardServlet extends HttpServlet {
 				msg = "card no must be a 12 digit number";
 			}
 			
-			if(activationType != 0 && activationType != 1) {
+			if(!isError && activationType != 0 && activationType != 1) {
 				isError = true;
 				msg = "invalid activation type value !!!";
 			}
 			
-			if(role == Role.CUSTOMER) {
+			if(!isError && role == Role.CUSTOMER) {
 				pin = Integer.parseInt(req.getParameter("pin"));
 				if(Util.getNoOfDigits(pin) != 4) {
 					isError = true;
@@ -61,21 +67,31 @@ public class BlockUnblockCardServlet extends HttpServlet {
 			
 			if(!isError) {
 				card = cardDAO.get(cardNo);
-				account = accountDAO.get(card.getLinkedAccountNo());
+				if(card == null) {
+					isError = true;
+					msg = "Invalid card details !!!";
+				}
+			}
+			
+			if(!isError) {
 				
 				switch(role) {
 		        	case EMPLOYEE: 
 		    						branchId = (Integer) req.getSession(false).getAttribute("branch-id");
-		        					if(account == null || account.getBranchId() != branchId) {
+		    						account = accountDAO.get(card.getLinkedAccountNo(), branchId);
+
+		    						if(account == null) {
 		        						isError = true;
 		        						msg = "Account linked with card does not exist in branch !!!";
 		        					}
 		        					break;
 		        	case CUSTOMER: 
-		        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-		        					if(account == null || account.getCustomerId() != customerId) {
+		        					customerId = (Long) req.getSession(false).getAttribute("id");
+		        					customer = customerDAO.get(customerId);
+		        					// Card nunber entered does not belong to this customer.
+		        					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1) {
 		        						isError = true;
-		        						msg = "Card not found !!!";
+		        						msg = "Account not exist !!!";
 		        					}
 		        					break;
 		        	default: break;
@@ -92,7 +108,7 @@ public class BlockUnblockCardServlet extends HttpServlet {
 						msg = "Incorrect pin !!!";
 					}
 					
-					if(card.isDeactivated()) {
+					if(!isError && card.isDeactivated()) {
 						isError = true;
 						msg = "Card is deactivated !!! cannot update card status !!!";
 					}

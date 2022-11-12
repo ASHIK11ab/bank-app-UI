@@ -486,7 +486,10 @@
 		<filter-name>SkipAuthenticationPageFilter</filter-name>
 		<url-pattern>/login/*</url-pattern>
 	</filter-mapping>
-	
+	<filter-mapping>
+		<filter-name>AuthenticationFilter</filter-name>
+		<url-pattern>/logout</url-pattern>
+	</filter-mapping>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
 		<url-pattern>/password-reset</url-pattern>

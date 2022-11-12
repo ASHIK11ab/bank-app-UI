@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.AccountCategory;
+import constant.DepositAccountType;
 import constant.TransactionType;
 import dao.AccountDAO;
 import dao.CustomerDAO;
@@ -47,11 +49,14 @@ public class RemoveCustomerServlet extends HttpServlet {
 				msg = "A/C no must be a 11 digit number";
 			}
 			
-			account = regularAccountDAO.get(accountNo);
-			
-			if(account == null || account.getBranchId() != branchId) {
-				isError = true;
-				msg = "Account does not exist !!!";
+			if(!isError) {
+				
+				account = regularAccountDAO.get(accountNo, branchId);
+				if(account == null) {
+					isError = true;
+					msg = "Account does not exist !!!";
+				}
+				
 			}
 			
 			/* Remove customer (executed only when a customer has only one account in bank
@@ -66,8 +71,9 @@ public class RemoveCustomerServlet extends HttpServlet {
                     	if(account.getBalance() > 0) {
                     		beforeBalance = accountDAO.updateBalance(conn, accountNo, 0, account.getBalance());
                     		transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+                    		account.deductAmount(beforeBalance);
                     	}
-                    	
+                    	accountDAO.closeAccount(conn, account, AccountCategory.REGULAR);
 						customerDAO.removeCustomer(conn, customer.getId(), accountNo);
 					}
 				}

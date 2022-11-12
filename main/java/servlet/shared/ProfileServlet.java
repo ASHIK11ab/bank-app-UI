@@ -51,8 +51,10 @@ public class ProfileServlet extends HttpServlet {
 			id = (Long) req.getSession(false).getAttribute("id");  
 			action = path.substring(1);
 			
-			if(role == Role.EMPLOYEE || role == Role.MANAGER)
+			if(role == Role.EMPLOYEE || role == Role.MANAGER) {
 				branchId = (Integer) req.getSession(false).getAttribute("branch-id");
+				req.setAttribute("branchId", branchId);
+			}
 			
 			switch(role) {
 				case ADMIN   : user = adminDAO.get(id); break;
@@ -64,29 +66,26 @@ public class ProfileServlet extends HttpServlet {
 							   user = (User) customer; 
 							   break;
 			}
-									
-			if(!isError) {
 				
-				if(role == Role.CUSTOMER)
-					req.setAttribute("user", customer);
-				else
-					req.setAttribute("user", user);
-				
-				switch(action) {
-					case "view": 
-								req.getRequestDispatcher("/jsp/components/profile.jsp").include(req, res);
-								break;
-					case "password-reset": 
-											req.setAttribute("id", id);
-											req.setAttribute("name", user.getName());
-											req.setAttribute("forRole", role);
-											req.setAttribute("redirectURI", String.format("/bank-app/%s/profile/view", roleName));
-											req.getRequestDispatcher("/jsp/components/resetPassword.jsp").include(req, res);
-											break;
-					default:
-							isError = true;
-							msg = "Page not found !!!";
-				}
+			if(role == Role.CUSTOMER)
+				req.setAttribute("user", customer);
+			else
+				req.setAttribute("user", user);
+			
+			switch(action) {
+				case "view": 
+							req.getRequestDispatcher("/jsp/components/profile.jsp").include(req, res);
+							break;
+				case "password-reset": 
+										req.setAttribute("id", id);
+										req.setAttribute("name", user.getName());
+										req.setAttribute("forRole", role);
+										req.setAttribute("redirectURI", String.format("/bank-app/%s/profile/view", roleName));
+										req.getRequestDispatcher("/jsp/components/resetPassword.jsp").include(req, res);
+										break;
+				default:
+						isError = true;
+						msg = "Page not found !!!";
 			}
 			
 		} catch(SQLException e) {

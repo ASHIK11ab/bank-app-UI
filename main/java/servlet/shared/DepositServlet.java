@@ -9,9 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.AccountCategory;
 import constant.Role;
+import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import model.account.DepositAccount;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
@@ -22,11 +25,14 @@ public class DepositServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		
+		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		DepositAccountDAO accountDAO = Factory.getDepositAccountDAO();
+		
+		Customer customer = null;
 		DepositAccount account = null;
 		
 		Role role = null;
-		boolean isError = false, exceptionOccured = false, isAccessGranted = false;
+		boolean isError = false, exceptionOccured = false;
 		String path = req.getPathInfo(), action = "", msg = "", queryMsg = null, status = null;
 		String [] result;
 		long accountNo = -1, customerId = -1;
@@ -55,28 +61,38 @@ public class DepositServlet extends HttpServlet {
 			accountNo = Long.parseLong(result[0]);
 			action = result[1];
 			
-			account = accountDAO.get(accountNo);
+			if(Util.getNoOfDigits(accountNo) != 11 ) {
+				isError = true;
+				msg = "Invalid account no !!!";
+			}
 			
-        	// Access for account differs for customer and employee.
-        	switch(role) {
-	        	case EMPLOYEE: 
-	        					if(account != null && account.getBranchId() == branchId)
-	        						isAccessGranted = true;
-	        					break;
-	        	case CUSTOMER: 
-	        					// customer cannot access closed account.
-	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-	        					if(account != null && account.getCustomerId() == customerId && !account.isClosed())
-	        						isAccessGranted = true;
-	        					break;
-	        	default: isAccessGranted = false;
-        	}
-        	
-        	if(!isAccessGranted) {
-        		isError = true;
-        		msg = "Account not found !!!";
-        	}
-			
+			if(!isError) {
+				switch(role) {
+		        	case EMPLOYEE: 
+		    						branchId = (Integer) req.getSession(false).getAttribute("branch-id");
+		    						account = accountDAO.get(accountNo, branchId);
+	
+		    						if(account == null) {
+		        						isError = true;
+		        						msg = "Account does not exist !!!";
+		        					}
+		        					break;
+		        	case CUSTOMER: 
+		        					customerId = (Long) req.getSession(false).getAttribute("id");
+		        					customer = customerDAO.get(customerId);
+		        					branchId = customer.getAccountBranchId(AccountCategory.DEPOSIT, accountNo);
+		        					
+		    						account = accountDAO.get(accountNo, branchId);
+		    						// Customer cannot access a closed account.
+		    						if(account == null || account.isClosed()) {
+		        						isError = true;
+		        						msg = "Account does not exist !!!";
+		        					}
+		        					break;
+		        	default: break;
+	        	}
+			}
+						
 			if(!isError) {
 				req.setAttribute("account", account);
 				

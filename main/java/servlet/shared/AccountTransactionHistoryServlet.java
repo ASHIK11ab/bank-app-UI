@@ -11,12 +11,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.AccountCategory;
 import constant.Role;
+import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.Transaction;
 import model.account.Account;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
@@ -26,15 +29,18 @@ public class AccountTransactionHistoryServlet extends HttpServlet {
 		PrintWriter out = res.getWriter();
 		
 		Role role = null;
+		AccountCategory category = null;
 		LocalDate fromDate, toDate;
 		long accountNo = -1, customerId = -1;
 		boolean exceptionOccured = false, isError = false, isAccountExists = false;
 		String msg = "", redirectURI = "", userType = "", accountCategoryName = "";
-		int branchId, accountCategory = -1;
+		int branchId = -1, accountCategory = -1;
 		
+		Customer customer = null;
 		Account account = null;
 		LinkedList<Transaction> transactions;
 		
+		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
@@ -42,10 +48,11 @@ public class AccountTransactionHistoryServlet extends HttpServlet {
 		try {
 			
 			role = (Role) req.getSession(false).getAttribute("role"); 
-			
-			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
-			accountNo = Long.parseLong(req.getParameter("account-no"));
 			accountCategory = Integer.parseInt(req.getParameter("account-category"));
+			
+			category = AccountCategory.getCategory(accountCategory);
+			
+			accountNo = Long.parseLong(req.getParameter("account-no"));
 			fromDate = LocalDate.parse(req.getParameter("from-date"));
 			toDate = LocalDate.parse(req.getParameter("to-date"));
 			
@@ -55,42 +62,49 @@ public class AccountTransactionHistoryServlet extends HttpServlet {
 			}
 			
 	        // Invalid date range.
-	        if(fromDate.isAfter(toDate)) {
+	        if(!isError && fromDate.isAfter(toDate)) {
 	            isError = true;
 	            msg = "Invalid date range";
 	        }
+	        
+	        if(!isError && category == null) {
+	        	isError = true;
+	        	msg = "Internal error !!!";
+	        }
 			
 	        if(!isError) {
-	        	account = regularAccountDAO.get(accountNo);
-	        	
-	        	if(account == null)
-	        		account = depositAccountDAO.get(accountNo);
 				
-	        	// Access for account differs for customer and employee.
+	        	// Get branch id associated with the account.
 	        	switch(role) {
-		        	case EMPLOYEE: 
-		        					if(account != null && account.getBranchId() == branchId)
-		        						isAccountExists = true;
+		        	case EMPLOYEE: 	branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 		        					break;
 		        	case CUSTOMER: 
-		        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-		        					if(account != null && account.getCustomerId() == customerId)
-		        						isAccountExists = true;
-		        					break;
-		        	default: isAccountExists = false;
+		        					customerId = (Long) req.getSession(false).getAttribute("id");
+		        					customer = customerDAO.get(customerId);
+		        					branchId = customer.getAccountBranchId(category, accountNo);
+		        	default: break;
 	        	}
 	        	
-				if(isAccountExists) {
-					transactions = transactionDAO.getAll(accountNo, fromDate, toDate);
-					req.setAttribute("actionType", 1);
-					req.setAttribute("account", account);
-					req.setAttribute("accountCategory", accountCategory);
-					req.setAttribute("transactions", transactions);
-					req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").forward(req, res);
-				} else {
-					isError = true;
-					msg = "Account not found !!!";
-				}
+	        	account = regularAccountDAO.get(accountNo, branchId);
+	        	
+	        	// Try getting account from deposit account dao.
+	        	if(account == null)
+	        		account = depositAccountDAO.get(accountNo, branchId);
+	        
+	        	if(account != null)
+	        		isAccountExists = true;
+	        }
+	        	
+			if(isAccountExists) {
+				transactions = transactionDAO.getAll(accountNo, fromDate, toDate);
+				req.setAttribute("actionType", 1);
+				req.setAttribute("account", account);
+				req.setAttribute("accountCategory", accountCategory);
+				req.setAttribute("transactions", transactions);
+				req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").forward(req, res);
+			} else {
+				isError = true;
+				msg = "Account not found !!!";
 			}
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());
@@ -107,12 +121,7 @@ public class AccountTransactionHistoryServlet extends HttpServlet {
 			
 			// Redirect to the respective URL from where request arrived.
 			if(isError || exceptionOccured) {
-				
-				switch(accountCategory) {
-					case 0: accountCategoryName = "account"; break;
-					case 1: accountCategoryName = "deposit"; break;
-					default: accountCategoryName = "";
-				}
+				accountCategoryName = AccountCategory.getName(category);
 				
 				userType = Role.getName(role);
 				
