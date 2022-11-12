@@ -6,9 +6,9 @@ import constant.RegularAccountType;
 import model.Nominee;
 
 public class SavingsAccount extends RegularAccount {
-    public static float intrestRate;
+    private static float intrestRate;
     private static int minimumBalance = 1000;
-//    public static int dailyLimit;
+    public static int dailyLimit;
     
     
     public SavingsAccount(long accountNo, long customerId, String customerName, 
@@ -30,10 +30,10 @@ public class SavingsAccount extends RegularAccount {
     public static int getMinimumBalance() {
     	return minimumBalance;
     }
-//    
-//    public int getDailyLimit() {
-//    	return dailyLimit;
-//    }
+    
+    public static int getDailyLimit() {
+    	return dailyLimit;
+    }
     
     // Setters
     public static void setIntrestRate(float intrestRate) {
@@ -42,5 +42,9 @@ public class SavingsAccount extends RegularAccount {
     
     public static void setMinimumBalance(int minBalance) {
     	SavingsAccount.minimumBalance = minBalance;
+    }
+    
+    public static void setDailyLimit(int dailyLimit) {
+    	SavingsAccount.dailyLimit = dailyLimit;
     }
 }

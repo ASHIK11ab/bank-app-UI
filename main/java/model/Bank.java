@@ -100,14 +100,4 @@ public class Bank {
     public void setAdmin(User admin) {
         this.admin = admin;
     }
-
-
-    public String toString() {
-        String repr = "";
-        repr += "\nBank Name         : " + name;
-        repr += "\nSupport Email     : " + supportEmail;
-        repr += "\nSupport Phone     : " + supportPhone;
-        repr += "\nWebsite URL       : " + websiteURL;
-        return repr;
-    }
 }

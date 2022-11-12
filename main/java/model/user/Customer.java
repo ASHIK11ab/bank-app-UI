@@ -1,8 +1,16 @@
 package model.user;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
+import constant.AccountCategory;
+import constant.BeneficiaryType;
+import constant.RegularAccountType;
 import model.Address;
+import model.Beneficiary;
+
 
 public class Customer extends User {
     private byte age;
@@ -16,18 +24,19 @@ public class Customer extends User {
     private Address address;
     private LocalDate removedDate;
     
-    /* private ArrayList<Beneficiary> ownBankBeneficiaries;
+    private ArrayList<Beneficiary> ownBankBeneficiaries;
     private ArrayList<Beneficiary> otherBankBeneficiaries;
-    private ArrayList<Nominee> nominees;
+    
     // Mapping of A/C(s) no's to corresponding branch Id.
-    private ConcurrentHashMap<Long, Integer> savingsAccounts; */
+    private ConcurrentHashMap<Long, Integer> savingsAccounts;
 
     // A customer can have only one current account.
     // A/C no, branch Id
-//    private long currentAccountNo;
-//    private int currentAccountBranchId;
+    private long currentAccountNo;
+    private int currentAccountBranchId;
 
-    // private HashMap<Long, Integer> depositAccounts;
+    // A/C no to branch id mapping.
+    private ConcurrentHashMap<Long, Integer> depositAccounts;
 
 
     public Customer(long id, String name, String password, long phone,
@@ -47,43 +56,60 @@ public class Customer extends User {
         this.address = address;
         this.removedDate = removedDate;
         
-//        this.ownBankBeneficiaries = new ArrayList<Beneficiary>();
-//        this.otherBankBeneficiaries = new ArrayList<Beneficiary>();
-//        this.nominees = new ArrayList<Nominee>();
-//        this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
-//
-//        this.currentAccountNo = -1;
-//        this.currentAccountBranchId = -1;
+        this.ownBankBeneficiaries = new ArrayList<Beneficiary>();
+        this.otherBankBeneficiaries = new ArrayList<Beneficiary>();
+        this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
+
+        this.currentAccountNo = -1;
+        this.currentAccountBranchId = -1;
         
-        // this.depositAccounts = new HashMap<Long, Integer>();
+        this.depositAccounts = new ConcurrentHashMap<Long, Integer>();
     }
 
 
     // Add a mapping of account no and branch (if exists).
-    /* public void addAccountBranchMapping(int type, long accountNo, int branchId) {        
-        switch(type) {
-            case AccountType.SAVINGS: this.savingsAccounts.put(accountNo, branchId);
-                                        break;
-            case AccountType.CURRENT: this.currentAccountNo = accountNo;
-                                      this.currentAccountBranchId = branchId;
-                                        break;
-            // case AccountType.DEPOSIT: this.depositAccounts.put(accountNo, branchId);
-            //                             break;
-        }
+    public void addAccountBranchMapping(AccountCategory category, int accountType, long accountNo, int branchId) {        
+    	RegularAccountType type;
+    	
+    	switch(category) {
+	    	case REGULAR: 
+	    					type = RegularAccountType.getType(accountType);
+				            switch(type) {
+					            case SAVINGS: this.savingsAccounts.put(accountNo, branchId);
+					                          break;
+					            case CURRENT: this.currentAccountNo = accountNo;
+					            			  this.currentAccountBranchId = branchId;
+					            			  break;
+				            }
+				            break;
+	    	case DEPOSIT: this.depositAccounts.put(accountNo, branchId);
+	    	              break;
+	    	default: break;
+    	}
     }
     
 
     // remove cached mapping of account no and branch (if exists).
-    public void removeAccountBranchMapping(int type, long accountNo) {     
-        switch(type) {
-            case AccountType.SAVINGS: this.savingsAccounts.remove(accountNo);
-                                        break;
-            case AccountType.CURRENT: this.currentAccountNo = -1;
-                                      this.currentAccountBranchId = -1;
-                                        break;
-            // case AccountType.DEPOSIT: this.depositAccounts.remove(accountNo);
-            //                             break;
-        }
+    public void removeAccountBranchMapping(AccountCategory category, long accountNo) {
+    	switch(category) {
+	    	case REGULAR: 
+				        	if(this.savingsAccounts.containsKey(accountNo)) {
+				        		this.savingsAccounts.remove(accountNo);
+				        	} else {
+					        	if(this.currentAccountNo == accountNo) {
+					        		this.currentAccountNo = -1;
+					        		this.currentAccountBranchId = -1;
+					        		return;
+					        	}	
+				        	}
+				            break;
+				            
+	    	case DEPOSIT:   if(this.depositAccounts.containsKey(accountNo)) {
+					    		this.depositAccounts.remove(accountNo);
+					    	}
+	    				    break;
+	    	default: break;
+		}
     }
 
 
@@ -95,7 +121,7 @@ public class Customer extends User {
 
 
     // Removes a beneficiary from cache.
-    private void removeBeneficiary(BeneficiaryType type, long beneficiaryId) {
+    public void removeBeneficiary(BeneficiaryType type, long beneficiaryId) {
         int index = 0;
         ArrayList<Beneficiary> beneficiaries;
         beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
@@ -107,9 +133,63 @@ public class Customer extends User {
                 ++index;
 
         beneficiaries.remove(index);
-    } */
+    }
+    
     
     // Getters
+    public int getAccountBranchId(AccountCategory category, long accountNo) {
+    	int branchId = -1;
+    	
+    	switch(category) {
+	    	case REGULAR: 
+				        	if(this.savingsAccounts.containsKey(accountNo)) {
+				        		branchId = this.savingsAccounts.get(accountNo);
+				        	} else {
+					        	if(this.currentAccountNo == accountNo) {
+					        		branchId = this.currentAccountBranchId;
+					        	}
+				        	}
+				        	
+				            break;
+				            
+	    	case DEPOSIT:   if(this.depositAccounts.containsKey(accountNo)) {
+					    		branchId = this.depositAccounts.get(accountNo);
+					    	}
+	    				    break;
+	    	default: break;
+		}
+    	
+    	return branchId;
+    }
+    
+    public Collection<Long> getSavingsAccounts() {
+    	return this.savingsAccounts.keySet();
+    }
+    
+    public Long getCurrentAccount() {
+    	return this.currentAccountNo;
+    }
+    
+    public Collection<Long> getDepositAccounts() {
+    	return this.depositAccounts.keySet();
+    }
+    
+    public ArrayList<Beneficiary> getBeneficiaries(BeneficiaryType type) {
+    	return (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    }
+    
+    // Returns a beneficiary with the given id.
+    public Beneficiary getBeneficiary(BeneficiaryType type, int id) {
+    	ArrayList<Beneficiary> beneficiaries;    	
+    	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    
+    	for(Beneficiary beneficiary : beneficiaries)
+    		if(beneficiary.getId() == id)
+    			return beneficiary;
+    	
+    	return null;
+    }
+    
     public byte getAge() {
     	return this.age;
     }
@@ -193,10 +273,5 @@ public class Customer extends User {
     
     public void setAddress(Address address) {
     	this.address = address;
-    }
-    
-    public String toString() {
-        String repr = "Role:     Customer";
-        return super.toString() + repr;
     }
 }
