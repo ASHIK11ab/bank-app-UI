@@ -91,6 +91,11 @@ public class AutoDebitRDRunnable implements Runnable {
 												if(debitFromAccount.getIsActive() && debitFromAccount.getBalance() >= monthlyInstallment) {
 													fromAccountBeforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, monthlyInstallment);
 													toAccountBeforeBalance = accountDAO.updateBalance(conn, rdAccountNo, 1, monthlyInstallment);
+													
+													// update cache.
+													debitFromAccount.deductAmount(monthlyInstallment);
+													rdAccount.addAmount(monthlyInstallment);
+													
 													transactionDAO.create(conn, 1, ("RD withdrawal for A/C: " + rdAccountNo), debitFromAccountNo, rdAccountNo, monthlyInstallment, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 												
 													// update RD recurring date to next month.

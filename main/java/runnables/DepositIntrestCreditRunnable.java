@@ -112,6 +112,10 @@ public class DepositIntrestCreditRunnable implements Runnable {
 									// credit intrest to bank.
 									fromAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);	// deduct from bank account
 									toAccountBeforeBalance = accountDAO.updateBalance(conn, accountNo, 1, intrestAmount);		// credit to deposit account
+									
+									// update in cache.
+									account.addAmount(intrestAmount);
+									
 									transactionDAO.create(conn, 1, ("Intrest credit for deposit A/C: " + accountNo), bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 									
 									stmt3.setInt(1, intrestCreditedMonthCnt);
