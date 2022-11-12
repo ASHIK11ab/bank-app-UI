@@ -77,16 +77,17 @@
 				
 				<!-- Display details for confirmation -->
 				<c:if test="${ requestScope.actionType == 1 }">
+					<h3>Customer Details:</h3>
+					<p>Customer Id: ${ debitFromAccount.getCustomerId() }</p>
+					<p>Customer Name: ${ debitFromAccount.getCustomerName() }</p>
 											
 					<h3>Debit from account Details:</h3>
 					<p>A/C No: ${ debitFromAccount.getAccountNo() }</p>
-					<p>Customer Id: ${ debitFromAccount.getCustomerId() }</p>
-					<p>Customer Name: ${ debitFromAccount.getCustomerName() }</p>
+					<p>Branch: ${ debitFromAccount.getBranchName() }</p>
 					
 					<h3>Payout account Details:</h3>
 					<p>A/C No: ${ payoutAccount.getAccountNo() }</p>
-					<p>Customer Id: ${ payoutAccount.getCustomerId() }</p>
-					<p>Customer Name: ${ payoutAccount.getCustomerName() }</p>
+					<p>Branch Name: ${ payoutAccount.getBranchName() }</p>
 					
 					<h3>Deposit details:</h3>
 					<p>Deposit type: ${ DepositAccountType.getName(depositType) }</p>

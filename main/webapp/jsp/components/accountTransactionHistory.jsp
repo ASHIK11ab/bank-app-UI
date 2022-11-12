@@ -23,7 +23,7 @@
 				<p>A/C No: ${ account.getAccountNo() }<p>
 				
 				<c:if test="${ requestScope.actionType == 1 }">				
-					<p>Balance: ${ account.getBalance() }</p>
+					<p>Balance: ${ String.format("%.2f", account.getBalance()) }</p>
 				</c:if>
 			</div>
 					
@@ -66,16 +66,16 @@
 											<td>${ transaction.getId() }</td>
 											<td>${ transaction.getDate() }</td>
 											<td>${ transaction.getDescription() }</td>
-											<td>${ transaction.getAmount() }</td>
+											<td>${ String.format("%.2f", transaction.getAmount()) }</td>
 											
 											<c:choose>
 												<c:when test="${ transaction.getFromAccountNo() == account.getAccountNo() }">
 													<td>Debit</td>
-													<td>${ transaction.getBalanceBeforeTransaction() - transaction.getAmount() }
+													<td>${ String.format("%.2f", transaction.getBalanceBeforeTransaction() - transaction.getAmount()) }
 												</c:when>
 												<c:when test="${ transaction.getToAccountNo() == account.getAccountNo() }">
 													<td>Credit</td>
-													<td>${ transaction.getBalanceBeforeTransaction() + transaction.getAmount() }
+													<td>${ String.format("%.2f", transaction.getBalanceBeforeTransaction() + transaction.getAmount()) }
 												</c:when>
 											</c:choose>
 										</tr>
