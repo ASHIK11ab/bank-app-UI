@@ -1,36 +1,65 @@
 package filter.manager;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import constant.Role;
+import dao.ManagerDAO;
+import util.Factory;
 
 
 public class ManagerAuthenticationFilter extends HttpFilter {
-	private static final long serialVersionUID = -8531833699294525517L;
-
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
-		Role role = (Role) req.getSession(false).getAttribute("role");
+		HttpSession session = req.getSession(false);
+		ManagerDAO managerDAO = Factory.getManagerDAO();
+		boolean isError = false, exceptionOccured = false;
+		long managerId;
+		int branchId;
+		Role role = null;
 		
-		/* Ensure that user has manager privileges, redirect to login page
-			if user does not have manager privileges */
-		if(role != Role.MANAGER) {
+		try {
+			role = (Role) session.getAttribute("role");
 			
-			switch(role) {
-				case ADMIN: res.sendRedirect("/bank-app/login/admin"); break;
-				case EMPLOYEE: res.sendRedirect("/bank-app/login/employee"); break;
-				case CUSTOMER: res.sendRedirect("/bank-app/login/customer"); break;
-				default: break;
-			}
-			
-			return;
+			/* Ensure that user has manager privileges, redirect to login page
+				if user does not have manager privileges */
+			if(role != Role.MANAGER) {
+				
+				switch(role) {
+					case ADMIN: res.sendRedirect("/bank-app/login/admin"); break;
+					case EMPLOYEE: res.sendRedirect("/bank-app/login/employee"); break;
+					case CUSTOMER: res.sendRedirect("/bank-app/login/customer"); break;
+					default: break;
+				}
+				
+				return;
+			} else {
+				managerId = (Long)  session.getAttribute("id");
+				branchId = (Integer) session.getAttribute("branch-id");
+				
+				// Check for valid manager, branch id's in session.
+				if(managerDAO.get(managerId, branchId) == null) {
+					isError = true;
+					session.invalidate();
+				} else {
+					chain.doFilter(req, res);
+				}
+			}		
+		} catch(ClassCastException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+		} finally {
+			if(isError || exceptionOccured)
+				res.sendRedirect("/bank-app/login/manager");				
 		}
-		
-		chain.doFilter(req, res);
 	}
 }
