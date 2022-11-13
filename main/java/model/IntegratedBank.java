@@ -2,7 +2,7 @@ package model;
 
 
 public class IntegratedBank {	
-	private int id;
+	private final int id;
     public String name;
     private String email;
     private long phone;

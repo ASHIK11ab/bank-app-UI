@@ -6,7 +6,7 @@ import cache.AppCache;
 import model.Nominee;
 
 public abstract class Account {
-    private long accountNo;
+    private final long accountNo;
     private long customerId;
     private String customerName;
     private Nominee nominee;
