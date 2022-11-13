@@ -28,7 +28,12 @@
 				<c:when test="${ sessionScope.role != Role.CUSTOMER }">
 					<p>Name: ${ user.getName() }</p>
 					<p>Phone: ${ user.getPhone() }</p>
-					<p>Email: ${ user.getEmail() }</p>				
+					<p>Email: ${ user.getEmail() }</p>
+					
+					<c:if test="${ sessionScope.role == Role.EMPLOYEE || sessionScope.role == Role.MANAGER }">
+						<p>Branch: ${ user.getBranchName() }</p>
+					</c:if>
+								
 				</c:when>
 			</c:choose>
 			
