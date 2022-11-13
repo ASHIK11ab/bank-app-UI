@@ -337,29 +337,6 @@
 		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
 		<url-pattern>/employee/customer/update</url-pattern>
 	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EmployeeCustomerPasswordResetServlet</servlet-name>
-		<servlet-class>servlet.employee.CustomerPasswordResetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmployeeCustomerPasswordResetServlet</servlet-name>
-		<url-pattern>/employee/customer/password-reset</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EmployeeSelfPasswordResetServlet</servlet-name>
-		<servlet-class>servlet.employee.PasswordResetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmployeeSelfPasswordResetServlet</servlet-name>
-		<url-pattern>/employee/password-reset</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EmployeeLogoutServlet</servlet-name>
-		<servlet-class>servlet.employee.LogoutServlet</servlet-class>
-	</servlet>
 	<!-- End of employee servlets -->
 	
 	
@@ -452,10 +429,6 @@
 	<servlet-mapping>
 		<servlet-name>CreateDepositServlet</servlet-name>
 		<url-pattern>/employee/deposit/create</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>EmployeeLogoutServlet</servlet-name>
-		<url-pattern>/employee/logout</url-pattern>
 	</servlet-mapping>
 	<!-- End of employee servlet mappings -->
 	

@@ -88,6 +88,9 @@ public class ProfileServlet extends HttpServlet {
 						msg = "Page not found !!!";
 			}
 			
+		} catch(NullPointerException e) {
+			exceptionOccured = true;
+			msg = e.getMessage();	
 		} catch(SQLException e) {
 			exceptionOccured = true;
 			msg = e.getMessage();

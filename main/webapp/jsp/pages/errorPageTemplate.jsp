@@ -11,10 +11,10 @@
 	</jsp:include>
 </head>
 <body>
-	<c:set var="userType" value="${ Role.getName(sessionScope.role) }" />
-	
-	<jsp:include page="/jsp/${ userType }/components/navbar.jsp" />
-	
+	<c:if test="${ sessionScope.role != null }">
+		<c:set var="userType" value="${ Role.getName(sessionScope.role) }" />
+		<jsp:include page="/jsp/${ userType }/components/navbar.jsp" />
+	</c:if>
 	<main class="container">
 		<div class="wrapper">
 			<h1 style="color: red">${ param.text }</h1>
