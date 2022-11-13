@@ -8,13 +8,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import util.Util;
+
 public class InitiateAccountCreationServlet extends HttpServlet {
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		req.getRequestDispatcher("/jsp/employee/initiateAccountCreation.jsp").include(req, res);
 	}
 	
-	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
+
+		String msg = "";
+		boolean isError = false, exceptionOccured = false;
 		int customerType, accountType, cardType;
 		
 		try {
@@ -30,14 +35,21 @@ public class InitiateAccountCreationServlet extends HttpServlet {
         		case 0: req.getRequestDispatcher("/jsp/employee/createCustomer.jsp").forward(req, res); break;
         		case 1: req.getRequestDispatcher("/jsp/employee/createAccount.jsp").forward(req, res); break;
         		default:
-        			out.println("<div class='notification danger'>" + "invalid customer type !!!" + "</div>");
-        			doGet(req, res);
+        			isError = true;
+        			msg = "invalid customer type !!!";
         	}
         	
 		} catch(NumberFormatException e) {
 			System.out.println(e.getMessage());
-			out.println("<div class='notification danger'>" + "internal error !!!" + "</div>");
+			exceptionOccured = true;
+			msg = "internal error !!!";
 		} finally {
+			
+			if(isError || exceptionOccured) {
+				out.println(Util.createNotification(msg, "danger"));
+				doGet(req, res);
+			}
+			
 			out.close();
 		}
 	}
