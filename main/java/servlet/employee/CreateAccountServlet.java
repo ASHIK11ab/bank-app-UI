@@ -20,6 +20,7 @@ import dao.TransactionDAO;
 import model.user.Customer;
 import model.account.RegularAccount;
 import util.Factory;
+import util.Util;
 
 public class CreateAccountServlet extends HttpServlet {
 	
@@ -37,7 +38,7 @@ public class CreateAccountServlet extends HttpServlet {
 		RegularAccount account = null;
 		RegularAccountType type;
 		String msg = "", customerName;
-		boolean isEligibleForAccount = true;
+		boolean isEligibleForAccount = true, isError = false, exceptionOccured = false;
 		long customerId;
 		int accountType, cardType, branchId, actionType;
 		
@@ -57,13 +58,13 @@ public class CreateAccountServlet extends HttpServlet {
 				req.setAttribute("cardType", cardType);
 				
 				if(customer == null) {
-					out.println("<div class='notification danger'>" + "invalid customer id !!!" + "</div>");
+					isError = true;
+					msg = "invalid customer id !!!";
 				} else {
 					req.setAttribute("customer", customer);
+					req.getRequestDispatcher("/jsp/employee/createAccount.jsp").include(req, res);
 				}
 				
-				req.getRequestDispatcher("/jsp/employee/createAccount.jsp").include(req, res);
-
 			} else {
 				
 				conn = Factory.getDataSource().getConnection();
@@ -79,7 +80,8 @@ public class CreateAccountServlet extends HttpServlet {
                     // Customer aldready has a current account.
                     if(rs.next()) {
                         isEligibleForAccount = false;
-                        msg = "Customer aldready has a current account in bank !!!";
+                        isError = true;
+                        msg = "Customer aldready has a current account in bank <br> Cannot create account !!!";
                     }
                 } else {
                     stmt = conn.prepareStatement("SELECT ra.account_no FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.customer_id = ? AND a.branch_id = ? AND ra.type_id = ?");
@@ -91,6 +93,7 @@ public class CreateAccountServlet extends HttpServlet {
                     // Customer aldreay has a savings account in this branch.
                     if(rs.next()) {
                         isEligibleForAccount = false;
+                        isError = true;
                         msg = "Customer aldready has a savings account in this branch !!!";
                     }
                 }
@@ -102,18 +105,21 @@ public class CreateAccountServlet extends HttpServlet {
             		transactionDAO.create(conn, TransactionType.CASH.id, ("Deposit to A/C: " + account.getAccountNo()), null, account.getAccountNo(), account.getBalance(), false, true, 0, 0);
 					req.setAttribute("account", account);
 					req.getRequestDispatcher("/jsp/employee/accountCreationSuccess.jsp").forward(req, res);
-                } else {
-    				req.setAttribute("msg", msg);
-    				req.getRequestDispatcher("/jsp/employee/accountCreationFailure.jsp").forward(req, res);
                 }
 			}
 			
 		} catch(NumberFormatException e) {
-			out.println("<div class='notification danger'>" + "internal error !!!" + "</div>");
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Internal error";
 		} catch(ClassCastException e) {
-			out.println("<div class='notification danger'>" + "internal error !!!" + "</div>");
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Internal error";
 		} catch(SQLException e) {
-			out.println("<div class='notification danger'>" + e.getMessage() + "</div>");
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = e.getMessage();
 		} finally {
 			
 			try {
@@ -130,6 +136,11 @@ public class CreateAccountServlet extends HttpServlet {
 				if(conn != null)
 					conn.close();
 			} catch(SQLException e) { System.out.println(e.getMessage()); }
+			
+			if(isError || exceptionOccured) {
+				out.println(Util.createNotification(msg, "danger"));
+				req.getRequestDispatcher("/jsp/employee/initiateAccountCreation.jsp").include(req, res);
+			}
 			
 			out.close();
 		}
