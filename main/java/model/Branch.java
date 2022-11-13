@@ -1,5 +1,8 @@
 package model;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import constant.AccountCategory;
@@ -88,6 +91,20 @@ public class Branch {
 
     
     // Getters
+    
+    public Collection<SavingsAccount> getSavingsAccounts() {
+        return this.savingsAccounts.values();
+    }
+
+
+    public Collection<CurrentAccount> getCurrentAccounts() {
+        return this.currentAccounts.values();
+    }
+
+     public Collection<DepositAccount> getDepositAccounts() {
+         return this.depositAccounts.values();
+     }
+    
     // Returns a account to the branch.
     public Account getAccount(AccountCategory category, long accountNo) {
         Account account = null;
