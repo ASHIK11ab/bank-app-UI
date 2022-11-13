@@ -18,6 +18,7 @@ import dao.ManagerDAO;
 import model.Branch;
 import model.user.Employee;
 import util.Factory;
+import util.Util;
 
 
 public class LoginServlet extends HttpServlet {
@@ -28,12 +29,12 @@ public class LoginServlet extends HttpServlet {
 		req.setAttribute("forRole", Role.MANAGER);
 		req.setAttribute("title", "Manager Login");
 		req.setAttribute("actionURL", req.getRequestURI());
-		req.getRequestDispatcher("/jsp/components/loginForm.jsp").forward(req, res);
+		req.getRequestDispatcher("/jsp/components/loginForm.jsp").include(req, res);
 	}
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		PrintWriter out;
+		PrintWriter out = res.getWriter();
 		ManagerDAO managerDAO = Factory.getManagerDAO();
 		
 		Employee manager = null;
@@ -54,7 +55,6 @@ public class LoginServlet extends HttpServlet {
 		try {
 			manager = managerDAO.get(id, branchId); 
 		} catch(SQLException e) {
-			out = res.getWriter();
 			res.setStatus(500);
 			out.println("<h1>Internal error</h1>");
 			out.close();
@@ -70,7 +70,7 @@ public class LoginServlet extends HttpServlet {
         	session.setAttribute("role", Role.MANAGER);
             res.sendRedirect("/bank-app/manager/dashboard");
         } else {
-			req.setAttribute("error", "Invalid id or password");
+			out.println(Util.createNotification("Invalid id or password", "danger"));
             doGet(req, res);
         }
 	}
