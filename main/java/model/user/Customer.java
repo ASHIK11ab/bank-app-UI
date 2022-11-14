@@ -3,6 +3,7 @@ package model.user;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import constant.AccountCategory;
@@ -24,8 +25,8 @@ public class Customer extends User {
     private Address address;
     private LocalDate removedDate;
     
-    private ArrayList<Beneficiary> ownBankBeneficiaries;
-    private ArrayList<Beneficiary> otherBankBeneficiaries;
+    private TreeSet<Beneficiary> ownBankBeneficiaries;
+    private TreeSet<Beneficiary> otherBankBeneficiaries;
     
     // Mapping of A/C(s) no's to corresponding branch Id.
     private ConcurrentHashMap<Long, Integer> savingsAccounts;
@@ -56,8 +57,8 @@ public class Customer extends User {
         this.address = address;
         this.removedDate = removedDate;
         
-        this.ownBankBeneficiaries = new ArrayList<Beneficiary>();
-        this.otherBankBeneficiaries = new ArrayList<Beneficiary>();
+        this.ownBankBeneficiaries = new TreeSet<Beneficiary>();
+        this.otherBankBeneficiaries = new TreeSet<Beneficiary>();
         this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
 
         this.currentAccountNo = -1;
@@ -114,7 +115,7 @@ public class Customer extends User {
 
 
     public void addBeneficiary(BeneficiaryType type, Beneficiary beneficiary) {
-        ArrayList<Beneficiary> beneficiaries;
+        TreeSet<Beneficiary> beneficiaries;
         beneficiaries =  (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
         beneficiaries.add(beneficiary);
     }
@@ -122,17 +123,29 @@ public class Customer extends User {
 
     // Removes a beneficiary from cache.
     public void removeBeneficiary(BeneficiaryType type, long beneficiaryId) {
-        int index = 0;
-        ArrayList<Beneficiary> beneficiaries;
-        beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-
-        for(Beneficiary beneficiary : beneficiaries)
-            if(beneficiaryId == beneficiary.getId())
-                break;
-            else
-                ++index;
-
-        beneficiaries.remove(index);
+    	TreeSet<Beneficiary> beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+        
+    	Beneficiary beneficiary = this.getBeneficiary(type, beneficiaryId);
+        
+    	beneficiaries.remove(beneficiary);
+    }
+    
+    
+    public TreeSet<Beneficiary> getBeneficiaries(BeneficiaryType type) {
+    	return (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    }
+    
+    
+    // Returns a beneficiary with the given id.
+    public Beneficiary getBeneficiary(BeneficiaryType type, long id) {
+    	TreeSet<Beneficiary> beneficiaries;    	
+    	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    
+    	for(Beneficiary beneficiary : beneficiaries)
+    		if(beneficiary.getId() == id)
+    			return beneficiary;
+    	
+    	return null;
     }
     
     
@@ -172,22 +185,6 @@ public class Customer extends User {
     
     public Collection<Long> getDepositAccounts() {
     	return this.depositAccounts.keySet();
-    }
-    
-    public ArrayList<Beneficiary> getBeneficiaries(BeneficiaryType type) {
-    	return (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-    }
-    
-    // Returns a beneficiary with the given id.
-    public Beneficiary getBeneficiary(BeneficiaryType type, int id) {
-    	ArrayList<Beneficiary> beneficiaries;    	
-    	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-    
-    	for(Beneficiary beneficiary : beneficiaries)
-    		if(beneficiary.getId() == id)
-    			return beneficiary;
-    	
-    	return null;
     }
     
     public byte getAge() {
