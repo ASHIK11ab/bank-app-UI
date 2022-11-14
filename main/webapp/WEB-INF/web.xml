@@ -454,6 +454,28 @@
 		<servlet-name>CustomerDashboardServlet</servlet-name>
 		<url-pattern>/customer/dashboard</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>BeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.BeneficiaryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/beneficiaries/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>CreateEditBeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.CreateEditBeneficiaryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CreateEditBeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/add-beneficiary</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CreateEditBeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/edit-beneficiary</url-pattern>
+	</servlet-mapping>
 	<!-- End of customer servlets and mappings -->
 	
 	<!-- Filters -->
