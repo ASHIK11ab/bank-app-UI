@@ -24,6 +24,7 @@ public class Factory {
 	private static RegularAccountDAO regularAccountDAO;
 	private static DepositAccountDAO depositAccountDAO;
 	private static DebitCardDAO debitCardDAO;
+	private static BeneficiaryDAO beneficiaryDAO;
 	
 	public static void init() throws Exception {
 		try {
@@ -42,6 +43,7 @@ public class Factory {
 			accountDAO = new AccountDAO();
 			userDAO = new UserDAO();
 			debitCardDAO = new DebitCardDAO();
+			beneficiaryDAO = new BeneficiaryDAO();
 		} catch(NamingException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -99,5 +101,9 @@ public class Factory {
 	
 	public static DepositAccountDAO getDepositAccountDAO() {
 		return depositAccountDAO;
+	}
+	
+	public static BeneficiaryDAO getBeneficiaryDAO() {
+		return beneficiaryDAO;
 	}
 }
