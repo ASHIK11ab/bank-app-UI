@@ -92,8 +92,32 @@ public class ProfileServlet extends HttpServlet {
 										req.getRequestDispatcher("/jsp/components/resetPassword.jsp").include(req, res);
 										break;
 				default:
-						isError = true;
-						msg = "Page not found !!!";
+						pageNotFound = true;
+			}
+			
+			// Role specific action.
+			if(pageNotFound) {
+				pageNotFound = false;
+				isError = false;
+				
+				switch(role) {
+					case CUSTOMER: 
+									switch(action) {
+										case "update": 
+														req.removeAttribute("user");
+														req.setAttribute("customer", customer);
+														req.getRequestDispatcher("/jsp/components/updateCustomer.jsp").forward(req, res);
+										               break;
+										default: pageNotFound = true;
+									}
+									break;
+					default: pageNotFound = true;
+				}
+			}
+			
+			if(pageNotFound) {
+				isError = true;
+				msg = "Page not found !!!";
 			}
 			
 		} catch(NumberFormatException e) {

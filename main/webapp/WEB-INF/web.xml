@@ -109,6 +109,19 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>UpdateCustomerServlet</servlet-name>
+		<servlet-class>servlet.shared.UpdateCustomerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UpdateCustomerServlet</servlet-name>
+		<url-pattern>/employee/customer/update</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>UpdateCustomerServlet</servlet-name>
+		<url-pattern>/customer/update</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>LogoutServlet</servlet-name>
 		<servlet-class>servlet.shared.LogoutServlet</servlet-class>
 	</servlet>
@@ -327,15 +340,6 @@
 	<servlet-mapping>
 		<servlet-name>CustomerServlet</servlet-name>
 		<url-pattern>/employee/customer/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
-		<servlet-class>servlet.employee.UpdateCustomerServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
-		<url-pattern>/employee/customer/update</url-pattern>
 	</servlet-mapping>
 	<!-- End of employee servlets -->
 	
