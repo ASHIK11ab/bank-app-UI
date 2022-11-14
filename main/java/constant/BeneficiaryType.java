@@ -10,9 +10,17 @@ public enum BeneficiaryType {
 	
 	public static BeneficiaryType getType(int id) {
 		switch(id) {
-			case 1: return OWN_BANK;
-			case 2: return OTHER_BANK;
+			case 0: return OWN_BANK;
+			case 1: return OTHER_BANK;
 			default: return null;
+		}
+	}
+	
+	public static int getId(BeneficiaryType type) {
+		switch(type) {
+			case OWN_BANK: return 0;
+			case OTHER_BANK: return 1;
+			default: return -1;
 		}
 	}
 }

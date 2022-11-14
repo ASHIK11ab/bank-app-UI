@@ -226,7 +226,7 @@ public class CustomerDAO {
                         beneficiaryName = rs3.getString("name");
                         beneficiaryNickName = rs3.getString("nick_name");
 
-                        beneficiary = new Beneficiary(beneficiaryId, bankId, beneficiaryAccountNo, beneficiaryIfsc, beneficiaryName, beneficiaryNickName);
+                        beneficiary = new Beneficiary(beneficiaryId, beneficiaryAccountNo, beneficiaryName, beneficiaryNickName, bankId, beneficiaryIfsc);
                         customer.addBeneficiary(BeneficiaryType.OTHER_BANK, beneficiary);
                     }
 
@@ -266,11 +266,27 @@ public class CustomerDAO {
             try {
                 if(rs != null)
                     rs.close();
+				if(rs2 != null)
+					rs2.close();
+				if(rs3 != null)
+					rs3.close();
+				if(rs4 != null)
+					rs4.close();
+				if(rs5 != null)
+					rs5.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {
                 if(stmt != null)
                     stmt.close();
+				if(stmt2 != null)
+					stmt2.close();
+				if(stmt3 != null)
+					stmt3.close();
+				if(stmt4 != null)
+					stmt4.close();
+				if(stmt5 != null)
+					stmt5.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {

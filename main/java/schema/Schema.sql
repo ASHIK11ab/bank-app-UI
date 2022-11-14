@@ -217,7 +217,7 @@ CREATE TABLE other_bank_beneficiary (
     customer_id BIGINT NOT NULL,
     bank_id SMALLINT NOT NULL,
     account_no BIGINT NOT NULL,
-    ifsc VARCHAR(30) NOT NULL,
+    ifsc VARCHAR(11) NOT NULL,
     name VARCHAR(20) NOT NULL,
     nick_name VARCHAR(15) NOT NULL,
     FOREIGN KEY (bank_id) REFERENCES banks (id) ON DELETE CASCADE,

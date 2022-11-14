@@ -9,7 +9,9 @@
 </head>
 <body>
 	<jsp:include page="/jsp/customer/components/navbar.jsp" />
-
-	<h1>In customer Dashboard</h1>
+	
+	<main class="container">
+		<h1>In customer Dashboard</h1>
+	</main>
 </body>
 </html>
