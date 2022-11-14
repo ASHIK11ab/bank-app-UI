@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.Role;
 import dao.CustomerDAO;
 import model.user.Customer;
 import util.Factory;
@@ -55,7 +56,15 @@ public class CustomerServlet extends HttpServlet {
 				switch(action) {
 					case "view": req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res); break;
 					case "update": req.getRequestDispatcher("/jsp/employee/updateCustomer.jsp").include(req, res); break;
-					case "password-reset": req.getRequestDispatcher("/jsp/employee/resetCustomerPassword.jsp").include(req, res); break;
+					case "password-reset": 
+											req.setAttribute("id", customerId);
+											req.setAttribute("name", customer.getName());
+											req.setAttribute("forRole", Role.CUSTOMER);
+											// reset login password.
+											req.setAttribute("type", 0);
+											req.setAttribute("redirectURI", String.format("/bank-app/employee/customer/%d/view", customerId));
+											req.getRequestDispatcher("/jsp/components/resetPassword.jsp").include(req, res); 
+											break;
 					default:
 							isError = true;
 							msg = "Page not found !!!";

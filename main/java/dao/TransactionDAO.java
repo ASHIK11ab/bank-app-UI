@@ -106,7 +106,7 @@ public class TransactionDAO {
 
         try {
             conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND (date BETWEEN ? AND ?)");
+            stmt = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND (date BETWEEN ? AND ?) ORDER BY id");
             stmt.setLong(1, accountNo);
             stmt.setLong(2, accountNo);
             stmt.setLong(3, accountNo);

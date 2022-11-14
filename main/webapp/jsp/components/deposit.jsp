@@ -24,6 +24,9 @@
 		</c:when>
 	</c:choose>
 	
+	<p><strong>Debit From A/C: ${ account.getDebitFromAccountNo() }</strong></p>
+	<p><strong>Payout A/C: ${ account.getPayoutAccountNo() }</strong></p>
+	
 	<c:if test="${ account.isClosed() }">
 		<strong>Deposit closed on: ${ account.getClosingDate() }</strong>
 	</c:if>

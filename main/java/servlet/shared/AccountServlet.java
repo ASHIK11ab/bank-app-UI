@@ -9,9 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.AccountCategory;
 import constant.Role;
+import dao.CustomerDAO;
 import dao.RegularAccountDAO;
 import model.account.RegularAccount;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
@@ -21,8 +24,10 @@ public class AccountServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		
+		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		RegularAccount account = null;
+		Customer customer = null;
 		
 		Role role = null;
 		boolean isError = false, exceptionOccured = false, pageFound = true, isAccessGranted = false;
@@ -49,24 +54,29 @@ public class AccountServlet extends HttpServlet {
 			result = path.split("/");
 			
 			role = (Role) req.getSession(false).getAttribute("role"); 
-			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			
 			accountNo = Long.parseLong(result[0]);
 			action = result[1];
-			
-			account = accountDAO.get(accountNo);
-			
+						
         	// Access for account differs for customer and employee.
         	switch(role) {
 	        	case EMPLOYEE: 
-	        					if(account != null && account.getBranchId() == branchId)
+	    						branchId = (Integer) req.getSession(false).getAttribute("branch-id");
+	    						account = accountDAO.get(accountNo, branchId);
+
+	        					if(account != null)
 	        						isAccessGranted = true;
 	        					break;
 	        	case CUSTOMER: 
 	        					// customer cannot access closed account.
-	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-	        					if(account != null && account.getCustomerId() == customerId && !account.isClosed())
+	        					customerId = (Long) req.getSession(false).getAttribute("id");
+	        					customer = customerDAO.get(customerId);
+	        					branchId = customer.getAccountBranchId(AccountCategory.REGULAR, accountNo);
+	        					
+        						account = accountDAO.get(accountNo, branchId);
+	        					if(account != null && !account.isClosed())
 	        						isAccessGranted = true;
+	        					
 	        					break;
 	        	default: isAccessGranted = false;
         	}

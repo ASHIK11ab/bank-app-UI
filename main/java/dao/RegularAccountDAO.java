@@ -8,9 +8,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
+import cache.AppCache;
+import constant.AccountCategory;
 import constant.RegularAccountType;
+import model.Branch;
 import model.Nominee;
 import model.account.*;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
@@ -19,10 +23,12 @@ public class RegularAccountDAO {
 										String customerName, int branchId, 
 										RegularAccountType accountType, int cardType,
 										Nominee nominee) throws SQLException {
-		PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null;
+		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs = null;
 		
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
+		
+		Customer customer = null;
 		LocalDate today = LocalDate.now();
 		RegularAccount account = null;
 		boolean exceptionOccured = false;
@@ -65,6 +71,15 @@ public class RegularAccountDAO {
 															nominee, branchId, balance, today, null, true); break;
 	        }
 	        
+			// update in cache if exists.
+			customer = AppCache.getBank().getCustomer(customerId);
+			
+			if(customer != null) {
+				synchronized (customer) {
+					customer.addAccountBranchMapping(AccountCategory.REGULAR, accountType.id, generatedAccountNo, branchId);
+				}
+			}
+	        
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
@@ -90,53 +105,71 @@ public class RegularAccountDAO {
 	}
 	
 	
-	public RegularAccount get(long accountNo) throws SQLException {
+	public RegularAccount get(long accountNo, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		
+		Branch branch = AppCache.getBranch(branchId);
 		RegularAccount account = null;
 		LocalDate openingDate, closingDate;
 		boolean exceptionOccured = false, isActive;
 		String msg = "", customerName = "";
 		float balance;
 		long customerId;
-		int type_id = -1, branchId;
+		int type_id = -1;
 		
+		if(branch == null) {
+			return null;
+		}
+				
 		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt1 = conn.prepareStatement("SELECT * FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.account_no = ?");
-			stmt2 = conn.prepareStatement("SELECT name FROM customer WHERE id = ?");
-			
-			stmt1.setLong(1, accountNo);
-			rs1 = stmt1.executeQuery();
-			
-			if(rs1.next()) {
-				type_id = rs1.getInt("type_id");
+			account = (RegularAccount) branch.getAccount(AccountCategory.REGULAR, accountNo);
+			// If not found in branch load from db.
+			if(account == null) {
+				conn = Factory.getDataSource().getConnection();
+				stmt1 = conn.prepareStatement("SELECT * FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.account_no = ? AND a.branch_id = ?");
+				stmt2 = conn.prepareStatement("SELECT name FROM customer WHERE id = ?");
 				
-		        customerId= rs1.getLong("customer_id");
-		        branchId = rs1.getInt("branch_id");
-		        balance = rs1.getFloat("balance");
-		        openingDate = rs1.getDate("opening_date").toLocalDate();
-		        isActive = rs1.getBoolean("active");
-		        
-		        if(rs1.getDate("closing_date") != null)
-		        	closingDate = rs1.getDate("closing_date").toLocalDate();
-		        else
-		        	closingDate = null;
-		        
-				stmt2.setLong(1, customerId);
-				rs2 = stmt2.executeQuery();
-				if(rs2.next())
-					customerName = rs2.getString("name");
+				stmt1.setLong(1, accountNo);
+				stmt1.setInt(2, branchId);
+				rs1 = stmt1.executeQuery();
 				
-				// update getting nominee
-				switch(RegularAccountType.getType(type_id)) {
-					case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
-					case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
-					default: return null;
+				if(rs1.next()) {
+					type_id = rs1.getInt("type_id");
+					
+			        customerId= rs1.getLong("customer_id");
+			        balance = rs1.getFloat("balance");
+			        openingDate = rs1.getDate("opening_date").toLocalDate();
+			        isActive = rs1.getBoolean("active");
+			        
+			        if(rs1.getDate("closing_date") != null)
+			        	closingDate = rs1.getDate("closing_date").toLocalDate();
+			        else
+			        	closingDate = null;
+			        
+					stmt2.setLong(1, customerId);
+					rs2 = stmt2.executeQuery();
+					if(rs2.next())
+						customerName = rs2.getString("name");
+					
+					// update getting nominee
+					switch(RegularAccountType.getType(type_id)) {
+						case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
+						case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
+						default: return null;
+					}
+					// ADD to cache.
+					branch.addAccount(AccountCategory.REGULAR, account.getTypeId(), account);
+					System.out.println("fetched from db regular account");
 				}
-			}	        
+			} else {
+				System.out.println("served from cache regular account");
+			}
+		} catch(ClassCastException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "internal error";		
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;

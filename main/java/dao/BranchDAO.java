@@ -5,155 +5,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.Collection;
 
+import cache.AppCache;
 import model.Address;
 import model.Branch;
-import model.user.*;
 import util.Factory;
 
 
 public class BranchDAO {
-	public LinkedList<Branch> getAll() throws SQLException {
-		LinkedList<Branch> branches = new LinkedList<Branch>();
-		Branch branch = null;
-		Employee manager = null;
-		Address address = null;
-		
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		
-		boolean exceptionOccured = false;
-        String doorNo, street, city, state, msg="";
-        String managerName, managerEmail, managerPassword;
-        long managerId, managerPhone;
-        int pincode;
-		
-		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id ORDER BY b.name");
-			
-			while(rs.next()) {
-                doorNo = rs.getString("door_no");
-                street = rs.getString("street");
-                city = rs.getString("city");
-                state = rs.getString("state");
-                pincode = rs.getInt("pincode");
-                
-				address = new Address(doorNo, street, city, state, pincode);
-				branch = new Branch(rs.getInt("id"), rs.getString("name"), address) ;
-                
-                managerId = rs.getLong("manager_id");
-                managerName = rs.getString("manager_name");
-                managerPhone = rs.getLong("manager_phone");
-                managerEmail = rs.getString("manager_email");
-                managerPassword = rs.getString("manager_password");
-                
-                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branch.getId(), branch.getName());
-                branch.assignManager(manager);
-                
-                branches.add(branch);
-			}
-		} catch(SQLException e) {
-			System.out.println(e.getMessage());
-			exceptionOccured = true;
-			msg = e.getMessage();
-		} finally {
-            try {
-                if(rs != null)
-                    rs.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-        }
-		
-		if(exceptionOccured)
-			throw new SQLException(msg);
-		else
-			return branches;
+	public Collection<Branch> getAll() {
+		return AppCache.getBank().getBranches();
 	}
 	
 	
-	public Branch get(int id) throws SQLException {
-		Branch branch = null;
-		Employee manager = null;
-		Address address = null;
-		
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		boolean exceptionOccured = false;
-        String doorNo, street, city, state, msg="";
-        String managerName, managerEmail, managerPassword;
-        long managerId, managerPhone;
-        int pincode;
-		
-		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.prepareStatement("SELECT b.id, b.name, door_no, street, city, state, pincode, m.id as manager_id, m.name as manager_name, m.email as manager_email, m.phone as manager_phone, m.password as manager_password FROM branch b JOIN manager m ON b.id = m.branch_id WHERE branch_id = ?");
-			stmt.setInt(1, id);
-			rs = stmt.executeQuery();
-			
-			if(rs.next()) {
-                doorNo = rs.getString("door_no");
-                street = rs.getString("street");
-                city = rs.getString("city");
-                state = rs.getString("state");
-                pincode = rs.getInt("pincode");
-                
-				address = new Address(doorNo, street, city, state, pincode);
-				branch = new Branch(rs.getInt("id"), rs.getString("name"), address) ;
-                
-                managerId = rs.getLong("manager_id");
-                managerName = rs.getString("manager_name");
-                managerPhone = rs.getLong("manager_phone");
-                managerEmail = rs.getString("manager_email");
-                managerPassword = rs.getString("manager_password");
-                
-                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branch.getId(), branch.getName());
-                branch.assignManager(manager);
-			}
-		} catch(SQLException e) {
-			System.out.println(e.getMessage());
-			exceptionOccured = true;
-			msg = e.getMessage();
-		} finally {
-            try {
-                if(rs != null)
-                    rs.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-        }
-		
-		if(exceptionOccured)
-			throw new SQLException(msg);
-		else
-			return branch;
+	public Branch get(int id) {
+		return AppCache.getBank().getBranch(id);
 	}
 	
 	
 	// Adds a new branch to DB.
-	public Branch create(Connection conn, String name, Address address) throws SQLException {
+	public Branch createUpdate(Connection conn, String name, Address address, byte type, int id) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -163,26 +35,42 @@ public class BranchDAO {
 		int branchId = 0;
 				
 		try {
-            stmt = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, name);
+			if(type == 0)
+				stmt = conn.prepareStatement("INSERT INTO branch (name, door_no, street, city, state, pincode) values (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			else
+	            stmt = conn.prepareStatement("UPDATE branch SET name = ?, door_no = ?, street = ?, city = ?, state = ?, pincode = ? WHERE id = ?");
+
+			stmt.setString(1, name);
             stmt.setString(2, address.getDoorNo());
             stmt.setString(3, address.getStreet());
             stmt.setString(4, address.getCity());
             stmt.setString(5, address.getState());
             stmt.setLong(6, address.getPincode());
-
+            
+            if(type == 1)
+            	stmt.setInt(7, id);
+            
             stmt.executeUpdate();
-            rs = stmt.getGeneratedKeys();
-
-            if(rs.next()) {
-                branchId = rs.getInt(1);
+            
+            if(type == 0) {
+	            rs = stmt.getGeneratedKeys();
+	
+	            if(rs.next()) {
+	                branchId = rs.getInt(1);
+	            }
+	            branch = new Branch(branchId, name, address);
+	            AppCache.getBank().addBranch(branch);
+            } else {
+            	branchId = id;
+            	branch = AppCache.getBranch(branchId);
+            	branch.setName(name);
+            	branch.setAddress(address);
             }
-
-            branch = new Branch(branchId, name, address);
+            
         } catch(SQLException e) {
         	System.out.println(e.getMessage());
             exceptionOccured = true;
-            msg = "Error adding branch";
+            msg = "Internal error";
         } finally {
             try {
                 if(rs != null)
@@ -213,6 +101,9 @@ public class BranchDAO {
 			stmt = conn.prepareStatement("DELETE FROM branch WHERE id = ?");
 			stmt.setInt(1,  id);
 			stmt.executeUpdate();
+			
+			// remove from cache.
+			AppCache.getBank().removeBranch(id);
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;

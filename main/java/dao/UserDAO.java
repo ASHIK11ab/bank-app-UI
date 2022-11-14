@@ -7,15 +7,24 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import constant.Role;
+import model.user.Customer;
 import model.user.Employee;
+import model.user.User;
 import util.Factory;
 import util.Util;
 
 
 public class UserDAO {
-	public void updatePassword(long id, String password, Role role, byte type) throws SQLException {
+	public void updatePassword(long id, String password, Role role, byte type, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
+		
+		User user = null;
+		Customer customer = null;
+		AdminDAO adminDAO = Factory.getAdminDAO();
+		ManagerDAO managerDAO = Factory.getManagerDAO();
+		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
+		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		
 		boolean exceptionOccured = false;
 		String msg = "";
@@ -40,6 +49,24 @@ public class UserDAO {
             stmt.setString(1, password);
             stmt.setLong(2, id);
             stmt.executeUpdate();
+            
+            // update in cache.
+            switch(role) {
+	            case ADMIN: user = adminDAO.get(id); break;
+	            case MANAGER: user = managerDAO.get(id, branchId); break;
+	            case EMPLOYEE: user = employeeDAO.get(id, branchId); break;
+	            case CUSTOMER: customer = customerDAO.get(id); break;
+            }
+            
+            // if user exists in cache, update.
+            if((role != Role.CUSTOMER && user != null) || (role == Role.CUSTOMER && customer != null))
+            	if(role == Role.CUSTOMER) {
+            		if(type == 0)
+            			customer.setPassword(password);
+            		else
+            			customer.setTransPassword(password);
+            	} else
+            		user.setPassword(password);
             
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());

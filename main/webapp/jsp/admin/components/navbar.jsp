@@ -6,9 +6,8 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/admin/branches">view branches</a>
-					<a href="/bank-app/admin/branches/branch/create">add branch</a>
+					<a href="/bank-app/admin/branches/create">create branch</a>
 					<a href="/bank-app/admin/branches/merge">merge branches</a>
-					<a href="/bank-app/admin/managers/manager/assign">assign new manager</a>
 				</li>
 			</ul>
 		</div>
@@ -17,7 +16,7 @@
 			<ul class="links">
 				<li>
 					<a href="/bank-app/admin/integrated-banks">view integrated banks</a>
-					<a href="/bank-app/admin/integrated-banks/bank/create">add integrated bank</a>
+					<a href="/bank-app/admin/integrated-banks/add">add integrated bank</a>
 					<a href="/bank-app/admin/integrated-banks/bank/delete">remove integrated bank</a>
 				</li>
 			</ul>
@@ -28,7 +27,6 @@
 				<li>
 					<a href="/bank-app/admin/managers">view managers</a>
 					<a href="/bank-app/admin/managers/transfer">transfer managers</a>
-					<a href="/bank-app/admin/managers/manager/password-reset">reset manager password</a>
 				</li>
 			</ul>
 		</div>
@@ -36,8 +34,8 @@
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
-					<a href="/bank-app/admin/profile">view profile</a>
-					<a href="/bank-app/admin/logout">logout</a>
+					<a href="/bank-app/admin/profile/view">view profile</a>
+					<a href="/bank-app/logout">logout</a>
 				</li>
 			</ul>
 		</div>

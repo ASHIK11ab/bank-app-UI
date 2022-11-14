@@ -1,8 +1,7 @@
 package servlet.admin;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.LinkedList;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,34 +11,84 @@ import javax.servlet.http.HttpServletResponse;
 import dao.IntegratedBankDAO;
 import model.IntegratedBank;
 import util.Factory;
+import util.Util;
 
 public class IntegratedBankServlet extends HttpServlet {
-	private static final long serialVersionUID = -4834928724658535143L;
-	private IntegratedBankDAO integratedBankDAO;
-	
-	public void init() {
-		integratedBankDAO = Factory.getIntegratedBankDAO();
-	}
-	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		IntegratedBankDAO integratedBankDAO = Factory.getIntegratedBankDAO();
 		IntegratedBank integratedBank = null;
-		int id;
+		PrintWriter out = res.getWriter();
+		
+		boolean isError = false, exceptionOccured = false;
+		String path = req.getPathInfo(), action = "", msg = "", redirectURI, queryMsg, status;
+		String [] result;
+		int bankId;
+		
+		queryMsg = req.getParameter("msg");
+		status = req.getParameter("status");
+		// Display notification if exists.
+		if(queryMsg != null && status != null)
+			out.println(Util.createNotification(queryMsg, status));
+				
+		// redirect to all branches page.
+		if(path == null || path.equals("/")) {
+			res.sendRedirect("/bank-app/admin/integrated-banks");
+			return;
+		}
+		
+		// dispatch to add page.
+		if(path.equals("/add")) {
+			req.setAttribute("type", 0);
+			req.getRequestDispatcher("/jsp/admin/addEditIntegratedBank.jsp").include(req, res);
+			return;
+		}
 		
 		try {
-			id = Integer.parseInt(req.getPathInfo().substring(1));
-			integratedBank = integratedBankDAO.get(id);
+			path = path.substring(1);
+			result = path.split("/");
+						
+			bankId = Integer.parseInt(result[0]);
+			action = result[1];
+			
+			integratedBank = integratedBankDAO.get(bankId);
 			
 			if(integratedBank == null) {
-				res.setStatus(404);
-				res.getWriter().println("<h1>Page not found</h1>");
-			} else {
-				req.setAttribute("integratedBank", integratedBank);
-				req.getRequestDispatcher("/jsp/admin/integratedBank.jsp").forward(req, res);				
+				isError = true;
+				msg = "Integrated bank does not exist !!!";
 			}
 			
-		} catch(SQLException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal server error</h1>");
+			if(!isError) {
+				req.setAttribute("bank", integratedBank);
+				switch(action) {
+					case "view": 
+								req.getRequestDispatcher("/jsp/admin/integratedBank.jsp").include(req, res);
+								break;
+					case "edit":
+								req.setAttribute("type", 1);
+								req.getRequestDispatcher("/jsp/admin/addEditIntegratedBank.jsp").forward(req, res);
+								break;
+					default: isError = true;
+							 msg = "page not found !!!";
+							 break;
+				}
+			}
+			
+		} catch(IndexOutOfBoundsException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "page not found !!!";
+		} catch(NumberFormatException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Page not found !!!";
+		} finally {			
+			
+			if(isError || exceptionOccured) {
+				redirectURI = String.format("/bank-app/admin/integrated-banks?msg=%s&status=danger", msg);
+				res.sendRedirect(redirectURI);
+			}
+			
+			out.close();
 		}
 	}
 }

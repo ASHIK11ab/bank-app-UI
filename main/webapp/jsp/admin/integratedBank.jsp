@@ -4,10 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Integrated bank: ${ requestScope.integratedBank.getName() }</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="${ bank.getName() } bank | Integrated bank" />
+	</jsp:include>
 	<style>
 		.wrapper {
 			width: 600px;
@@ -25,7 +24,6 @@
 	</style>
 </head>
 <body>
-	<c:set var="bank" value="${ requestScope.integratedBank }" />
 	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
 	
@@ -37,6 +35,9 @@
 				<p>Email: ${ bank.getEmail() }</p>
 				<p>Phone: ${ bank.getPhone() }</p>
 				<p>Api URL: ${ bank.getApiURL() }
+			</section>
+			<section>
+				<a class="button" href="/bank-app/admin/integrated-banks/${ bank.getId() }/edit">Edit</a>
 			</section>
 		</div>
 	</main>

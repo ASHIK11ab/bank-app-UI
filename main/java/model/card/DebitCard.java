@@ -3,16 +3,16 @@ package model.card;
 import java.time.LocalDate;
 
 public class DebitCard {	
-	private long cardNo;
-	private long linkedAccountNo;
-	private LocalDate validFromDate;
-	private LocalDate expiryDate;
+	private final long cardNo;
+	private final long linkedAccountNo;
+	private final LocalDate validFromDate;
+	private final LocalDate expiryDate;
 	private LocalDate activatedDate;
 	private LocalDate deactivatedDate;
-	private byte typeId;
+	private final byte typeId;
 	private boolean isActive;
 	private int pin;
-	private int cvv;
+	private final int cvv;
 	
 	
 	public DebitCard(long cardNo, long accountNo, LocalDate validFromDate, LocalDate expiryDate,

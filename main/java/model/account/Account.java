@@ -2,10 +2,11 @@ package model.account;
 
 import java.time.LocalDate;
 
+import cache.AppCache;
 import model.Nominee;
 
 public abstract class Account {
-    private long accountNo;
+    private final long accountNo;
     private long customerId;
     private String customerName;
     private Nominee nominee;
@@ -63,6 +64,10 @@ public abstract class Account {
         return this.branchId;
     }
     
+    public String getBranchName() {
+    	return AppCache.getBranch(this.branchId).getName();
+    }
+    
     public float getBalance() {
         return this.balance;
     }
@@ -72,6 +77,10 @@ public abstract class Account {
     }
     
     // setters
+    public void setClosingDate(LocalDate date) {
+    	if(!this.isClosed())
+    		this.closingDate = date;
+    }
     
     public void setBranchId(int branchId) {
     	this.branchId = branchId;

@@ -4,17 +4,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>${ requestScope.branch.getName() } branch</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/admin/branch.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="${ branch.getName() } branch" />
+	</jsp:include>
 </head>
 <body>
 	
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
 
-	<c:set var="branch" value="${ requestScope.branch }" />
+	<c:set var="branch" value="${ branch }" />
 	<c:set var="manager" value="${ branch.getManager() }" />
 	
 	<main class="container">
@@ -23,18 +21,20 @@
 				<h2 class="title">Branch details:</h2>
 				<p>Name: ${ branch.getName() }</p>
 				<p>Address: ${ branch.getAddress() }</p>
+				
+				<a class="button" href="/bank-app/admin/branches/${ branch.getId() }/edit">Edit</a>
 			</section>
 			<section class="manager-section">
 				<h2 class="title">Manager details:</h2>
 				<p>Id: ${ manager.getId() }</p>
 				
-				<c:if test="${ requestScope.displayManagerPassword }">
+				<c:if test="${ displayManagerPassword }">
 					<p>Password: ${ manager.getPassword() }<p>
 				</c:if>
 				
 				<p>Name: ${ manager.getName() }</p>
-				<p>Email: ${ manager.getEmail() }</p>
-				<p>Phone: ${ manager.getPhone() }</p>
+				<a class="button" href="/bank-app/admin/managers/${ manager.getId() }/view?branch-id=${ manager.getBranchId() }">View manager</a>
+				<a class="button secondary" href="/bank-app/admin/branches/${ branch.getId() }/assign-manager">Assign new manager</a>
 			</section>
 		</div>
 	</main>

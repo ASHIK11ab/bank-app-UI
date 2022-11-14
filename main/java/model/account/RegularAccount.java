@@ -21,6 +21,12 @@ public abstract class RegularAccount extends Account {
     }
      
     // Setters
+    @Override
+    public void setClosingDate(LocalDate date) { 
+    	super.setClosingDate(date);
+    	this.setIsActive(false);
+    }
+    
     public void setIsActive(boolean status) {
     	this.isActive = status;
     }

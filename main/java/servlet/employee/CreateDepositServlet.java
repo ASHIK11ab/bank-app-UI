@@ -53,7 +53,7 @@ public class CreateDepositServlet extends HttpServlet {
 		long payoutAccountNo, debitFromAccountNo, customerId;
 		float balance, beforeBalance;
 		int branchId, actionType = -1, depositType, amount = 0, tenureMonths;
-		int recurringDate = -1;
+		int recurringDate = -1, debitFromAccountBranchId, payoutAccountBranchId;
 		LocalDate nextRecurringDate = null;
 		
 		try {
@@ -70,30 +70,22 @@ public class CreateDepositServlet extends HttpServlet {
 				msg = "Invalid deposit type";
 			}
 			
-			if(!isError && depositType == DepositAccountType.RD.id) {
-				amount = Integer.parseInt(req.getParameter("rd-amount"));
-				recurringDate = Integer.parseInt(req.getParameter("recurring-date"));
-				
-				if(!isError && !((recurringDate >= 1) && (recurringDate <= 15))) {
-					isError = true;
-					msg = "Monthly installment date should be between 1 to 15";
+			if(!isError) {
+				if(depositType == DepositAccountType.RD.id) {
+					amount = Integer.parseInt(req.getParameter("rd-amount"));
+					recurringDate = Integer.parseInt(req.getParameter("recurring-date"));
+					
+					if((recurringDate >= 1) && (recurringDate <= 15)) {
+						nextRecurringDate = today.withDayOfMonth(recurringDate).plusMonths(1);
+					} else {
+						isError = true;
+						msg = "Monthly installment date should be between 1 to 15";
+					}
+					
 				} else {
-	            	nextRecurringDate = today.withDayOfMonth(recurringDate).plusMonths(1);
+					amount = Integer.parseInt(req.getParameter("fd-amount"));
 				}
-				
-			} else {
-				amount = Integer.parseInt(req.getParameter("fd-amount"));
 			}
-			
-			/* Inorder to display previously inputed values attributes are set
-				even when some error occurs */
-			req.setAttribute("actionType", 1);
-			req.setAttribute("depositType", depositType);
-			req.setAttribute("debitFromAccountNo", debitFromAccountNo);
-			req.setAttribute("payoutAccountNo", payoutAccountNo);
-			req.setAttribute("tenureMonths", tenureMonths);
-			req.setAttribute("amount", amount);
-			req.setAttribute("recurringDate", recurringDate);
 			
 			// Validate account no.
 			if(!isError && (Util.getNoOfDigits(debitFromAccountNo) != 11 || Util.getNoOfDigits(payoutAccountNo) != 11)) {
@@ -111,50 +103,66 @@ public class CreateDepositServlet extends HttpServlet {
 				msg = "Tenure months should be between 2 to 20 !!!";
 			}
 			
-			// Get deposit account details and ask for confirmation
-			if(!isError && actionType == 0) {
-				debitFromAccount = regularAccountDAO.get(debitFromAccountNo);
+			// Validate debit from account and payout account details
+			if(!isError) {
+				conn = Factory.getDataSource().getConnection();
+				debitFromAccountBranchId = accountDAO.getBranchId(conn, debitFromAccountNo);
+				debitFromAccount = regularAccountDAO.get(debitFromAccountNo, debitFromAccountBranchId);
 				
 				if(debitFromAccount != null && debitFromAccount.getIsActive() && !debitFromAccount.isClosed()) {
 					if(debitFromAccountNo == payoutAccountNo)
 						payoutAccount = debitFromAccount;
 					else {
-						payoutAccount = regularAccountDAO.get(payoutAccountNo);
-						if(payoutAccount == null || !payoutAccount.getIsActive() || payoutAccount.isClosed()) {
+						
+						payoutAccountBranchId = accountDAO.getBranchId(conn, payoutAccountNo);
+						payoutAccount = regularAccountDAO.get(payoutAccountNo, payoutAccountBranchId);
+						if(payoutAccount == null || !payoutAccount.getIsActive() || payoutAccount.isClosed()
+								|| payoutAccount.getCustomerId() != debitFromAccount.getCustomerId()) {
 							isError = true;
 							msg = "Invalid payout account details !!!";
 						}
+						
 					}
 				} else {
 					isError = true;
 					msg = "Invalid debit from account details !!!";
 				}
-				
-				// request for confirmation
-				if(!isError) {
-					req.setAttribute("debitFromAccount", debitFromAccount);
-					req.setAttribute("payoutAccount", payoutAccount);					
-					req.getRequestDispatcher("/jsp/employee/createDeposit.jsp").forward(req, res);
-				}
+			}
+			
+			/* Inorder to display previously inputed values attributes are set
+			even when some error occurs */
+			req.setAttribute("depositType", depositType);
+			req.setAttribute("debitFromAccountNo", debitFromAccountNo);
+			req.setAttribute("payoutAccountNo", payoutAccountNo);
+			req.setAttribute("tenureMonths", tenureMonths);
+			req.setAttribute("amount", amount);
+			req.setAttribute("recurringDate", recurringDate);
+			
+			// Get deposit account details and ask for confirmation
+			if(!isError && actionType == 0) {
+				req.setAttribute("actionType", 1);
+				req.setAttribute("debitFromAccount", debitFromAccount);
+				req.setAttribute("payoutAccount", payoutAccount);					
+				req.getRequestDispatcher("/jsp/employee/createDeposit.jsp").forward(req, res);
 			}
 			
 			
 			// Create Deposit account
 			if(!isError && actionType == 1) {
-				debitFromAccount = regularAccountDAO.get(debitFromAccountNo);
 				customerId = debitFromAccount.getCustomerId();
 				customerName = debitFromAccount.getCustomerName();
 				
 				/* Incase of RD if deposit account create date is after 15 th of the month
 					dont debit for RD, set recurring date to next month and create account */
-				conn = Factory.getDataSource().getConnection();
 				
 				if(depositType == DepositAccountType.RD.id && today.getDayOfMonth() > 15) {
+					
 					// create deposit account
 	            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, 0, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
 					out.println(Util.createNotification("Deposit created successfully, initial deposit amount will be auto debited on next recurring date", "success"));
 	            	req.setAttribute("account", account);
 	            	req.getRequestDispatcher("/jsp/employee/depositCreationSuccess.jsp").include(req, res);
+				
 				} else {
 					synchronized (debitFromAccount) {
 						
@@ -175,6 +183,9 @@ public class CreateDepositServlet extends HttpServlet {
 			            	
 			            	// create deposit account
 			            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
+			            	
+			            	// update debit from account amount in cache.
+			            	debitFromAccount.deductAmount(amount);
 			            	
 			            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
 			            	

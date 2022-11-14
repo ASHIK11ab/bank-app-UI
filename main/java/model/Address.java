@@ -58,6 +58,24 @@ public class Address {
     	this.pincode = pincode;
     }
     
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Address target = (Address) obj;
+        
+        return (this.doorNo.equals(target.getDoorNo()) && this.street.equals(target.getStreet()) && this.city.equals(target.getCity())
+        		&& this.state.equals(target.getState()) && this.pincode == target.getPincode());
+    }
+    
+    
     public String toString() {
         String repr = "";
         repr += "\nNo: " + this.doorNo + ", " + this.street;

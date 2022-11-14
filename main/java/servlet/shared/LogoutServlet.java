@@ -1,4 +1,4 @@
-package servlet.admin;
+package servlet.shared;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -7,13 +7,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import constant.Role;
+
 
 public class LogoutServlet extends HttpServlet {
-	private static final long serialVersionUID = -6900419201190617167L;
-
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		Role role = (Role) req.getSession(false).getAttribute("role"); 
 		HttpSession session = req.getSession(false);
-		session.invalidate();
-		res.sendRedirect("/bank-app/login/admin");
+		session.invalidate(); 
+		res.sendRedirect("/bank-app/login/" + Role.getName(role));
 	}
 }

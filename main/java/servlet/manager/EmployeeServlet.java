@@ -25,10 +25,9 @@ public class EmployeeServlet extends HttpServlet {
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			employeeId = Long.parseLong(req.getPathInfo().substring(1));
-			employee = employeeDAO.get(employeeId);
+			employee = employeeDAO.get(employeeId, branchId);
 			
-			// Display the details of employees who belong to the manager's branch.
-			if(employee != null && employee.getBranchId() == branchId ) {
+			if(employee != null) {
 				req.setAttribute("employee", employee);
 				req.getRequestDispatcher("/jsp/manager/employee.jsp").forward(req, res);
 			} else {

@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
+import cache.AppCache;
 import model.user.User;
 import util.Factory;
 
@@ -24,20 +26,31 @@ public class AdminDAO {
         String msg = "";
         
         try {
-            conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("SELECT * FROM admin WHERE id = ?");
-            stmt.setLong(1, id);
-            rs = stmt.executeQuery();
-
-            // Load admin to cache if exists with the given id.
-            if(rs.next()) {
-                name = rs.getString("name");
-                password = rs.getString("password");
-                email = rs.getString("email");
-                phone = rs.getLong("phone");
-                
-                admin = new User(id, name, password, email, phone);
-            }
+        	admin = AppCache.getAdmin();
+        	
+        	if(admin != null && admin.getId() != id) {
+        		return null;
+        	}
+        	
+        	// Try loading from DB
+        	if(admin == null) {
+	            conn = Factory.getDataSource().getConnection();
+	            stmt = conn.prepareStatement("SELECT * FROM admin WHERE id = ?");
+	            stmt.setLong(1, id);
+	            rs = stmt.executeQuery();
+	
+	            // Load admin to cache if exists with the given id.
+	            if(rs.next()) {
+	                name = rs.getString("name");
+	                password = rs.getString("password");
+	                email = rs.getString("email");
+	                phone = rs.getLong("phone");
+	                
+	                admin = new User(id, name, password, email, phone);
+	                // update in cache.
+	                AppCache.cacheAdmin(admin);
+	            }
+        	}
         } catch(SQLException e) {
         	System.out.println(e.getMessage());
             exceptionOccured = true;

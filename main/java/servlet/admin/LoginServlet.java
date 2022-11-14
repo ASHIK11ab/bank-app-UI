@@ -16,61 +16,57 @@ import constant.Role;
 import dao.AdminDAO;
 import model.user.User;
 import util.Factory;
+import util.Util;
 
 
 public class LoginServlet extends HttpServlet {
-	private static final long serialVersionUID = 6415721614440963644L;
-	
-	private AdminDAO adminDAO;
-	
-	public void init() {		
-		adminDAO = Factory.getAdminDAO();
-	}
-	
-	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		req.setAttribute("title", "Admin Login");
 		req.setAttribute("actionURL", req.getRequestURI());
-		req.getRequestDispatcher("/jsp/components/loginForm.jsp").forward(req, res);
+		req.getRequestDispatcher("/jsp/components/loginForm.jsp").include(req, res);
 	}
 	
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		PrintWriter out;
+		AdminDAO adminDAO = Factory.getAdminDAO();
+		PrintWriter out = res.getWriter();
 		User admin;
 		
+		boolean isError = false, exceptionOccured = false;
 		long id = 0;
-		String password = "";
+		String password = "", msg = "";
 				
 		try {
 			id = Long.parseLong(req.getParameter("id"));
 			password = req.getParameter("password");
-		} catch(NumberFormatException e) {
-			req.setAttribute("error", "Invliad input for id");
-			doGet(req, res);
-			return;
-		}
-		
-		try {
+			
 			admin = adminDAO.get(id);    
+			
+	        if((admin != null) && admin.getPassword().equals(password)) {
+	        	HttpSession session = req.getSession();
+	        	session.setAttribute("id", admin.getId());
+	        	// 2 days.
+	        	session.setMaxInactiveInterval(60*60*24*2);
+	        	session.setAttribute("role", Role.ADMIN);
+	            res.sendRedirect("/bank-app/admin/dashboard");
+	        } else {
+				isError = true;
+				msg = "Invalid id or password";
+	        }
+
+		} catch(NumberFormatException e) {
+			System.out.println(e.getMessage());
+			isError = true;
+			msg = "Invalid input !!!";
 		} catch(SQLException e) {
-			out = res.getWriter();
-			res.setStatus(500);
-			out.println("<h1>Internal error</h1>");
-			out.close();
-			return;
+			System.out.println(e.getMessage());
+			isError = true;
+			msg = e.getMessage();
+		} finally {
+			if(isError || exceptionOccured) {
+				out.println(Util.createNotification(msg, "danger"));
+				doGet(req, res);
+			}
 		}
-		
-        if((admin != null) && admin.getPassword().equals(password)) {
-        	HttpSession session = req.getSession();
-        	session.setAttribute("id", admin.getId());
-        	// 2 days.
-        	session.setMaxInactiveInterval(60*60*24*2);
-        	session.setAttribute("role", Role.ADMIN);
-            res.sendRedirect("/bank-app/admin/dashboard");
-        } else {
-			req.setAttribute("error", "Invalid id or password");
-            doGet(req, res);
-        }
 	}
 }

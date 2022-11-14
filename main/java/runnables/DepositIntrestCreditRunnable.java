@@ -13,7 +13,9 @@ import cache.AppCache;
 import constant.Constants;
 import constant.DepositAccountType;
 import dao.AccountDAO;
+import dao.DepositAccountDAO;
 import dao.TransactionDAO;
+import model.account.DepositAccount;
 import util.Factory;
 
 
@@ -43,8 +45,10 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		ResultSet rs1 = null, rs2 = null;
 		
 		AccountDAO accountDAO = Factory.getAccountDAO();
+		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		
+		DepositAccount account = null;
 		LocalDate today = null;
 		boolean isEligibleForIntrest;
 		float intrestRate, intrestAmount = 0, fromAccountBeforeBalance, toAccountBeforeBalance;
@@ -52,7 +56,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		
 		// FD -> deposit amount is the amount deposited.
 		// RD -> deposit amount is the monthly installment.
-		int depositAmount = 0, intrestCreditedMonthCnt;
+		int depositAmount = 0, intrestCreditedMonthCnt, branchId;
 		long accountNo, bankAccountNo = AppCache.getBank().getBankAccountNo();
 
 		try {
@@ -69,9 +73,9 @@ public class DepositIntrestCreditRunnable implements Runnable {
 						stmt2 = conn.prepareStatement("SELECT to_account_no FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ? WHERE account_no = ?");
 						
-						rs1 = stmt1.executeQuery("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no");
+						rs1 = stmt1.executeQuery("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL");
 						
-						// Get all deposit accounts.
+						// Get all deposit unclosed accounts.
 						while(rs1.next()) {
 							isEligibleForIntrest = true;
 							
@@ -80,6 +84,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							intrestRate = rs1.getFloat("rate_of_intrest");
 							depositAmount = rs1.getInt("deposit_amount");
 							intrestCreditedMonthCnt = rs1.getInt("intrest_credited_month_cnt");
+							branchId = rs1.getInt("branch_id");
 														
 							if(typeId == DepositAccountType.RD.id) {
 								System.out.println("RD: " + accountNo);
@@ -96,20 +101,28 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							}
 							
 							if(isEligibleForIntrest) {
-								intrestCreditedMonthCnt++;
+								account = depositAccountDAO.get(accountNo, branchId);
 								
-								// calculate intrest amount for current month.
-								intrestAmount = calculateIntrestAmount(typeId, intrestRate, depositAmount, intrestCreditedMonthCnt);
-								
-								// credit intrest to bank.
-								fromAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);	// deduct from bank account
-								toAccountBeforeBalance = accountDAO.updateBalance(conn, accountNo, 1, intrestAmount);		// credit to deposit account
-								transactionDAO.create(conn, 1, ("Intrest credit for deposit A/C: " + accountNo), bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
-								
-								stmt3.setInt(1, intrestCreditedMonthCnt);
-								stmt3.setLong(2, accountNo);
-								stmt3.executeUpdate();
-								System.out.println("Intrest credited for A/C: " + accountNo);
+								synchronized (account) {
+									intrestCreditedMonthCnt++;
+									
+									// calculate intrest amount for current month.
+									intrestAmount = calculateIntrestAmount(typeId, intrestRate, depositAmount, intrestCreditedMonthCnt);
+									
+									// credit intrest to bank.
+									fromAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);	// deduct from bank account
+									toAccountBeforeBalance = accountDAO.updateBalance(conn, accountNo, 1, intrestAmount);		// credit to deposit account
+									
+									// update in cache.
+									account.addAmount(intrestAmount);
+									
+									transactionDAO.create(conn, 1, ("Intrest credit for deposit A/C: " + accountNo), bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+									
+									stmt3.setInt(1, intrestCreditedMonthCnt);
+									stmt3.setLong(2, accountNo);
+									stmt3.executeUpdate();
+									System.out.println("Intrest credited for A/C: " + accountNo);
+								}
 							}							
 						}						
 					} catch(SQLException e) {

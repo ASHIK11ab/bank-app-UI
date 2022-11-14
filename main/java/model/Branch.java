@@ -1,8 +1,11 @@
 package model;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import constant.DepositAccountType;
+import constant.AccountCategory;
 import constant.RegularAccountType;
 import model.user.Employee;
 import model.account.*;
@@ -47,50 +50,79 @@ public class Branch {
 
 
     // Adds a account to the branch.
-//    public void addAccount(int accountType, Account account, char type) {
-//        switch(accountType) {
-//            case RegularAccountType.SAVINGS.id: this.savingsAccounts.put(account.getAccountNo(), (SavingsAccount) account);
-//                                      			break;
-//            case RegularAccountType.CURRENT.id: this.currentAccounts.put(account.getAccountNo(), (CurrentAccount) account);
-//                                      			break;
-//            case DepositAccountType.FD.id: this.depositAccounts.put(account.getAccountNo(), (DepositAccount) account);
-//                                       		break;
-//            case DepositAccountType.FD.id: this.depositAccounts.put(account.getAccountNo(), (DepositAccount) account);
-//       										break;
-//        }
-//        
-//    }
+    public void addAccount(AccountCategory category, int accountType, Account account) {
+    	RegularAccountType type;
+    	
+    	switch(category) {
+	    	case REGULAR: 
+	    					type = RegularAccountType.getType(accountType);
+				            switch(type) {
+					            case SAVINGS: this.savingsAccounts.put(account.getAccountNo(), (SavingsAccount) account);
+					                                      			break;
+					            case CURRENT: this.currentAccounts.put(account.getAccountNo(), (CurrentAccount) account);
+					                                      			break;
+				            }
+				            break;
+	    	case DEPOSIT: this.depositAccounts.put(account.getAccountNo(), (DepositAccount) account);
+	    	              break;
+	    	default: break;
+    	}
+        
+    }
 
 
     // Removes a account to the branch.
-//    public void removeAccount(int accountType, long accountNo) {
-//        switch(accountType) {
-//            case AccountType.SAVINGS: this.savingsAccounts.remove(accountNo);
-//                                        break;
-//            case AccountType.CURRENT: this.currentAccounts.remove(accountNo);
-//                                        break;
-//            // case AccountType.DEPOSIT: this.depositAccounts.remove(accountNo);
-//            //                             break;
-//        }
-//    }
+    public void removeAccount(long accountNo) {    	
+    	if(this.savingsAccounts.containsKey(accountNo)) {
+    		this.savingsAccounts.remove(accountNo);
+    		return;
+    	}
+    	
+    	if(this.currentAccounts.containsKey(accountNo)) {
+    		this.currentAccounts.remove(accountNo);
+    		return;
+    	}
+    	
+    	if(this.depositAccounts.containsKey(accountNo)) {
+    		this.depositAccounts.remove(accountNo);
+    		return;
+    	} 
+    }
 
     
     // Getters
+    
+    public Collection<SavingsAccount> getSavingsAccounts() {
+        return this.savingsAccounts.values();
+    }
+
+
+    public Collection<CurrentAccount> getCurrentAccounts() {
+        return this.currentAccounts.values();
+    }
+
+     public Collection<DepositAccount> getDepositAccounts() {
+         return this.depositAccounts.values();
+     }
+    
     // Returns a account to the branch.
-    public Account getAccount(long accountNo) {
+    public Account getAccount(AccountCategory category, long accountNo) {
         Account account = null;
-
-        account = this.savingsAccounts.get(accountNo);
-        if(account != null)
-            return account;
-
-        account = this.currentAccounts.get(accountNo);
-        if(account != null)
-            return account;
-            
-         account = this.depositAccounts.get(accountNo);
-         if(account != null)
-             return account;
+        
+        switch(category) {
+	        case REGULAR:   account = this.savingsAccounts.get(accountNo);
+					        if(account != null)
+					            return account;
+					
+					        account = this.currentAccounts.get(accountNo);
+					        if(account != null)
+					            return account;
+					        break;
+	        case DEPOSIT: account = this.depositAccounts.get(accountNo);
+				          if(account != null)
+				             return account;
+	        default: break;
+        }
         
         return null;
     }
@@ -98,7 +130,6 @@ public class Branch {
     public Employee getManager() {
         return this.manager;
     }
-
 
     public Employee getEmployee(long employeeId) {
         return this.employees.get(employeeId);
@@ -115,15 +146,28 @@ public class Branch {
     public int getId() {
         return this.id;
     }
+    
+    // setters
+    public void setName(String name) {
+    	this.name = name;
+    }
+    
+    public void setAddress(Address address) {
+    	this.address = address;
+    }
 
 
-    public String toString() {
-        String repr = "";
-        repr += "\n-----------------";
-        repr += "\nBranch details  :\n";
-        repr += "-----------------";
-        repr += "\nBranch Name     : " + this.name;
-        repr += "\nAddress         : " + this.address;
-        return repr;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Branch target = (Branch) obj;
+        return (this.name.equals(target.getName()) && this.address.equals(target.getAddress()));
     }
 }

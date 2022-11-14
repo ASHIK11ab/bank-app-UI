@@ -17,9 +17,13 @@ import constant.Constants;
 import constant.DepositAccountType;
 import constant.Role;
 import dao.AccountDAO;
+import dao.CustomerDAO;
 import dao.DepositAccountDAO;
+import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.account.DepositAccount;
+import model.account.RegularAccount;
+import model.user.Customer;
 import util.Factory;
 import util.Util;
 
@@ -28,23 +32,26 @@ public class CloseDepositServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
 		
+		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
+		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		
+		Customer customer = null;
+		RegularAccount payoutAccount = null;
 		DepositAccount account = null;
 		
 		Role role = null;
 		String msg = "", description = "", userType = "", redirectURI = "";
 		float fromAccountBeforeBalance, toAccountBeforeBalance, totalAmount;
-		boolean exceptionOccured = false, isError = false, prematureClosing = false, isAccountExists = false;
+		boolean exceptionOccured = false, isError = false, prematureClosing = false;
 		long accountNo = -1, bankAccountNo = AppCache.getBank().getBankAccountNo(), customerId = -1;
-		int branchId = -1, actionType = 0;
+		int branchId = -1, actionType = 0, payoutAccountBranchId;
 		
 		try {
 			role = (Role) req.getSession(false).getAttribute("role");
 			userType = Role.getName(role);
-			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			actionType = Integer.parseInt(req.getParameter("action-type"));
 			accountNo = Long.parseLong(req.getParameter("account-no"));
 			
@@ -52,27 +59,27 @@ public class CloseDepositServlet extends HttpServlet {
 				isError = true;
 				msg = "A/C no must be a 11 digit number";
 			}
-			
-			account = depositAccountDAO.get(accountNo);
-			
-        	// Access for account differs for customer and employee.
-        	switch(role) {
-	        	case EMPLOYEE: 
-	        					if(account != null && account.getBranchId() == branchId  && !account.isClosed())
-	        						isAccountExists = true;
-	        					break;
-	        	case CUSTOMER: 
-	        					customerId = (Long) req.getSession(false).getAttribute("id"); 
-	        					if(account != null && account.getCustomerId() == customerId  && !account.isClosed())
-	        						isAccountExists = true;
-	        					break;
-	        	default: isAccountExists = false;
-        	}
+						
+			if(!isError) {
+				
+	        	// Access for account differs for customer and employee.
+	        	switch(role) {
+		        	case EMPLOYEE:	branchId = (Integer) req.getSession(false).getAttribute("branch-id");
+		        					break;
+		        	case CUSTOMER: 
+		        					customerId = (Long) req.getSession(false).getAttribute("id"); 
+		        					customer = customerDAO.get(customerId);
+		        					branchId = customer.getAccountBranchId(AccountCategory.DEPOSIT, accountNo);
+		        	default: break;
+	        	}
+	        	
+				account = depositAccountDAO.get(accountNo, branchId);
+				if(account == null || account.isClosed()) {
+					isError = true;
+					msg = "Account does not exist !!!";
+				}
         	
-        	if(!isAccountExists) {
-        		isError = true;
-        		msg = "Account not found !!!";
-        	}
+			}
 			
 			/* Check whether account has reached maturity */
 			if(!isError) {
@@ -108,17 +115,32 @@ public class CloseDepositServlet extends HttpServlet {
 						fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, Constants.PREMATURE_CLOSING_CHARGES);
 						toAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 1, Constants.PREMATURE_CLOSING_CHARGES);
 						
+						// update in cache.
+						account.deductAmount(Constants.PREMATURE_CLOSING_CHARGES);
+						
 						description = "Premature closing charges on A/C: " + account.getAccountNo();
 						transactionDAO.create(conn, 1, description, account.getAccountNo(), bankAccountNo, Constants.PREMATURE_CLOSING_CHARGES, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 					}
-				
-					// credit amount to payout account and close deposit.
-					fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, totalAmount);
-					toAccountBeforeBalance = accountDAO.updateBalance(conn, account.getPayoutAccountNo(), 1, totalAmount);
-					description = DepositAccountType.getType(account.getTypeId()).toString() + " closing on A/C: " + account.getAccountNo();
-					transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 					
-					accountDAO.closeAccount(conn, account.getAccountNo(), AccountCategory.DEPOSIT);
+					payoutAccountBranchId = accountDAO.getBranchId(conn, account.getPayoutAccountNo());
+					payoutAccount = regularAccountDAO.get(account.getPayoutAccountNo(), payoutAccountBranchId);
+					
+					synchronized(payoutAccount) {
+						// credit amount to payout account and close deposit.
+						fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, totalAmount);
+						toAccountBeforeBalance = accountDAO.updateBalance(conn, account.getPayoutAccountNo(), 1, totalAmount);
+						
+						// update in cache.
+						
+						account.deductAmount(totalAmount);
+						payoutAccount.addAmount(totalAmount);
+						
+						description = DepositAccountType.getType(account.getTypeId()).toString() + " closing on A/C: " + account.getAccountNo();
+						transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+						
+						accountDAO.closeAccount(conn, account, AccountCategory.DEPOSIT);
+					}
+					// End of payout account synchronized block.
 				}
 			}
 		} catch(ClassCastException e) {

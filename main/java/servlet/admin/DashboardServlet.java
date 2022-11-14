@@ -19,8 +19,6 @@ import util.Factory;
 
 
 public class DashboardServlet extends HttpServlet {
-	private static final long serialVersionUID = -349155979508440020L;
-
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
 		Statement stmt1 = null, stmt2 = null;

@@ -56,7 +56,7 @@ public class Bank {
         this.branches.remove(branchId);
     }
     
-    public void addIntegratedBank(int bankId) {
+    public void removeIntegratedBank(int bankId) {
         this.integratedBanks.remove(bankId);
     }
 
@@ -81,8 +81,8 @@ public class Bank {
     }
 
 
-    public ConcurrentHashMap<Integer, IntegratedBank> getIntegratedBanks() {
-        return this.integratedBanks;
+    public Collection<IntegratedBank> getIntegratedBanks() {
+        return this.integratedBanks.values();
     }
 
     
@@ -99,15 +99,5 @@ public class Bank {
     // Setters
     public void setAdmin(User admin) {
         this.admin = admin;
-    }
-
-
-    public String toString() {
-        String repr = "";
-        repr += "\nBank Name         : " + name;
-        repr += "\nSupport Email     : " + supportEmail;
-        repr += "\nSupport Phone     : " + supportPhone;
-        repr += "\nWebsite URL       : " + websiteURL;
-        return repr;
     }
 }
