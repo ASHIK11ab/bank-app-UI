@@ -23,8 +23,10 @@
 				<c:when test="${ sessionScope.role == Role.CUSTOMER }">
 					<c:set var="customer" value="${ user }" scope="request" />
 					<jsp:include page="/jsp/components/customer.jsp" />
-					<a class="button" href="/bank-app/${ userType }/profile/password-reset?type=0">Reset password</a>
-					<a class="button secondary" href="/bank-app/${ userType }/profile/password-reset?type=1">Reset transaction password</a>
+					
+					<a class="button" href="/bank-app/customer/profile/update">Edit profile</a>
+					<a class="button secondary" href="/bank-app/customer/profile/password-reset?type=0">Reset password</a>
+					<a class="button" href="/bank-app/customer/profile/password-reset?type=1">Reset transaction password</a>
 				</c:when>
 				
 				<c:when test="${ sessionScope.role != Role.CUSTOMER }">
