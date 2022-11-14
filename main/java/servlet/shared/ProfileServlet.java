@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.jasper.tagplugins.jstl.core.If;
+
 import constant.Role;
 import dao.AdminDAO;
 import dao.CustomerDAO;
@@ -33,9 +35,10 @@ public class ProfileServlet extends HttpServlet {
 		
 		Role role = null;
 		String path = req.getPathInfo(), action = "", msg = "", queryMsg, status, roleName = "";
-		boolean isError = false, exceptionOccured = false;
+		boolean isError = false, exceptionOccured = false, pageNotFound = false;
 		long id;
 		int branchId = -1;
+		byte type = -1;
 		
 		queryMsg = req.getParameter("msg");
 		status = req.getParameter("status");
@@ -77,6 +80,11 @@ public class ProfileServlet extends HttpServlet {
 							req.getRequestDispatcher("/jsp/components/profile.jsp").include(req, res);
 							break;
 				case "password-reset": 
+										if(role == Role.CUSTOMER) {
+											type = Byte.parseByte(req.getParameter("type"));											
+											req.setAttribute("type", type);
+										}
+					
 										req.setAttribute("id", id);
 										req.setAttribute("name", user.getName());
 										req.setAttribute("forRole", role);
@@ -88,7 +96,12 @@ public class ProfileServlet extends HttpServlet {
 						msg = "Page not found !!!";
 			}
 			
+		} catch(NumberFormatException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = e.getMessage();	
 		} catch(NullPointerException e) {
+			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = e.getMessage();	
 		} catch(SQLException e) {

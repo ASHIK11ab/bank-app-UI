@@ -11,7 +11,13 @@
 	
 	<c:choose>
 		<c:when test="${ forRole == role }">
-			<c:set var="title" value="Password Reset" />
+			<c:if test="${ forRole == Role.CUSTOMER }">
+				<c:set var="title" value='${ type == 0 ? "Login password reset" : "Transaction password reset" }' />
+			</c:if>	
+			
+			<c:if test="${ forRole != Role.CUSTOMER }">
+				<c:set var="title" value="Password Reset" />
+			</c:if>
 		</c:when>
 		
 		<c:when test="${ forRole != role }">
@@ -31,8 +37,13 @@
 	<main class="container">
 		<section class="wrapper">
 			<h1 class="title">${ title }</h1>
-			<p><strong>Id: ${ id }</strong></p>
-			<p><strong>Name: ${ name }</strong></p>
+			
+			<!-- Only display id and name when resetting other user password -->
+			<c:if test="${ forRole != role }">
+				<p><strong>Id: ${ id }</strong></p>
+				<p><strong>Name: ${ name }</strong></p>
+			</c:if>
+			
 			<form action="/bank-app/password-reset" method="post">
 			
 				<input name="id" value="${ id }" class="hidden" required>
@@ -51,7 +62,7 @@
 				<!-- Prompt for old password during self password reset -->
 				<c:if test="${ forRole == role }">
 					<label>Old Password:</label>
-					<input type="text" name="old-password" placeholder="old password" maxlength="15" required>
+					<input type="password" name="old-password" placeholder="old password" maxlength="15" required>
 				</c:if>
 				
 				<label>New Password:</label>
