@@ -103,11 +103,20 @@ public class UpdateCustomerServlet extends HttpServlet {
         		msg = "Invalid pincode";	
         	}
         	
+            tempCustomer = new Customer(customerId, name, "", phone, email, age,
+                    gender, martialStatus, occupation, income, adhaar, pan, 
+                    "", address, null);
+        	
         	// Create new customer.
-        	if(!isError) {	
-	        	customerDAO.update(customerId, name, phone, email, age, gender, 
-	        									martialStatus, occupation, income, adhaar, 
-	        									pan, address);	 
+        	if(!isError) {
+	            
+	            if(!customer.equals(tempCustomer)) {
+	        		// only perform update when values are changed.
+		        	customerDAO.update(customerId, name, phone, email, age, gender, 
+		        									martialStatus, occupation, income, adhaar, 
+		        									pan, address);	 
+	            }
+	            
 	        	msg = "customer details updated successfully";
         	}
         } catch(ClassCastException e) {
@@ -124,11 +133,8 @@ public class UpdateCustomerServlet extends HttpServlet {
 		} finally {
 			
 			if(isError || exceptionOccured) {
-				// Dummy customer object to prefill the user input values.
-	            tempCustomer = new Customer(customerId, name, "", phone, email, age,
-						                    gender, martialStatus, occupation, income, adhaar, pan, 
-						                    "", address, null);
 				out.println(Util.createNotification(msg, "danger"));
+				// Set dummy customer object to prefill the user input values.
 				req.setAttribute("customer", tempCustomer);
 				req.getRequestDispatcher("/jsp/components/updateCustomer.jsp").include(req, res);
 			}

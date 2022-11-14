@@ -274,4 +274,23 @@ public class Customer extends User {
     public void setAddress(Address address) {
     	this.address = address;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Customer target = (Customer) obj;
+        
+        return (this.getName().equals(target.getName()) && this.getEmail().equals(target.getEmail()) 
+        		&& this.getPhone() == target.getPhone() && this.getAge() == target.getAge() &&
+        		this.getGender() == target.getGender() && this.getOccupation().equals(target.getOccupation())
+        		&& this.getIncome() == target.getIncome() && this.getAdhaar() == target.getAdhaar() &&
+        		this.getPan().equals(target.getPan()) && this.getAddress().equals(target.getAddress()));
+    }
 }
