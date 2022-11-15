@@ -79,6 +79,58 @@ public class BeneficiaryDAO {
 	}
 	
 	
+	public void update(BeneficiaryType type, long beneficiaryId, long accountNo, 
+						String name, String nickName, int bankId, String IFSC) throws SQLException {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		
+		boolean exceptionOccured = false;
+		String msg = "";
+		
+		try {
+			conn = Factory.getDataSource().getConnection();
+			
+			if(type == BeneficiaryType.OWN_BANK)
+                stmt = conn.prepareStatement("UPDATE own_bank_beneficiary SET account_no = ?, name = ?, nick_name = ? WHERE id = ?");
+			else
+                stmt = conn.prepareStatement("UPDATE other_bank_beneficiary SET account_no = ?, name = ?, nick_name = ?, bank_id = ?, ifsc = ? WHERE id = ?");
+
+                stmt.setLong(1, accountNo);
+                stmt.setString(2, name);
+                stmt.setString(3, nickName);
+                
+                if(type == BeneficiaryType.OWN_BANK) {
+                	stmt.setLong(4, beneficiaryId);
+                } else {
+                    stmt.setInt(4, bankId);
+                    stmt.setString(5, IFSC);
+                    stmt.setLong(6, beneficiaryId);
+                }
+
+                stmt.executeUpdate();
+		} catch(SQLException e) {
+			System.out.println("sql excep");
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            
+            try {
+                if(stmt != null)
+                    stmt.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+            
+            try {
+                if(conn != null)
+                    conn.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+				
+		if(exceptionOccured)
+			throw new SQLException(msg);
+	}
+	
+	
 	public void delete(BeneficiaryType type, long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;

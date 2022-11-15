@@ -6,7 +6,10 @@
 
 <div>
 	<h3>Name: ${ beneficiary.getName() }</h3>
-	<p>Nick Name: ${ beneficiary.getNickName() }</p>
+	
+	<c:if test="${ beneficiary.getNickName().length() > 0 }">
+		<p>Nick Name: ${ beneficiary.getNickName() }</p>
+	</c:if>
 	
 	<c:if test="${ BeneficiaryType.getType(param.type) == BeneficiaryType.OTHER_BANK }">
 		<p>Bank Name: ${ AppCache.getIntegratedBank(beneficiary.getBankId()).getName() }
