@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import constant.BeneficiaryType;
 import dao.CustomerDAO;
+import dao.IntegratedBankDAO;
 import model.Beneficiary;
 import model.IntegratedBank;
 import model.user.Customer;
@@ -24,6 +25,7 @@ public class BeneficiaryServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
+		IntegratedBankDAO integratedBandDAO = Factory.getIntegratedBankDAO();
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		Customer customer = null;
 		
@@ -61,7 +63,7 @@ public class BeneficiaryServlet extends HttpServlet {
 			
 			// add a beneficiary.
 			if(path.equals("/add")) {
-				integratedBanks = Factory.getIntegratedBankDAO().getAll();
+				integratedBanks = integratedBandDAO.getAll();
 				req.setAttribute("banks", integratedBanks);
 				// action type = 0 -> Add a beneficiary.
 				req.setAttribute("actionType", 0);
@@ -94,12 +96,19 @@ public class BeneficiaryServlet extends HttpServlet {
 			
 			if(!isError) {
 				req.setAttribute("beneficiary", beneficiary);
+				req.setAttribute("type", type);
 				switch(action) {
 					case "view": 
 								req.getRequestDispatcher("/jsp/customer/displayBeneficiary.jsp").include(req, res);
 								break;
 					case "remove": break; 
-					case "edit": break;
+					case "edit":
+								integratedBanks = integratedBandDAO.getAll();
+								req.setAttribute("banks", integratedBanks);
+								// action type = 1 -> update beneficiary.
+								req.setAttribute("actionType", 1);
+								req.getRequestDispatcher("/jsp/customer/createEditBeneficiary.jsp").forward(req, res);
+								break;
 					default: isError = true;
 							 msg = "page not found !!!";
 							 break;

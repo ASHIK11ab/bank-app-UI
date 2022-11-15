@@ -21,7 +21,7 @@ import util.Factory;
 import util.Util;
 
 
-public class CreateEditBeneficiaryServlet extends HttpServlet {
+public class AddEditBeneficiaryServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		
@@ -34,22 +34,21 @@ public class CreateEditBeneficiaryServlet extends HttpServlet {
 		Customer customer = null;
 		String name = "", ifsc = "", nickName = "", msg = "";
 		boolean isError = false, exceptionOccured = false;
-		long accountNo = 0, customerId, confirmAccountNo;
+		long accountNo = 0, customerId, confirmAccountNo, beneficiaryId = -1;
 		int bankId = -1, beneficiaryType = -1, actionType = -1;
 		
 		try {
 			customerId = (Long) req.getSession(false).getAttribute("id");
+			
 			beneficiaryType = Integer.parseInt(req.getParameter("type"));
-			System.out.println(beneficiaryType);
 			actionType = Integer.parseInt(req.getParameter("action-type"));
-			System.out.println(actionType);
 			
 			accountNo = Long.parseLong(req.getParameter("account-no"));
-			System.out.println(accountNo);
-			confirmAccountNo = Long.parseLong(req.getParameter("confirm-account-no"));
-			System.out.println(confirmAccountNo);
+			
+			confirmAccountNo = (actionType == 0) ? Long.parseLong(req.getParameter("confirm-account-no")) : -1;
+			
 			name = req.getParameter("name");
-			nickName = req.getParameter("nick-name");
+			nickName = req.getParameter("nick-name").strip();
 			
 			type = BeneficiaryType.getType(beneficiaryType);
 			
@@ -58,15 +57,17 @@ public class CreateEditBeneficiaryServlet extends HttpServlet {
 				msg = "Invalid beneficiary type !!!";
 			}
 			
-			if(!isError && (actionType != 0 && actionType == 1)) {
+			if(!isError && (actionType != 0 && actionType != 1)) {
 				isError = true;
-				msg = "Internal error !!!";
+				msg = "Invalid action !!!";
 			}
 			
 			if(!isError) {
+				// get the beneficiary id to be updated.
+				beneficiaryId = actionType == 1 ? Long.parseLong(req.getParameter("beneficiary-id")) : -1;
+				
 				if(type == BeneficiaryType.OTHER_BANK) {
 					bankId = Integer.parseInt(req.getParameter("bank-id"));
-					System.out.println(bankId);
 					ifsc = req.getParameter("ifsc");
 				} else {
 					if(Util.getNoOfDigits(accountNo) != 11 ) {
@@ -76,7 +77,7 @@ public class CreateEditBeneficiaryServlet extends HttpServlet {
 				}
 			}
 			
-			if(!isError && accountNo != confirmAccountNo) {
+			if(!isError && actionType == 0 && accountNo != confirmAccountNo) {
 				isError = true;
 				msg = "Account no's does not match !!!";
 			}
@@ -107,18 +108,19 @@ public class CreateEditBeneficiaryServlet extends HttpServlet {
 				isError = true;
 				msg = "Nick name should be less than 15 characters";
 			}
-			
-			// Dummy object to hold user input values.
-			tempBeneficiary = new Beneficiary(-1, accountNo, name, nickName, bankId, ifsc);
 						
+			// Dummy object to hold user input values.
+			tempBeneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName, bankId, ifsc);
+			
 			if(!isError) {
 				customer = customerDAO.get(customerId);
 				synchronized(customer) {
+
 					// new beneficiary.
 					if(actionType == 0) {
 						
 						for(Beneficiary existingBeneficiary : customer.getBeneficiaries(type)) {
-							if(existingBeneficiary.compareTo(tempBeneficiary) == 0) {
+							if(existingBeneficiary.equals(tempBeneficiary)) {
 								isError = true;
 								msg = "Beneficiary with given details aldready exists !!!";
 							}
@@ -131,7 +133,34 @@ public class CreateEditBeneficiaryServlet extends HttpServlet {
 							msg = "Beneficiary added successfully";
 						}
 					} else {
-						// update logic.
+						// update.
+						
+						beneficiary = customer.getBeneficiary(type, beneficiaryId);
+						
+						if(beneficiary == null) {
+							isError = true;
+							msg = "Beneficiary does not exist !!!";
+						} else {
+							// update beneficiary in DB only when changed.
+							if(!beneficiary.equals(tempBeneficiary)) {
+								synchronized(beneficiary) {
+									
+									beneficiaryDAO.update(type, beneficiaryId, accountNo, name, nickName, bankId, ifsc);
+									
+									// update in cache.
+									beneficiary.setAccountNo(accountNo);
+									beneficiary.setName(name);
+									beneficiary.setNickName(nickName);
+									
+									if(type == BeneficiaryType.OTHER_BANK) {
+										beneficiary.setBankId(bankId);
+										beneficiary.setIFSC(ifsc);
+									}
+								}
+							}
+							
+							msg = "Beneficiary details updated successfully";
+						}
 					}
 				}
 			}

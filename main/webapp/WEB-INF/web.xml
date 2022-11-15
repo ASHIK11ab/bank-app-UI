@@ -465,16 +465,12 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>CreateEditBeneficiaryServlet</servlet-name>
-		<servlet-class>servlet.customer.CreateEditBeneficiaryServlet</servlet-class>
+		<servlet-name>AddEditBeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.AddEditBeneficiaryServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>CreateEditBeneficiaryServlet</servlet-name>
-		<url-pattern>/customer/add-beneficiary</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>CreateEditBeneficiaryServlet</servlet-name>
-		<url-pattern>/customer/edit-beneficiary</url-pattern>
+		<servlet-name>AddEditBeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/add-edit-beneficiary</url-pattern>
 	</servlet-mapping>
 	<!-- End of customer servlets and mappings -->
 	
