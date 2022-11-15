@@ -472,6 +472,15 @@
 		<servlet-name>AddEditBeneficiaryServlet</servlet-name>
 		<url-pattern>/customer/add-edit-beneficiary</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RemoveBeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.RemoveBeneficiaryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RemoveBeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/remove-beneficiary</url-pattern>
+	</servlet-mapping>
 	<!-- End of customer servlets and mappings -->
 	
 	<!-- Filters -->

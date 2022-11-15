@@ -57,7 +57,7 @@ public class BeneficiaryServlet extends HttpServlet {
 				otherBankBeneficiaries = customer.getBeneficiaries(BeneficiaryType.OTHER_BANK);
 				req.setAttribute("ownBankBeneficiaries", ownBankBeneficiaries);
 				req.setAttribute("otherBankBeneficiaries", otherBankBeneficiaries);
-				req.getRequestDispatcher("/jsp/customer/displayBeneficiaries.jsp").forward(req, res);
+				req.getRequestDispatcher("/jsp/customer/displayBeneficiaries.jsp").include(req, res);
 				return;
 			}
 			
@@ -101,7 +101,8 @@ public class BeneficiaryServlet extends HttpServlet {
 					case "view": 
 								req.getRequestDispatcher("/jsp/customer/displayBeneficiary.jsp").include(req, res);
 								break;
-					case "remove": break; 
+					case "remove": req.getRequestDispatcher("/jsp/customer/removeBeneficiaryConfirmation.jsp").forward(req, res);
+									break;
 					case "edit":
 								integratedBanks = integratedBandDAO.getAll();
 								req.setAttribute("banks", integratedBanks);
