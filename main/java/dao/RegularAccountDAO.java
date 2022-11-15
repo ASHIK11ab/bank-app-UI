@@ -7,12 +7,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.LinkedList;
 
 import cache.AppCache;
 import constant.AccountCategory;
 import constant.RegularAccountType;
 import model.Branch;
 import model.Nominee;
+import model.Transaction;
 import model.account.*;
 import model.user.Customer;
 import util.Factory;
@@ -110,6 +112,9 @@ public class RegularAccountDAO {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		
+		TransactionDAO transactionDAO = Factory.getTransactionDAO();
+		LinkedList<Transaction> recentTransactions = null;
+		
 		Branch branch = AppCache.getBranch(branchId);
 		RegularAccount account = null;
 		LocalDate openingDate, closingDate;
@@ -157,8 +162,14 @@ public class RegularAccountDAO {
 					switch(RegularAccountType.getType(type_id)) {
 						case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
 						case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
-						default: return null;
 					}
+					
+					// Cache recent transactions of account.
+					recentTransactions = transactionDAO.getRecentTransactions(conn, accountNo);
+					
+					for(Transaction transaction : recentTransactions)
+						account.addTransaction(transaction);
+					
 					// ADD to cache.
 					branch.addAccount(AccountCategory.REGULAR, account.getTypeId(), account);
 					System.out.println("fetched from db regular account");

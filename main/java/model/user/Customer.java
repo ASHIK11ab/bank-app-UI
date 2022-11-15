@@ -3,6 +3,7 @@ package model.user;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,6 +12,7 @@ import constant.BeneficiaryType;
 import constant.RegularAccountType;
 import model.Address;
 import model.Beneficiary;
+import model.Transaction;
 
 
 public class Customer extends User {
@@ -38,7 +40,7 @@ public class Customer extends User {
 
     // A/C no to branch id mapping.
     private ConcurrentHashMap<Long, Integer> depositAccounts;
-
+   
 
     public Customer(long id, String name, String password, long phone,
                         String email, byte age, char gender, String martialStatus,
@@ -147,7 +149,7 @@ public class Customer extends User {
     	
     	return null;
     }
-    
+        
     
     // Getters
     public int getAccountBranchId(AccountCategory category, long accountNo) {

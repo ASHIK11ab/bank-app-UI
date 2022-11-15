@@ -18,7 +18,14 @@ public class CurrentAccount extends RegularAccount {
     
 
     @Override
-    public int initiateTransaction(float amount) { return 200; }
+    public int initiateTransaction(float amount) {        
+        //Insufficient balance.
+        if(super.getBalance() < amount)
+            return 401;
+
+        //Transaction can proceed.
+        return 200;
+    }
     
     // Getters
     public static int getMinimumBalance() {
