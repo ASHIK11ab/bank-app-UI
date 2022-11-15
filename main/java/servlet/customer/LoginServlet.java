@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
 			
 			customer = customerDAO.get(customerId);    
 			
-	        if((customer != null) && customer.getPassword().equals(password)) {
+	        if((customer != null) && !customer.isRemoved() && customer.getPassword().equals(password)) {
 	        	// create session.
 	        	session = req.getSession();
 	        	session.setAttribute("id", customer.getId());
