@@ -166,8 +166,8 @@ public class CustomerDAO {
 	            stmt = conn.prepareStatement("SELECT * FROM customer c JOIN customer_info c_info ON c.id = c_info.customer_id WHERE c.id = ?");
                 stmt2 = conn.prepareStatement("SELECT * from own_bank_beneficiary WHERE customer_id = ?");
                 stmt3 = conn.prepareStatement("SELECT * from other_bank_beneficiary WHERE customer_id = ?");
-                stmt4 = conn.prepareStatement("SELECT a.account_no, a.branch_id, ra.type_id FROM regular_account ra LEFT JOIN account a ON a.account_no = ra.account_no where a.customer_id = ?");
-                stmt5 = conn.prepareStatement("SELECT a.account_no, a.branch_id, da.type_id FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no where a.customer_id = ?");
+                stmt4 = conn.prepareStatement("SELECT a.account_no, a.branch_id, ra.type_id FROM regular_account ra LEFT JOIN account a ON a.account_no = ra.account_no where a.customer_id = ? AND a.closing_date IS NULL");
+                stmt5 = conn.prepareStatement("SELECT a.account_no, a.branch_id, da.type_id FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no where a.customer_id = ? AND a.closing_date IS NULL");
 	            
 	            stmt.setLong(1, customerId);
 	            
