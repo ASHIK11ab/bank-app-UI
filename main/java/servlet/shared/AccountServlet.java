@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,6 +15,7 @@ import constant.AccountCategory;
 import constant.Role;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
+import model.Transaction;
 import model.account.RegularAccount;
 import model.user.Customer;
 import util.Factory;
@@ -30,6 +32,7 @@ public class AccountServlet extends HttpServlet {
 		
 		RegularAccount account = null;
 		Customer customer = null;
+		LinkedList<Transaction> transactions = null;
 		
 		Role role = null;
 		boolean isError = false, exceptionOccured = false, pageFound = true, isAccessGranted = false;
@@ -105,11 +108,17 @@ public class AccountServlet extends HttpServlet {
 				switch(action) {
 					case "view":
 								req.setAttribute("actionType", 1);
-								req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res); break;
+								req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
+								break;
 					case "transaction-history":
 												req.setAttribute("actionType", 0);
 												req.setAttribute("accountCategory", AccountCategory.REGULAR.id);
-												req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").include(req, res); break;
+												req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").include(req, res);
+												break;
+					case "mini-statement":
+											req.getRequestDispatcher("/jsp/components/miniStatement.jsp").forward(req, res);
+											break;
+											
 					default: pageFound = false;
 				}
 				

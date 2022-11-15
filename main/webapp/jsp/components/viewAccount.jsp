@@ -84,6 +84,10 @@
 					Transaction history
 				</a>
 				
+				<a class="button secondary" href="/bank-app/${ userType }/account/${ account.getAccountNo() }/mini-statement">
+					Mini Statement
+				</a>
+				
 				<c:if test="${ role == Role.EMPLOYEE && !account.isClosed() }">
 					<a class="button danger" href="/bank-app/employee/account/${ account.getAccountNo() }/close">
 						close Account
