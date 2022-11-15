@@ -2,6 +2,15 @@
 	<a class="app-name" href="/bank-app/customer/dashboard">Your bank</a>
 	<nav class="nav">
 		<div class="sub-nav">
+			<span class="text">Accounts</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/customer/account/">account management</a>
+				</li>
+			</ul>
+		</div>
+		
+		<div class="sub-nav">
 			<span class="text">Beneficiaries</span>
 			<ul class="links">
 				<li>
@@ -10,7 +19,6 @@
 				</li>
 			</ul>
 		</div>
-		
 		<div class="sub-nav">
 			<span class="text">my profile</span>
 			<ul class="links">
