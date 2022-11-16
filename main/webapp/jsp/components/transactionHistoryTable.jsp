@@ -4,7 +4,7 @@
 	<!-- Display transactions -->
 	<c:choose>
 		<c:when test="${ transactions.size() == 0 }">
-			<h2>${ fallbackText }</h2>
+			<h2>${ param.fallbackText }</h2>
 		</c:when>
 	
 		<c:when test="${ transactions.size() > 0 }">

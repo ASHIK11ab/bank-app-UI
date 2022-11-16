@@ -9,7 +9,6 @@
 				</li>
 			</ul>
 		</div>
-		
 		<div class="sub-nav">
 			<span class="text">Accounts</span>
 			<ul class="links">
@@ -18,7 +17,15 @@
 				</li>
 			</ul>
 		</div>
-		
+		<div class="sub-nav">
+			<span class="text">deposits</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/customer/deposit/create">create deposit</a>
+					<a href="/bank-app/customer/deposit/">deposit management</a>
+				</li>
+			</ul>
+		</div>
 		<div class="sub-nav">
 			<span class="text">Beneficiaries</span>
 			<ul class="links">
