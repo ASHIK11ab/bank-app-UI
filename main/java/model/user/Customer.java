@@ -1,18 +1,25 @@
 package model.user;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import constant.AccountCategory;
 import constant.BeneficiaryType;
 import constant.RegularAccountType;
+import dao.RegularAccountDAO;
 import model.Address;
 import model.Beneficiary;
 import model.Transaction;
+import model.account.RegularAccount;
+import util.Factory;
 
 
 public class Customer extends User {
@@ -176,6 +183,41 @@ public class Customer extends User {
     	
     	return branchId;
     }
+    
+    public Properties getActiveAccounts(AccountCategory category) throws SQLException {
+    	Properties activeAccounts = new Properties();
+    	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+    	RegularAccount account = null;
+    	LinkedList<Long> activeSavingsAccounts = new LinkedList<Long>();
+    	
+    	if(category == AccountCategory.REGULAR) {
+    		
+	    	// Add all active savings account to list.
+			for(Entry<Long, Integer> set  : this.savingsAccounts.entrySet()) {
+	    		account = accountDAO.get(set.getKey(), set.getValue());
+	    		synchronized (account) {
+					if(account.getIsActive())
+						activeSavingsAccounts.add(account.getAccountNo());
+				}
+			}
+			
+			if(activeSavingsAccounts.size() > 0)
+				activeAccounts.put(RegularAccountType.SAVINGS, activeSavingsAccounts);
+			
+			// Check if current account exists and active.
+			// If so, add current account to active accounts.
+			if(this.currentAccountNo != -1) {
+				account = accountDAO.get(this.currentAccountNo, this.currentAccountBranchId);
+				synchronized (account) {
+					if(account.getIsActive())
+						activeAccounts.put(RegularAccountType.CURRENT, this.currentAccountNo);
+				}
+			}
+    	}
+		
+		return activeAccounts;
+    }
+    
     
     public Collection<Long> getSavingsAccounts() {
     	return this.savingsAccounts.keySet();

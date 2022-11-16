@@ -2,6 +2,7 @@ package model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class Transaction {
@@ -31,6 +32,10 @@ public class Transaction {
     // Getters
     public LocalDate getDate() {
         return this.dateTime.toLocalDate();
+    }
+    
+    public LocalTime getTime() {
+    	return this.dateTime.toLocalTime();
     }
 
     public float getAmount() {
