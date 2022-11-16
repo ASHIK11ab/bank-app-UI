@@ -45,19 +45,27 @@ public class DepositServlet extends HttpServlet {
 		if(queryMsg != null && status != null)
 			out.println(Util.createNotification(queryMsg, status));
 		
-		if(path == null || path.equals("/")) {
-			req.setAttribute("actionType", 0);
-			req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res);
-			return;
-		}
-		
 		try {
 			role = (Role) req.getSession(false).getAttribute("role"); 
+			
+			if(role == Role.CUSTOMER) {
+				customerId = (Long) req.getSession(false).getAttribute("id");
+				customer = customerDAO.get(customerId);
+			}
+			
+			if(path == null || path.equals("/")) {
+				req.setAttribute("actionType", 0);
+				
+				if(role == Role.CUSTOMER)
+					req.setAttribute("customerDeposits", customer.getDepositAccounts());
+				
+				req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res);
+				return;
+			}
+			
 			path = path.substring(1);
 			result = path.split("/");
-			
-			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
-			
+						
 			accountNo = Long.parseLong(result[0]);
 			action = result[1];
 			
@@ -78,10 +86,7 @@ public class DepositServlet extends HttpServlet {
 		        					}
 		        					break;
 		        	case CUSTOMER: 
-		        					customerId = (Long) req.getSession(false).getAttribute("id");
-		        					customer = customerDAO.get(customerId);
 		        					branchId = customer.getAccountBranchId(AccountCategory.DEPOSIT, accountNo);
-		        					
 		    						account = accountDAO.get(accountNo, branchId);
 		    						// Customer cannot access a closed account.
 		    						if(account == null || account.isClosed()) {
@@ -102,7 +107,7 @@ public class DepositServlet extends HttpServlet {
 								req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res); break;
 					case "transaction-history":
 												req.setAttribute("actionType", 0);
-												req.setAttribute("accountCategory", 1);
+												req.setAttribute("accountCategory", AccountCategory.DEPOSIT.id);
 												req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").include(req, res); break;
 					case "close":
 								// Only employee has access to a closed account.
@@ -137,6 +142,10 @@ public class DepositServlet extends HttpServlet {
 			if(isError || exceptionOccured) {
 				out.println(Util.createNotification(msg, "danger"));
 				req.setAttribute("actionType", 0);
+				
+				if(role == Role.CUSTOMER)
+					req.setAttribute("customerDeposits", customer.getDepositAccounts());
+				
 				req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res);
 				out.close();
 			}
@@ -166,8 +175,7 @@ public class DepositServlet extends HttpServlet {
 			
 			if(isError || exceptionOccured) {
 				out.println(Util.createNotification(errorMsg, "danger"));
-				req.setAttribute("actionType", 0);
-				req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res);
+				doGet(req, res);
 			}
 			
 			out.close();
