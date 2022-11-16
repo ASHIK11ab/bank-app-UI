@@ -456,6 +456,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>FundTransferServlet</servlet-name>
+		<servlet-class>servlet.customer.FundTransferServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FundTransferServlet</servlet-name>
+		<url-pattern>/customer/fund-transfer</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>BeneficiaryServlet</servlet-name>
 		<servlet-class>servlet.customer.BeneficiaryServlet</servlet-class>
 	</servlet>

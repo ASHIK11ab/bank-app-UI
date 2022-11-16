@@ -2,6 +2,15 @@
 	<a class="app-name" href="/bank-app/customer/dashboard">Your bank</a>
 	<nav class="nav">
 		<div class="sub-nav">
+			<span class="text">Funds</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/customer/fund-transfer">Fund Transfer</a>
+				</li>
+			</ul>
+		</div>
+		
+		<div class="sub-nav">
 			<span class="text">Accounts</span>
 			<ul class="links">
 				<li>
