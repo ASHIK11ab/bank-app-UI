@@ -137,6 +137,22 @@ a.button.danger, button.danger {
 	color: #fff;
 }
 
+.beneficiary-container {
+	height: 200px;
+	overflow-y: scroll;
+}
+
+.beneficiary-group {
+	display: flex;
+    align-items: center;
+    border-top: 2px solid #000;
+    margin-top: 30px;
+}
+
+.beneficiary-group .details {
+	margin-left: 50px;
+}
+
 
 @keyframes slide-from-top {
 	0% {

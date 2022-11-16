@@ -19,7 +19,7 @@
 	<main class="container">
 		<div class="wrapper">
 			<h1>View Beneficiaries</h1>
-			<form action="#" id="beneficiary-select-form" metho="post">
+			<form action="#" id="beneficiary-select-form" method="post">
 				<label>Select Beneficiary type</label>
 				<select id="beneficiary-type-dropdown">
 					<option value="-1" hidden disabled selected>select</option>
