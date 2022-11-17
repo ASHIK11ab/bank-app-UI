@@ -19,6 +19,7 @@ import model.Address;
 import model.Beneficiary;
 import model.Transaction;
 import model.account.RegularAccount;
+import model.card.DebitCard;
 import util.Factory;
 
 
@@ -216,6 +217,36 @@ public class Customer extends User {
     	}
 		
 		return activeAccounts;
+    }
+    
+    // Returns all of the debit cards associated with this customer.
+    public TreeSet<DebitCard> getCards() throws SQLException {
+    	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+    	
+    	RegularAccount account = null;
+    	TreeSet<DebitCard> cards = new TreeSet<DebitCard>();
+    	
+    	int branchId;
+    	
+    	for(Long accountNo : this.getSavingsAccounts()) {
+    		branchId = this.getAccountBranchId(AccountCategory.REGULAR, accountNo);
+    		account = accountDAO.get(accountNo, branchId);
+    		
+    		for(DebitCard card : account.getCards())
+    			if(!card.isDeactivated())
+    				cards.add(card);
+    	}
+    	
+    	if(this.currentAccountNo != -1) {
+    		branchId = this.getAccountBranchId(AccountCategory.REGULAR, this.currentAccountNo);
+    		account = accountDAO.get(this.currentAccountNo, branchId);
+    		
+    		for(DebitCard card : account.getCards())
+    			if(!card.isDeactivated())
+    				cards.add(card);
+    	}
+    	
+    	return cards;
     }
     
     
