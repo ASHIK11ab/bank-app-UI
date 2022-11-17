@@ -218,7 +218,7 @@ public class CreateDepositServlet extends HttpServlet {
 				if(depositType == DepositAccountType.RD.id && today.getDayOfMonth() > 15) {
 					
 					// create deposit account
-	            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, 0, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
+	            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, 0, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
 					out.println(Util.createNotification("Deposit created successfully, initial deposit amount will be auto debited on next recurring date", "success"));
 	            	req.setAttribute("account", account);
 	            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").include(req, res);
@@ -251,7 +251,7 @@ public class CreateDepositServlet extends HttpServlet {
 				            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
 				            	
 				            	// create deposit account
-				            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate);
+				            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
 				            	
 				            	// update debit from account amount in cache.
 				            	debitFromAccount.deductAmount(amount);
