@@ -91,7 +91,7 @@ public class BlockUnblockCardServlet extends HttpServlet {
 		        					// Card nunber entered does not belong to this customer.
 		        					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1) {
 		        						isError = true;
-		        						msg = "Account not exist !!!";
+		        						msg = "Card not exist !!!";
 		        					}
 		        					break;
 		        	default: break;

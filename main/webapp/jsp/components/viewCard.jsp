@@ -19,55 +19,68 @@
 	
 	<main class="container">
 		<div class="wrapper">
-			<form action="/bank-app/${ userType }/card/" method="post">
-				<input name="action-type" value="${ actionType }" class="hidden">
-				
-				<section class="${ actionType == 1 ? 'hidden' : ''}">
-					<h1>View Card</h1>
+			
+			<c:if test="${ actionType == 0 }">
+				<form action="/bank-app/${ userType }/card/" method="post">
+					<input name="action-type" value="${ actionType }" class="hidden">
 					
-					<c:choose>
-					
-						<c:when test="${ role == Role.EMPLOYEE  }">
-							<label>Card No:</label>
-							<input type="number" placeholder="12 Digit card no"
-								name="card-no" value="${ cardNo }"  required>
-						</c:when>
-						
-						<c:when test="${ role == Role.CUSTOMER }">
-							<select name="card-no">
-								<option value="-1" selected disabled hidden>select card</option>
-								<c:forEach items="${ requestScope.cards }" var="card">
-									<option value="${ card.getCardNo() }"
-										${ card.getCardNo() == cardNo ? 'selected' : '' }
-										>
-										
-										( ${ card.getCardNo() } ) ${ DebitCardType.getName(card.getTypeId()) }
-									
-									</option>
-								</c:forEach>
-							</select>
-						</c:when>
-						
-					</c:choose>
-					
-					<button>submit</button>
-				</section>
-				
-				<c:if test="${ actionType == 1 }">
 					<section>
-						<c:if test="${ card.isDeactivated() }">
-							<h2 style="color: red">Card Deactivated</h2>
-						</c:if>
+						<h1>View Card</h1>
 						
-						<h1>Card Details:</h1>
-						<jsp:include page="/jsp/components/card.jsp" />
+						<c:choose>
 						
-						<c:if test="${ card.isActivated() && !card.isDeactivated() }">
-							<a class="button" href="/bank-app/${ userType }/card/${ cardNo }/block-unblock">Block / Unblock card</a>
-						</c:if>
+							<c:when test="${ role == Role.EMPLOYEE  }">
+								<label>Card No:</label>
+								<input type="number" placeholder="12 Digit card no"
+									name="card-no" value="${ cardNo }"  required>
+							</c:when>
+						
+							<c:when test="${ role == Role.CUSTOMER }">
+								<c:choose>
+									<c:when test="${ cards.size() > 0 }">
+										<select name="card-no">
+											<option value="-1" selected disabled hidden>select card</option>
+											<c:forEach items="${ requestScope.cards }" var="card">
+												<option value="${ card.getCardNo() }"
+													${ card.getCardNo() == cardNo ? 'selected' : '' }
+													>
+													( ${ card.getCardNo() } ) ${ DebitCardType.getName(card.getTypeId()) }
+												</option>
+											</c:forEach>
+										</select>
+									</c:when>
+									
+									<c:when test="${ cards.size() == 0 }">
+										<h1>No cards found</h1>
+									</c:when>
+								</c:choose>
+							</c:when>
+						
+						</c:choose>
+					
+						<button>submit</button>
 					</section>
-				</c:if>
-			</form>
+				</form>
+			</c:if>
+				
+			<c:if test="${ actionType == 1 }">
+				<section>
+					<c:if test="${ card.isDeactivated() }">
+						<h2 style="color: red">Card Deactivated</h2>
+					</c:if>
+					
+					<h1>Card Details:</h1>
+					<jsp:include page="/jsp/components/card.jsp" />
+					
+					<c:if test="${ !card.isActivated() && role == Role.CUSTOMER }">
+						<a class="button" href="/bank-app/${ userType }/card/${ cardNo }/activate">Activate card</a>
+					</c:if>
+					
+					<c:if test="${ card.isActivated() && !card.isDeactivated() }">
+						<a class="button secondary" href="/bank-app/${ userType }/card/${ cardNo }/block-unblock">Block / Unblock card</a>
+					</c:if>
+				</section>
+			</c:if>
 		</div>
 	</main>
 </body>
