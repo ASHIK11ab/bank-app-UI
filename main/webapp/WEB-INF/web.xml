@@ -494,6 +494,15 @@
 		<servlet-name>RemoveBeneficiaryServlet</servlet-name>
 		<url-pattern>/customer/remove-beneficiary</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ActivateCardServlet</servlet-name>
+		<servlet-class>servlet.customer.ActivateCardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ActivateCardServlet</servlet-name>
+		<url-pattern>/customer/activate-card</url-pattern>
+	</servlet-mapping>
 	<!-- End of customer servlets and mappings -->
 	
 	<!-- Filters -->

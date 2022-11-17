@@ -133,10 +133,23 @@ public class CardServlet extends HttpServlet {
 										
 										if(!isError) {
 											req.setAttribute("actionType", 0);
-											req.setAttribute("cardNo", cardNo);
 											req.getRequestDispatcher("/jsp/components/blockUnblockCard.jsp").include(req, res); break;	
 										}
 										break;
+					case "activate":
+									if(role == Role.EMPLOYEE) {
+										isError = true;
+										msg = "page not found !!!";
+									}
+									
+									if(!isError && card.isActivated()) {
+										isError = true;
+										msg = "card is aldready activated !!!";
+									}
+									
+									if(!isError)
+										req.getRequestDispatcher("/jsp/customer/activateCard.jsp").forward(req, res);
+									break;
 					default: 
 							isError = true;
 							msg = "page not found !!!";
