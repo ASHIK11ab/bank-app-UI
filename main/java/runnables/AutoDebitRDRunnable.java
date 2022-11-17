@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 
 import constant.Constants;
 import constant.DepositAccountType;
+import constant.TransactionType;
 import dao.AccountDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Transaction;
 import model.account.DepositAccount;
 import model.account.RegularAccount;
 import util.Factory;
@@ -33,13 +35,15 @@ public class AutoDebitRDRunnable implements Runnable {
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		
+		Transaction transaction = null;
 		RegularAccount debitFromAccount;
 		DepositAccount rdAccount;
 		LocalDate today;
+		String description;
 		boolean monthlyInstallmentPaid = false;
 		float fromAccountBeforeBalance, toAccountBeforeBalance;
 		int monthlyInstallment, branchId, debitFromAccountBranchId;
-		long debitFromAccountNo, rdAccountNo;
+		long debitFromAccountNo, rdAccountNo, transactionId;
 		
 		try {
 			while(!exit) {
@@ -77,7 +81,7 @@ public class AutoDebitRDRunnable implements Runnable {
 								rs2 = stmt2.executeQuery();
 								
 								if(rs2.next()) {
-									monthlyInstallmentPaid = (rs2.getInt("count") > 1) ? true : false;
+									monthlyInstallmentPaid = (rs2.getInt("count") >= 1) ? true : false;
 									
 									// Only auto debit for RD if current month installment is not aldready paid.
 									if(!monthlyInstallmentPaid) {
@@ -96,12 +100,17 @@ public class AutoDebitRDRunnable implements Runnable {
 													debitFromAccount.deductAmount(monthlyInstallment);
 													rdAccount.addAmount(monthlyInstallment);
 													
-													transactionDAO.create(conn, 1, ("RD withdrawal for A/C: " + rdAccountNo), debitFromAccountNo, rdAccountNo, monthlyInstallment, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
-												
+													description = "RD withdrawal for A/C: " + rdAccountNo;
+													
+													transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, rdAccountNo, monthlyInstallment, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+													
 													// update RD recurring date to next month.
 													stmt3.setDate(1, Date.valueOf(today.plusMonths(1)));
 													stmt3.setLong(2, rdAccountNo);
 													stmt3.executeUpdate();
+													
+													transaction = new Transaction(transactionId, TransactionType.NEFT.id, debitFromAccountNo, rdAccountNo, monthlyInstallment, LocalDateTime.now(), description, fromAccountBeforeBalance);
+													debitFromAccount.addTransaction(transaction);
 													
 													System.out.println("Auto debited for RD: " + rdAccountNo + " from A/C: " + debitFromAccountNo);
 												} else {

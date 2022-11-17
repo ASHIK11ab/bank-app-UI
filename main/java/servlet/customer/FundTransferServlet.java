@@ -56,6 +56,7 @@ public class FundTransferServlet extends HttpServlet {
 		Transaction transaction = null;
 		RegularAccount account = null, beneficiaryAccount = null;
 		TreeSet<Beneficiary> beneficiaries = null;
+		LocalDateTime dateTime = null;
 		
 		boolean isError = false, exceptionOccured = false;
 		String msg = "", transactionPassword, description = "";
@@ -262,12 +263,15 @@ public class FundTransferServlet extends HttpServlet {
 							// Transaction successfull
 							if(!isError) {
 								// create transaction record.
+								dateTime = LocalDateTime.now();
+								
 								transactionId = transactionDAO.create(conn, transactionTypeId, description, account.getAccountNo(), beneficiary.getAccountNo(), amount, true, (beneficiaryType == BeneficiaryType.OWN_BANK), fromAccountBeforeBalance, toAccountBeforeBalance);
-								transaction = new Transaction(transactionId, transactionTypeId, account.getAccountNo(), beneficiary.getAccountNo(), amount, LocalDateTime.now(), description, fromAccountBeforeBalance);
+								transaction = new Transaction(transactionId, transactionTypeId, account.getAccountNo(), beneficiary.getAccountNo(), amount, dateTime, description, fromAccountBeforeBalance);
 								
 								account.addTransaction(transaction);
 								if(beneficiaryType == BeneficiaryType.OWN_BANK) {
 									synchronized (beneficiaryAccount) {
+										transaction = new Transaction(transactionId, transactionTypeId, account.getAccountNo(), beneficiary.getAccountNo(), amount, dateTime, description, toAccountBeforeBalance);
 										beneficiaryAccount.addTransaction(transaction);											
 									}
 								}

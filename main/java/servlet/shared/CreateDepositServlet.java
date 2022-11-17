@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +24,7 @@ import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Transaction;
 import model.account.DepositAccount;
 import model.account.RegularAccount;
 import model.user.Customer;
@@ -77,13 +80,14 @@ public class CreateDepositServlet extends HttpServlet {
 		
 		Role role = null;
 		Customer customer = null;
+		Transaction transaction = null;
 		RegularAccount debitFromAccount = null, payoutAccount = null;
 		DepositAccount account = null;
 		
 		LocalDate today = LocalDate.now();
 		boolean isError = false, exceptionOccured = false, isSufficientBalance = false;
 		String msg = "", customerName, description = "";
-		long payoutAccountNo, debitFromAccountNo, customerId = -1;
+		long payoutAccountNo, debitFromAccountNo, customerId = -1, transactionId;
 		float balance, beforeBalance;
 		int branchId = -1, actionType = -1, depositType, amount = 0, tenureMonths;
 		int recurringDate = -1, debitFromAccountBranchId, payoutAccountBranchId;
@@ -258,7 +262,11 @@ public class CreateDepositServlet extends HttpServlet {
 				            	
 				            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
 				            	
-				            	transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
+				            	transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
+				            	
+				            	// Add transaction record to cached debit from account.
+				            	transaction = new Transaction(transactionId, TransactionType.NEFT.id, debitFromAccountNo, account.getAccountNo(), amount, LocalDateTime.now(), description, beforeBalance);
+				            	debitFromAccount.addTransaction(transaction);
 				            	
 				            	req.setAttribute("account", account);
 				            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").forward(req, res);
