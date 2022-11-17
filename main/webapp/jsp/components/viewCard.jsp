@@ -22,7 +22,7 @@
 			<form action="/bank-app/${ userType }/card/" method="post">
 				<input name="action-type" value="${ actionType }" class="hidden">
 				
-				<section class="${ actionType == 0 ? '' : 'hidden'}">
+				<section class="${ actionType == 1 ? 'hidden' : ''}">
 					<h1>View Card</h1>
 					
 					<c:choose>

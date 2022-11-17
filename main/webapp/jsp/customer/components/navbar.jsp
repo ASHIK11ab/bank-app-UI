@@ -36,6 +36,14 @@
 			</ul>
 		</div>
 		<div class="sub-nav">
+			<span class="text">cards</span>
+			<ul class="links">
+				<li>
+					<a href="/bank-app/customer/card/">card management</a>
+				</li>
+			</ul>
+		</div>
+		<div class="sub-nav">
 			<span class="text">my profile</span>
 			<ul class="links">
 				<li>
