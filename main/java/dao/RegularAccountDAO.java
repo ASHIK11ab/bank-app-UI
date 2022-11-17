@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import cache.AppCache;
@@ -16,6 +17,7 @@ import model.Branch;
 import model.Nominee;
 import model.Transaction;
 import model.account.*;
+import model.card.DebitCard;
 import model.user.Customer;
 import util.Factory;
 import util.Util;
@@ -112,6 +114,7 @@ public class RegularAccountDAO {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		
+		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		LinkedList<Transaction> recentTransactions = null;
 		
@@ -169,6 +172,10 @@ public class RegularAccountDAO {
 					
 					for(Transaction transaction : recentTransactions)
 						account.addTransaction(transaction);
+					
+					// Load cards linked with account.
+					for(DebitCard card : cardDAO.getAll(conn, accountNo))
+						account.addDebitCard(card);
 					
 					// ADD to cache.
 					branch.addAccount(AccountCategory.REGULAR, account.getTypeId(), account);

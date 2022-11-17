@@ -4,12 +4,16 @@ import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.TreeSet;
 
 import model.Nominee;
 import model.Transaction;
+import model.card.DebitCard;
 
 public abstract class RegularAccount extends Account {
     private boolean isActive;
+    private TreeSet<DebitCard> cards;
+    
     private LinkedList<Transaction> recentTransactions;
 
 
@@ -21,6 +25,7 @@ public abstract class RegularAccount extends Account {
 		super(accountNo, customerId, customerName, nominee, branchId, amount, openingDate, closingDate, typeId);
 		this.isActive = activeStatus;
 		this.recentTransactions = new LinkedList<Transaction>();
+		this.cards = new TreeSet<DebitCard>();
 	}
     
     
@@ -46,10 +51,38 @@ public abstract class RegularAccount extends Account {
     }
     
     
+    public void addDebitCard(DebitCard card) {
+    	this.cards.add(card);
+    }
+    
+    
+    public void removeDebitCard(DebitCard card) {
+    	this.cards.remove(card);
+    }
+    
+    
     // Getters
     public boolean getIsActive() {
     	return this.isActive;
     }
+    
+    
+    public TreeSet<DebitCard> getCards() {
+    	return this.cards;
+    }
+    
+    
+//    public DebitCard getCard(long cardNo) {
+//    	DebitCard card = null;
+//    	
+//    	for(DebitCard debitCard : this.cards)
+//    		if(debitCard.getCardNo() == cardNo) {
+//    			card = debitCard;
+//    			break;
+//    		}
+//    	
+//    	return card;
+//    }
     
     
     protected LinkedList<Transaction> getRecentTransactions() {

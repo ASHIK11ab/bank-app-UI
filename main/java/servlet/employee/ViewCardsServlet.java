@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,14 +29,13 @@ public class ViewCardsServlet extends HttpServlet {
 		PrintWriter out = res.getWriter();
 		
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
-		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
 		
 		RegularAccount account = null;
 		boolean isError = false, exceptionOccured = false;
 		String msg = "";
 		long accountNo;
 		int branchId;
-		LinkedList<DebitCard> cards = null;
+		TreeSet<DebitCard> cards = null;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id"); 
@@ -50,7 +50,7 @@ public class ViewCardsServlet extends HttpServlet {
 				account = accountDAO.get(accountNo, branchId);
 				
 				if(account != null) {
-					cards = cardDAO.getAll(accountNo);
+					cards = account.getCards();
 					req.setAttribute("actionType", 1);
 					req.setAttribute("account", account);
 					req.setAttribute("cards", cards);

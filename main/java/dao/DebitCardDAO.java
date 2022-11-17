@@ -134,8 +134,7 @@ public class DebitCardDAO {
 	
 	
 	// Returns all debit cards linked with a account.
-	public LinkedList<DebitCard> getAll(long accountNo) throws SQLException {
-		Connection conn = null;
+	public LinkedList<DebitCard> getAll(Connection conn, long accountNo) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -183,11 +182,6 @@ public class DebitCardDAO {
                 if(stmt != null)
                     stmt.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		
 		if(exceptionOccured)
@@ -226,7 +220,18 @@ public class DebitCardDAO {
 	}
 	
 	
-	// internal method
+	// public interface
+	public void activateCard(Connection conn, long cardNo) throws SQLException {
+		_setCardActivationStatus(conn, cardNo, true);
+	}
+	
+	
+	public void deactivateCard(Connection conn, long cardNo) throws SQLException {
+		_setCardActivationStatus(conn, cardNo, false);
+	}
+	
+	
+	// internal method used when activating / deactivating a card.
 	private void _setCardActivationStatus(Connection conn, long cardNo, boolean activationStatus) throws SQLException {
 		PreparedStatement stmt = null;
 		
@@ -259,16 +264,5 @@ public class DebitCardDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
-	}
-	
-	
-	// public interface
-	public void activateCard(Connection conn, long cardNo) throws SQLException {
-		_setCardActivationStatus(conn, cardNo, true);
-	}
-	
-	
-	public void deactivateCard(Connection conn, long cardNo) throws SQLException {
-		_setCardActivationStatus(conn, cardNo, false);
 	}
 }
