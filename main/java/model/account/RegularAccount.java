@@ -72,17 +72,18 @@ public abstract class RegularAccount extends Account {
     }
     
     
-//    public DebitCard getCard(long cardNo) {
-//    	DebitCard card = null;
-//    	
-//    	for(DebitCard debitCard : this.cards)
-//    		if(debitCard.getCardNo() == cardNo) {
-//    			card = debitCard;
-//    			break;
-//    		}
-//    	
-//    	return card;
-//    }
+    public DebitCard getCard(long cardNo) {
+    	System.out.println("cards: " + this.cards);
+    	DebitCard card = null;
+    	
+    	for(DebitCard debitCard : this.cards)
+    		if(debitCard.getCardNo() == cardNo) {
+    			card = debitCard;
+    			break;
+    		}
+    	
+    	return card;
+    }
     
     
     protected LinkedList<Transaction> getRecentTransactions() {
