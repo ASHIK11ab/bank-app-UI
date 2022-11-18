@@ -12,10 +12,15 @@ import java.time.LocalDateTime;
 import cache.AppCache;
 import constant.Constants;
 import constant.DepositAccountType;
+import constant.TransactionType;
 import dao.AccountDAO;
 import dao.DepositAccountDAO;
+import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Bank;
+import model.Transaction;
 import model.account.DepositAccount;
+import model.account.RegularAccount;
 import util.Factory;
 
 
@@ -45,19 +50,28 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		ResultSet rs1 = null, rs2 = null;
 		
 		AccountDAO accountDAO = Factory.getAccountDAO();
+		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		DepositAccountDAO depositAccountDAO = Factory.getDepositAccountDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
 		
+		Bank bank = AppCache.getBank();
+		
+		Transaction transaction = null;
+		RegularAccount bankAccount = null;
 		DepositAccount account = null;
 		LocalDate today = null;
 		boolean isEligibleForIntrest;
+		String description = "";
 		float intrestRate, intrestAmount = 0, fromAccountBeforeBalance, toAccountBeforeBalance;
 		byte typeId;
 		
 		// FD -> deposit amount is the amount deposited.
 		// RD -> deposit amount is the monthly installment.
 		int depositAmount = 0, intrestCreditedMonthCnt, branchId;
-		long accountNo, bankAccountNo = AppCache.getBank().getBankAccountNo();
+		long accountNo, transactionId;
+		
+		long bankAccountNo = bank.getBankAccountNo();
+		int bankAccountBranchId = bank.getAccountBranchId();
 
 		try {
 			while(!exit) {
@@ -102,26 +116,43 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							
 							if(isEligibleForIntrest) {
 								account = depositAccountDAO.get(accountNo, branchId);
+								bankAccount = regularAccountDAO.get(bankAccountNo, bankAccountBranchId);
 								
-								synchronized (account) {
-									intrestCreditedMonthCnt++;
-									
-									// calculate intrest amount for current month.
-									intrestAmount = calculateIntrestAmount(typeId, intrestRate, depositAmount, intrestCreditedMonthCnt);
-									
-									// credit intrest to bank.
-									fromAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);	// deduct from bank account
-									toAccountBeforeBalance = accountDAO.updateBalance(conn, accountNo, 1, intrestAmount);		// credit to deposit account
-									
-									// update in cache.
-									account.addAmount(intrestAmount);
-									
-									transactionDAO.create(conn, 1, ("Intrest credit for deposit A/C: " + accountNo), bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
-									
-									stmt3.setInt(1, intrestCreditedMonthCnt);
-									stmt3.setLong(2, accountNo);
-									stmt3.executeUpdate();
-									System.out.println("Intrest credited for A/C: " + accountNo);
+								synchronized(bankAccount) {
+									synchronized (account) {
+										intrestCreditedMonthCnt++;
+										
+										// calculate intrest amount for current month.
+										intrestAmount = calculateIntrestAmount(typeId, intrestRate, depositAmount, intrestCreditedMonthCnt);
+										
+										
+										// Ensure sufficient balance in bank Account.
+										if(bankAccount.getBalance() >= intrestAmount) {
+											// credit intrest to bank.
+											fromAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 0, intrestAmount);	// deduct from bank account
+											toAccountBeforeBalance = accountDAO.updateBalance(conn, accountNo, 1, intrestAmount);		// credit to deposit account
+											
+											// update in cache.
+											bankAccount.deductAmount(intrestAmount);
+											account.addAmount(intrestAmount);
+											
+											description = "Intrest credit for deposit A/C: " + accountNo;
+											
+											transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+											
+											stmt3.setInt(1, intrestCreditedMonthCnt);
+											stmt3.setLong(2, accountNo);
+											stmt3.executeUpdate();
+											
+											transaction = new Transaction(transactionId, TransactionType.NEFT.id, bankAccountNo, accountNo, intrestAmount, LocalDateTime.now(), description, fromAccountBeforeBalance);
+											bankAccount.addTransaction(transaction);
+											
+											System.out.println("Intrest credited for A/C: " + accountNo);
+										} else {
+											System.out.println("Insufficient balance in bank Account !!!");
+											break;
+										}
+									}
 								}
 							}							
 						}						
