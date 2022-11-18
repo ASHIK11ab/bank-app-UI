@@ -132,6 +132,7 @@ public class BlockUnblockCardServlet extends HttpServlet {
 					if(!isError) {
 						conn = Factory.getDataSource().getConnection();
 						cardDAO.setCardActiveStatus(conn, cardNo, (activationType == 0) ? false : true);
+						card.setIsActive((activationType == 0) ? false : true);
 					}
 				}
 			}

@@ -102,6 +102,7 @@ public class ActivateCardServlet extends HttpServlet {
 					if(!isError) {
 						conn = Factory.getDataSource().getConnection();
 						cardDAO.activateCard(conn, cardNo);
+						card.activateCard();
 						msg = "Card Activated Successfully";
 					}
 				}
