@@ -13,7 +13,8 @@ public class Bank {
     public long supportPhone;
     public String websiteURL;
     private User admin;
-    private long bankAccountNo;
+    private long accountNo;
+    private int accountBranchId;
     private ConcurrentHashMap<Integer, Branch> branches;
     private ConcurrentHashMap<Long, Customer> customers;
     private ConcurrentHashMap<Integer, IntegratedBank> integratedBanks;
@@ -22,12 +23,13 @@ public class Bank {
     private ConcurrentHashMap<Long, Properties> cardAccountBranchMap = null; 
 
     public Bank(String name, String supportEmail, long supportPhone, String websiteURL,
-                long bankAccountNo) {
+                long bankAccountNo, int accountBranchId) {
         this.name = name;
         this.supportEmail = supportEmail;
         this.supportPhone = supportPhone;
         this.websiteURL = websiteURL;
-        this.bankAccountNo = bankAccountNo;
+        this.accountNo = bankAccountNo;
+        this.accountBranchId = accountBranchId;
         branches = new ConcurrentHashMap<Integer, Branch>();
         customers = new ConcurrentHashMap<Long, Customer>();
         integratedBanks = new ConcurrentHashMap<Integer, IntegratedBank>();
@@ -77,7 +79,11 @@ public class Bank {
     }
     
     public long getBankAccountNo() {
-        return this.bankAccountNo;
+        return this.accountNo;
+    }
+    
+    public int getAccountBranchId() {
+        return this.accountBranchId;
     }
 
     public User getAdmin() {

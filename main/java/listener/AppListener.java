@@ -9,6 +9,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import cache.AppCache;
+import dao.AccountDAO;
 import model.Address;
 import model.Bank;
 import model.Branch;
@@ -56,6 +57,8 @@ public class AppListener implements ServletContextListener {
         Connection conn = null;
         PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null;
         ResultSet rs1 = null, rs2 = null, rs3 = null;
+        
+        AccountDAO accountDAO = Factory.getAccountDAO();
 
         Bank bank;
         Branch branch;
@@ -73,7 +76,8 @@ public class AppListener implements ServletContextListener {
         String integratedBankApiURL;
 
         long bankAccountNo = -1;
-
+        int bankAccountBranchId = -1;
+        	
         int branchId, pincode;
         String branchName;
         String doorNo;
@@ -99,8 +103,10 @@ public class AppListener implements ServletContextListener {
                 bankWebsiteURL = rs1.getString("website_url");
                 bankAccountNo = rs1.getLong("account_no");
                 
+                bankAccountBranchId = accountDAO.getBranchId(conn, bankAccountNo);
+                
                 // Cache bank
-                bank = new Bank(bankName, bankContactEmail, bankContactPhone, bankWebsiteURL, bankAccountNo);
+                bank = new Bank(bankName, bankContactEmail, bankContactPhone, bankWebsiteURL, bankAccountNo, bankAccountBranchId);
 
 	            rs2 = stmt2.executeQuery();
 	            // Cache branches.
