@@ -3,6 +3,7 @@ package model;
 import model.user.*;
 
 import java.util.Collection;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -16,6 +17,9 @@ public class Bank {
     private ConcurrentHashMap<Integer, Branch> branches;
     private ConcurrentHashMap<Long, Customer> customers;
     private ConcurrentHashMap<Integer, IntegratedBank> integratedBanks;
+    
+    // Mapping of debit card no to its associated account number, branchId.
+    private ConcurrentHashMap<Long, Properties> cardAccountBranchMap = null; 
 
     public Bank(String name, String supportEmail, long supportPhone, String websiteURL,
                 long bankAccountNo) {
@@ -27,6 +31,7 @@ public class Bank {
         branches = new ConcurrentHashMap<Integer, Branch>();
         customers = new ConcurrentHashMap<Long, Customer>();
         integratedBanks = new ConcurrentHashMap<Integer, IntegratedBank>();
+        this.cardAccountBranchMap = new ConcurrentHashMap<Long, Properties>();
     }
 
 
@@ -43,6 +48,11 @@ public class Bank {
 
     public void addIntegratedBank(IntegratedBank integratedBank) {
         this.integratedBanks.put(integratedBank.getId(), integratedBank);
+    }
+    
+    
+    public void addCardAccountBranchMapping(long cardNo, Properties props) {
+    	this.cardAccountBranchMap.put(cardNo, props);
     }
 
 
@@ -62,6 +72,10 @@ public class Bank {
 
 
     // Getters
+    public Properties getCardAccountBranch(long cardNo) {
+    	return this.cardAccountBranchMap.get(cardNo);
+    }
+    
     public long getBankAccountNo() {
         return this.bankAccountNo;
     }
