@@ -94,7 +94,7 @@ public class DebitCard implements Comparable<DebitCard> {
     
     
     public void deactivateCard() {
-    	if(this.isActivated() && !this.isDeactivated()) {
+    	if(!this.isDeactivated()) {
     		this.deactivatedDate = LocalDate.now();
     		this.setIsActive(false);
     	}
