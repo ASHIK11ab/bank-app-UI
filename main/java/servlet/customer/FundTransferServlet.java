@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.servlet.ServletException;
@@ -55,7 +56,7 @@ public class FundTransferServlet extends HttpServlet {
 		Beneficiary beneficiary = null;
 		Transaction transaction = null;
 		RegularAccount account = null, beneficiaryAccount = null;
-		TreeSet<Beneficiary> beneficiaries = null;
+		SortedSet<Beneficiary> beneficiaries = null;
 		LocalDateTime dateTime = null;
 		
 		boolean isError = false, exceptionOccured = false;

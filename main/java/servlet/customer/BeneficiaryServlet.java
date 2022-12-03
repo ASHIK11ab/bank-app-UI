@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.servlet.ServletException;
@@ -30,7 +31,7 @@ public class BeneficiaryServlet extends HttpServlet {
 		Customer customer = null;
 		
 		Collection<IntegratedBank> integratedBanks = null;
-		TreeSet<Beneficiary> ownBankBeneficiaries = null, otherBankBeneficiaries = null;
+		SortedSet<Beneficiary> ownBankBeneficiaries = null, otherBankBeneficiaries = null;
 		Beneficiary beneficiary = null;
 		
 		BeneficiaryType beneficiaryType = null;

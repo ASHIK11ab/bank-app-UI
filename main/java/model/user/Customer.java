@@ -4,10 +4,12 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,8 +37,8 @@ public class Customer extends User {
     private Address address;
     private LocalDate removedDate;
     
-    private TreeSet<Beneficiary> ownBankBeneficiaries;
-    private TreeSet<Beneficiary> otherBankBeneficiaries;
+    private SortedSet<Beneficiary> ownBankBeneficiaries;
+    private SortedSet<Beneficiary> otherBankBeneficiaries;
     
     // Mapping of A/C(s) no's to corresponding branch Id.
     private ConcurrentHashMap<Long, Integer> savingsAccounts;
@@ -67,8 +69,8 @@ public class Customer extends User {
         this.address = address;
         this.removedDate = removedDate;
         
-        this.ownBankBeneficiaries = new TreeSet<Beneficiary>();
-        this.otherBankBeneficiaries = new TreeSet<Beneficiary>();
+        this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>());
+        this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>());
         this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
 
         this.currentAccountNo = -1;
@@ -125,7 +127,7 @@ public class Customer extends User {
 
 
     public void addBeneficiary(BeneficiaryType type, Beneficiary beneficiary) {
-        TreeSet<Beneficiary> beneficiaries;
+        SortedSet<Beneficiary> beneficiaries;
         beneficiaries =  (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
         beneficiaries.add(beneficiary);
     }
@@ -133,7 +135,7 @@ public class Customer extends User {
 
     // Removes a beneficiary from cache.
     public void removeBeneficiary(BeneficiaryType type, long beneficiaryId) {
-    	TreeSet<Beneficiary> beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    	SortedSet<Beneficiary> beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
         
     	Beneficiary beneficiary = this.getBeneficiary(type, beneficiaryId);
         
@@ -141,14 +143,14 @@ public class Customer extends User {
     }
     
     
-    public TreeSet<Beneficiary> getBeneficiaries(BeneficiaryType type) {
+    public SortedSet<Beneficiary> getBeneficiaries(BeneficiaryType type) {
     	return (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
     }
     
     
     // Returns a beneficiary with the given id.
     public Beneficiary getBeneficiary(BeneficiaryType type, long id) {
-    	TreeSet<Beneficiary> beneficiaries;    	
+    	SortedSet<Beneficiary> beneficiaries;    	
     	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
     
     	for(Beneficiary beneficiary : beneficiaries)
