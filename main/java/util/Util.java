@@ -22,12 +22,13 @@ public class Util {
 
         Random random = new Random();
         for(byte i = 0; i < digit; ++i) {
-            val = random.nextInt(10);
-            // Prevent generating 0 on very first time.
-            if(i == 0 && val == 0) {
-                i--;
-                continue;
-            }
+        	
+        	// Prevent generating 0 on very first time.
+        	if(i == 0)
+        		val = random.nextInt(1, 10);
+        	else
+        		val = random.nextInt(10);
+
             pin = (pin * 10) + val;
         }
 
