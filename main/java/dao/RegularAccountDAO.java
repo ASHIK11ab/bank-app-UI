@@ -33,6 +33,8 @@ public class RegularAccountDAO {
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
 		
 		Customer customer = null;
+		DebitCard card = null;
+		
 		LocalDate today = LocalDate.now();
 		RegularAccount account = null;
 		boolean exceptionOccured = false;
@@ -66,7 +68,7 @@ public class RegularAccountDAO {
 	        stmt2.setBoolean(3, true);
 	        stmt2.executeUpdate();
 	        
-	        cardDAO.create(conn, generatedAccountNo, (byte) cardType);
+	        card = cardDAO.create(conn, generatedAccountNo, (byte) cardType);
 	        
 	        switch(accountType) {
 	        	case SAVINGS: account = new SavingsAccount(generatedAccountNo, customerId, customerName,
@@ -74,6 +76,8 @@ public class RegularAccountDAO {
 	        	case CURRENT: account = new CurrentAccount(generatedAccountNo, customerId, customerName,
 															nominee, branchId, balance, today, null, true); break;
 	        }
+	        
+	        account.addDebitCard(card);
 	        
 			// update in cache if exists.
 			customer = AppCache.getBank().getCustomer(customerId);

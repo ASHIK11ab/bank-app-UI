@@ -104,6 +104,7 @@ public class CreateAccountServlet extends HttpServlet {
 													branchId, type, cardType, null);
             		transactionDAO.create(conn, TransactionType.CASH.id, ("Deposit to A/C: " + account.getAccountNo()), null, account.getAccountNo(), account.getBalance(), false, true, 0, 0);
 					req.setAttribute("account", account);
+					req.setAttribute("card", account.getCards().first());
 					req.getRequestDispatcher("/jsp/employee/accountCreationSuccess.jsp").forward(req, res);
                 }
 			}

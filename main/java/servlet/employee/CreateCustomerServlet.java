@@ -131,6 +131,7 @@ public class CreateCustomerServlet extends HttpServlet {
 	        	req.setAttribute("customer", customer);
 	        	req.setAttribute("displayPassword", true);
 	        	req.setAttribute("account", account);
+	        	req.setAttribute("card", account.getCards().first());
 	        	req.getRequestDispatcher("/jsp/employee/customerCreationSuccess.jsp").forward(req, res);
         	}
         } catch(ClassCastException e) {

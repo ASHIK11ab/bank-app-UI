@@ -7,6 +7,7 @@
 	
 	<c:if test="${ requestScope.displayPassword }">
 		<p>Login password: ${ customer.getPassword() }<p>
+		<p>Transaction password: ${ customer.getTransPassword() }</p>
 	</c:if>
 	
 	<h3>General Details:</h3>

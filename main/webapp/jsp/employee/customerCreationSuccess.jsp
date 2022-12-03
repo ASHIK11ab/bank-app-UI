@@ -16,6 +16,14 @@
 			<h1 style="color: green">Customer Created Successfully</h1>
 			<jsp:include page="/jsp/components/customer.jsp" />
 			<jsp:include page="/jsp/components/account.jsp" />
+			
+			<h2>Card Details:</h2>
+			<jsp:include page="/jsp/components/card.jsp" />
+			
+			<!-- Display card credentials on account creation -->
+			<h3>Card Credentials:</h3>
+			<p>Pin: ${ card.getPin() }</p>
+			<p>CVV: ${ card.getCvv() }</p>
 		</div>
 	</main>
 </body>
