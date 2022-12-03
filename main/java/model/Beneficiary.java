@@ -91,14 +91,26 @@ public class Beneficiary implements Comparable<Beneficiary> {
     	this.IFSC = IFSC;
     }
         
-    // Beneficiaries are compared and sorted based on the names.
+    // Beneficiaries are compared based on their names (dictionary format).
     @Override
     public int compareTo(Beneficiary target) {
     	if(target == null)
     		return 1;
     	
-    	// If not equal just compare by name.
-    	return this.getName().compareTo(target.getName());
+    	char baseCharacter, targetCharacter;
+    	    	
+    	int minLength = (this.name.length() < target.getName().length()) ? this.name.length() : target.getName().length();
+    	
+    	for(int index = 0; index < minLength; ++index) {
+    		baseCharacter = Character.toLowerCase(this.name.charAt(index));
+    		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
+    		
+    		if(baseCharacter != targetCharacter) {
+    			return baseCharacter - targetCharacter;
+    		}
+    	}
+
+    	return 0;
     }
     
     
