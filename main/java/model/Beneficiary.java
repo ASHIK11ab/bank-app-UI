@@ -2,7 +2,7 @@ package model;
 
 import cache.AppCache;
 
-public class Beneficiary implements Comparable<Beneficiary> {
+public class Beneficiary {
     private final long id;
     private int bankId;
     private String bankName;
@@ -89,28 +89,6 @@ public class Beneficiary implements Comparable<Beneficiary> {
     
     public void setIFSC(String IFSC) {
     	this.IFSC = IFSC;
-    }
-        
-    // Beneficiaries are compared based on their names (dictionary format).
-    @Override
-    public int compareTo(Beneficiary target) {
-    	if(target == null)
-    		return 1;
-    	
-    	char baseCharacter, targetCharacter;
-    	    	
-    	int minLength = (this.name.length() < target.getName().length()) ? this.name.length() : target.getName().length();
-    	
-    	for(int index = 0; index < minLength; ++index) {
-    		baseCharacter = Character.toLowerCase(this.name.charAt(index));
-    		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
-    		
-    		if(baseCharacter != targetCharacter) {
-    			return baseCharacter - targetCharacter;
-    		}
-    	}
-
-    	return 0;
     }
     
     

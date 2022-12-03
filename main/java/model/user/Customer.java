@@ -13,6 +13,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import comparator.BeneficiaryComparator;
 import constant.AccountCategory;
 import constant.BeneficiaryType;
 import constant.RegularAccountType;
@@ -58,6 +59,9 @@ public class Customer extends User {
                         String transPassword, Address address, LocalDate removedDate) {
 
         super(id, name, password, email, phone);
+        
+        BeneficiaryComparator beneficiaryComparator = new BeneficiaryComparator();
+        
         this.age = age;
         this.gender = gender;
         this.martialStatus = martialStatus;
@@ -68,9 +72,9 @@ public class Customer extends User {
         this.transPassword = transPassword;
         this.address = address;
         this.removedDate = removedDate;
-        
-        this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>());
-        this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>());
+
+        this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
+        this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
         this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
 
         this.currentAccountNo = -1;
