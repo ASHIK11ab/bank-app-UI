@@ -32,8 +32,8 @@ public class DebitCardDAO {
 		try {
             stmt = conn.prepareStatement("INSERT INTO debit_card (account_no, valid_from, expiry_date, type_id, pin, cvv) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
-            pin = (byte) Util.genPin(4);
-            cvv = (byte) Util.genPin(3);
+            pin = Util.genPin(4);
+            cvv = Util.genPin(3);
             
             validFromDate = today.plusDays(10);
             expiryDate = validFromDate.plusYears(3);
