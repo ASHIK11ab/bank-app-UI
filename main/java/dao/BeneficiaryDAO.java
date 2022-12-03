@@ -1,6 +1,9 @@
 package dao;
 
 import java.sql.Statement;
+
+import cache.AppCache;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,7 +22,7 @@ public class BeneficiaryDAO {
 		
 		Beneficiary beneficiary = null;
 		boolean exceptionOccured = false;
-		String msg = "";
+		String msg = "", bankName;
 		long beneficiaryId = -1;
 		
 		try {
@@ -49,8 +52,10 @@ public class BeneficiaryDAO {
                 
                 if(type == BeneficiaryType.OWN_BANK)
                 	beneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName);
-                else
-                	beneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName, bankId, IFSC);
+                else {
+                	bankName = AppCache.getIntegratedBank(bankId).getName();
+                	beneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName, bankId, bankName, IFSC);
+                }
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;

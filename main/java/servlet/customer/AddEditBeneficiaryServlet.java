@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
 import constant.BeneficiaryType;
 import dao.BeneficiaryDAO;
 import dao.CustomerDAO;
@@ -32,7 +33,7 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 		BeneficiaryType type = null;
 		Beneficiary beneficiary = null, tempBeneficiary = null;
 		Customer customer = null;
-		String name = "", ifsc = "", nickName = "", msg = "";
+		String name = "", ifsc = "", nickName = "", msg = "", bankName = "";
 		boolean isError = false, exceptionOccured = false;
 		long accountNo = 0, customerId, confirmAccountNo, beneficiaryId = -1;
 		int bankId = -1, beneficiaryType = -1, actionType = -1;
@@ -109,8 +110,13 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 				msg = "Nick name should be less than 15 characters";
 			}
 						
-			// Dummy object to hold user input values.
-			tempBeneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName, bankId, ifsc);
+			// Dummy object to hold user input values.			
+            if(type == BeneficiaryType.OWN_BANK)
+            	tempBeneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName);
+            else {
+            	bankName = AppCache.getIntegratedBank(bankId).getName();
+            	tempBeneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName, bankId, bankName, ifsc);
+            }
 			
 			if(!isError) {
 				customer = customerDAO.get(customerId);

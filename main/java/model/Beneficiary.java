@@ -5,6 +5,7 @@ import cache.AppCache;
 public class Beneficiary implements Comparable<Beneficiary> {
     private final long id;
     private int bankId;
+    private String bankName;
     private long accountNo;
     private String IFSC;
     private String name;
@@ -17,17 +18,20 @@ public class Beneficiary implements Comparable<Beneficiary> {
         this.accountNo = accountNo;
         this.name = name;
         this.nickName = nickName;
-
+        
         this.bankId = -1;
+        // Bank name is not necessary incase of own bank beneficiary.
+        this.bankName = "";
         this.IFSC = "";
     }
 
 
     // Other bank beneficiary
     public Beneficiary(long id, long accountNo, String name, String nickName,
-    					int bankId, String IFSC) {
+    					int bankId, String bankName, String IFSC) {
         this.id = id;
         this.bankId = bankId;
+        this.bankName = bankName;
         this.accountNo = accountNo;
         this.IFSC = IFSC;
         this.name = name;
@@ -41,6 +45,10 @@ public class Beneficiary implements Comparable<Beneficiary> {
 
     public int getBankId() {
         return this.bankId;
+    }
+    
+    public String getBankName() {
+    	return this.bankName;
     }
 
     public long getId() {
@@ -61,8 +69,10 @@ public class Beneficiary implements Comparable<Beneficiary> {
     
     
     // setters
+    // Updates bank id and bank name.
     public void setBankId(int id) {
     	this.bankId = id;
+    	this.bankName = AppCache.getIntegratedBank(this.bankId).getName();
     }
     
     public void setName(String name) {

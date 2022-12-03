@@ -141,7 +141,7 @@ public class CustomerDAO {
 		
         Beneficiary beneficiary;
         long beneficiaryAccountNo, beneficiaryId = -1;
-        String beneficiaryName, beneficiaryNickName, beneficiaryIfsc = "";
+        String beneficiaryName, beneficiaryNickName, beneficiaryIfsc = "", beneficiaryBankName;
         int bankId = -1;
         
         long accountNo;
@@ -226,7 +226,9 @@ public class CustomerDAO {
                         beneficiaryName = rs3.getString("name");
                         beneficiaryNickName = rs3.getString("nick_name");
 
-                        beneficiary = new Beneficiary(beneficiaryId, beneficiaryAccountNo, beneficiaryName, beneficiaryNickName, bankId, beneficiaryIfsc);
+                        beneficiaryBankName = AppCache.getIntegratedBank(bankId).getName();
+                        
+                        beneficiary = new Beneficiary(beneficiaryId, beneficiaryAccountNo, beneficiaryName, beneficiaryNickName, bankId, beneficiaryBankName, beneficiaryIfsc);
                         customer.addBeneficiary(BeneficiaryType.OTHER_BANK, beneficiary);
                     }
 

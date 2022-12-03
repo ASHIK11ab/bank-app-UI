@@ -1,7 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page 
 	import = "constant.BeneficiaryType"
-	import = "cache.AppCache"
  %>
 
 <div>
@@ -12,7 +11,7 @@
 	</c:if>
 	
 	<c:if test="${ BeneficiaryType.getType(param.type) == BeneficiaryType.OTHER_BANK }">
-		<p>Bank Name: ${ AppCache.getIntegratedBank(beneficiary.getBankId()).getName() }
+		<p>Bank Name: ${ beneficiary.getBankName() }
 		<p>IFSC: ${ beneficiary.getIFSC() }
 	</c:if>
 	
