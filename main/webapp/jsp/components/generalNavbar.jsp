@@ -25,7 +25,7 @@
 			<span class="text">Contact</span>
 			<ul class="links">
 				<li>
-					<a href="/bank-app/">Contact Us</a>
+					<a href="/bank-app/contact">Contact Us</a>
 				</li>
 			</ul>
 		</div>

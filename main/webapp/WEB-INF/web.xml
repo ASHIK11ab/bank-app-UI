@@ -17,6 +17,15 @@
 		<url-pattern>/services/*</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>ContactPageServlet</servlet-name>
+		<servlet-class>servlet.ContactPageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ContactPageServlet</servlet-name>
+		<url-pattern>/contact</url-pattern>
+	</servlet-mapping>
+	
 	<!-- Shared servlets -->
 	<servlet>
 		<servlet-name>AccountTransactionServlet</servlet-name>

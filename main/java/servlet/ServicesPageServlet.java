@@ -21,6 +21,8 @@ public class ServicesPageServlet extends HttpServlet {
 		switch(path) {
 			case "/account": req.getRequestDispatcher("/jsp/pages/accountServices.jsp").forward(req, res); 
 							 break;
+			case "/deposit": req.getRequestDispatcher("/jsp/pages/depositServices.jsp").forward(req, res); 
+			 				 break;
 			default:
 					res.sendError(404);
 		}
