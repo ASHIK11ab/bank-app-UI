@@ -17,12 +17,14 @@ import model.IntegratedBank;
 import model.user.Employee;
 import runnables.AutoDebitRDRunnable;
 import runnables.DepositIntrestCreditRunnable;
+import runnables.MinimumBalanceCheckRunnable;
 import util.Factory;
 
 
 public class AppListener implements ServletContextListener {
 	private Thread depositIntrestCreditThread;
 	private Thread autoDebitRDThread;
+	private Thread minimumBalanceCheckThread;
 	
 	public void contextInitialized(ServletContextEvent sce)  { 
     	try {    		    		
@@ -40,6 +42,10 @@ public class AppListener implements ServletContextListener {
     		autoDebitRDThread.start();
     		System.out.println("\nAuto Debit RD thread started in context");
     		
+    		minimumBalanceCheckThread = new Thread(new MinimumBalanceCheckRunnable());
+    		minimumBalanceCheckThread.start();
+    		System.out.println("\nMinimum balance check thread started in context");
+    		
     	} catch(Exception e) {
     		System.out.println(e.getMessage());
     	}
@@ -49,6 +55,7 @@ public class AppListener implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent sce) {
 		depositIntrestCreditThread.interrupt();
 		autoDebitRDThread.interrupt();
+		minimumBalanceCheckThread.interrupt();
 		System.out.println("context destroyed");
 	}
 	

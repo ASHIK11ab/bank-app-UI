@@ -11,8 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import constant.RegularAccountType;
+import constant.TransactionType;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
+import dao.TransactionDAO;
 import model.Address;
 import model.user.Customer;
 import model.account.RegularAccount;
@@ -31,6 +33,7 @@ public class CreateCustomerServlet extends HttpServlet {
         
         RegularAccountType type;
         
+        TransactionDAO transactionDAO = Factory.getTransactionDAO();
         CustomerDAO customerDAO = Factory.getCustomerDAO();
         RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
 		
@@ -127,6 +130,8 @@ public class CreateCustomerServlet extends HttpServlet {
 	        									martialStatus, occupation, income, adhaar, 
 	        									pan, address);
 	        	account = accountDAO.create(conn, customer.getId(), name, branchId, type, cardType, null);
+	        	
+        		transactionDAO.create(conn, TransactionType.CASH.id, ("Deposit to A/C: " + account.getAccountNo()), null, account.getAccountNo(), account.getBalance(), false, true, 0, 0);
 	        	
 	        	req.setAttribute("customer", customer);
 	        	req.setAttribute("displayPassword", true);

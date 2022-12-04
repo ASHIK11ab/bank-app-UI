@@ -161,6 +161,8 @@ CREATE TABLE regular_account (
     account_no BIGINT NOT NULL,
     type_id SMALLINT NOT NULL,
     active BOOLEAN NOT NULL,
+    sum_closing_balance FLOAT DEFAULT 0 NOT NULL,
+    closing_balance_calculated_days INT DEFAULT 0 NOT NULL,
     FOREIGN KEY (account_no) REFERENCES account (account_no) ON DELETE CASCADE,
     FOREIGN KEY (type_id) REFERENCES regular_account_type (id)
 );
@@ -238,7 +240,7 @@ CREATE TABLE transaction (
     description VARCHAR NOT NULL,
     from_account_no BIGINT NULL,
     to_account_no BIGINT NULL,
-    amount INT NOT NULL,
+    amount FLOAT NOT NULL,
     date date not null,
     time time not null,
     FOREIGN KEY (type_id) REFERENCES transaction_type (id)
@@ -251,7 +253,7 @@ ALTER SEQUENCE transaction_id_seq RESTART 1000000000001;
 CREATE TABLE account_transaction (
     account_no BIGINT NOT NULL,
     transaction_id BIGINT NOT NULL,
-    before_balance INT NOT NULL,    -- balance in account before this transaction.
+    before_balance FLOAT NOT NULL,    -- balance in account before this transaction.
     FOREIGN KEY (account_no) REFERENCES account (account_no) ON DELETE CASCADE,
     FOREIGN KEY (transaction_id) REFERENCES transaction (id)
 );
