@@ -16,6 +16,7 @@ import dao.AccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.Transaction;
+import model.account.CurrentAccount;
 import model.account.RegularAccount;
 import model.account.SavingsAccount;
 import util.Factory;
@@ -26,7 +27,7 @@ import util.Factory;
  */
 public class MinimumBalanceCheckRunnable implements Runnable {
 	public boolean exit = false;
-	private static final int MINIMUM_BALANCE_DEBIT_DATE = 4;
+	private static final int MINIMUM_BALANCE_DEBIT_DATE = 1;
 	
 	@Override
 	public void run() {
@@ -45,10 +46,10 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 		LocalDate today;
 		
 		float closing_balance, sum_closing_balance;
-		int closing_balance_calculated_days;
+		int closing_balance_calculated_days, minimumBalance = 0;
 		
 		long accountNo, fromAccountNo, transactionId;
-		int accountBranchId;
+		int accountBranchId, typeId;
 		float transactionAmount, beforeBalance, fromAccountBeforeBalance, toAccountBeforeBalance;
 		
 		String description;
@@ -67,20 +68,20 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 					
 					bankAccountBranchId = accountDAO.getBranchId(conn, bankAccountNo);
 					
-					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.sum_closing_balance, ra.closing_balance_calculated_days, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ? AND (ra.closing_balance_calculated_on IS NULL OR ra.closing_balance_calculated_on != ?)");
+					stmt1 = conn.prepareStatement("SELECT ra.type_id, ra.account_no, ra.sum_closing_balance, ra.closing_balance_calculated_days, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND (ra.closing_balance_calculated_on IS NULL OR ra.closing_balance_calculated_on != ?)");
 					
 					stmt2 = conn.prepareStatement("SELECT t.from_account_no, t.amount, at.before_balance FROM transaction t JOIN account_transaction at ON t.id = at.transaction_id WHERE at.account_no = ? AND t.date < ? ORDER BY t.id DESC LIMIT 1");
 				
 					stmt3 = conn.prepareStatement("UPDATE regular_account SET sum_closing_balance = ?, closing_balance_calculated_days = ?, closing_balance_calculated_on = ? WHERE account_no = ?");
 					
-					stmt1.setInt(1, RegularAccountType.SAVINGS.id);
 					// Prevent calculating intrest again in same day. (Occurs when server restarted in same day).
-					stmt1.setDate(2, Date.valueOf(today));
+					stmt1.setDate(1, Date.valueOf(today));
 					
 					rs1 = stmt1.executeQuery();
 					
 					// Get all active savings accounts along with the previously calculated closing balance details.
 					while(rs1.next()) {
+						typeId = rs1.getInt("type_id");
 						accountNo = rs1.getLong("account_no");
 						sum_closing_balance = rs1.getFloat("sum_closing_balance");
 						closing_balance_calculated_days = rs1.getInt("closing_balance_calculated_days");
@@ -106,8 +107,14 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 							// If today is minimum balance debit date, if applicable,
 							// Debit charges.
 							if(today.getDayOfMonth() == MINIMUM_BALANCE_DEBIT_DATE) {
+								
+								switch(RegularAccountType.getType(typeId)) {
+									case SAVINGS: minimumBalance = SavingsAccount.getMinimumBalance(); break;
+									case CURRENT: minimumBalance = CurrentAccount.getMinimumBalance(); break;
+								}
+								
 								// If monthly average balance deficit, debit charges.
-								if( (sum_closing_balance / closing_balance_calculated_days) < SavingsAccount.getMinimumBalance() ) {
+								if( (sum_closing_balance / closing_balance_calculated_days) < minimumBalance ) {
 									
 									account = regularAccountDAO.get(accountNo, accountBranchId);
 									bankAccount = regularAccountDAO.get(bankAccountNo, bankAccountBranchId);
