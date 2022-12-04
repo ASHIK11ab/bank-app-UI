@@ -18,6 +18,7 @@ import model.user.Employee;
 import runnables.AutoDebitRDRunnable;
 import runnables.DepositIntrestCreditRunnable;
 import runnables.MinimumBalanceCheckRunnable;
+import runnables.SavingsIntrestCreditRunnable;
 import util.Factory;
 
 
@@ -25,6 +26,7 @@ public class AppListener implements ServletContextListener {
 	private Thread depositIntrestCreditThread;
 	private Thread autoDebitRDThread;
 	private Thread minimumBalanceCheckThread;
+	private Thread savingsIntrestCreditThread;
 	
 	public void contextInitialized(ServletContextEvent sce)  { 
     	try {    		    		
@@ -46,6 +48,10 @@ public class AppListener implements ServletContextListener {
     		minimumBalanceCheckThread.start();
     		System.out.println("\nMinimum balance check thread started in context");
     		
+    		savingsIntrestCreditThread = new Thread(new SavingsIntrestCreditRunnable());
+    		savingsIntrestCreditThread.start();
+    		System.out.println("\nSavings intrest credit thread started in context");
+    		
     	} catch(Exception e) {
     		System.out.println(e.getMessage());
     	}
@@ -56,6 +62,7 @@ public class AppListener implements ServletContextListener {
 		depositIntrestCreditThread.interrupt();
 		autoDebitRDThread.interrupt();
 		minimumBalanceCheckThread.interrupt();
+		savingsIntrestCreditThread.interrupt();
 		System.out.println("context destroyed");
 	}
 	
