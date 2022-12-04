@@ -163,6 +163,8 @@ CREATE TABLE regular_account (
     active BOOLEAN NOT NULL,
     sum_closing_balance FLOAT DEFAULT 0 NOT NULL,
     closing_balance_calculated_days INT DEFAULT 0 NOT NULL,
+    intrest_calculated_on DATE,
+    closing_balance_calculated_on DATE,
     FOREIGN KEY (account_no) REFERENCES account (account_no) ON DELETE CASCADE,
     FOREIGN KEY (type_id) REFERENCES regular_account_type (id)
 );
@@ -230,7 +232,9 @@ CREATE TABLE other_bank_beneficiary (
 -- NEFT / ATM / UPI.
 CREATE TABLE transaction_type (
     id SMALLSERIAL PRIMARY KEY,
-    name VARCHAR(15) UNIQUE NOT NULL
+    name VARCHAR(15) UNIQUE NOT NULL,
+    min_amount INT NOT NULL,
+    max_amount INT NOT NULL
 );
 
 

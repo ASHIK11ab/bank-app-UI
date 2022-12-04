@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8"
+	import="model.account.*"    
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -64,14 +66,14 @@
 			</tr>
 			<tr>
 				<td>Savings Account</td>
-				<td>3 %</td>
-				<td>1000</td>
-				<td>40000</td>
+				<td>${ String.format("%.2f", SavingsAccount.getIntrestRate()*100) } %</td>
+				<td>${ SavingsAccount.getMinimumBalance() }</td>
+				<td>${ SavingsAccount.getDailyLimit() }</td>
 			</tr>
 			<tr>
 				<td>Current Account</td>
 				<td>Nil</td>
-				<td>No minimum balance (0)</td>
+				<td>${ CurrentAccount.getMinimumBalance() }</td>
 				<td>No limit on transaction amount</td>
 			</tr>
 		</table>

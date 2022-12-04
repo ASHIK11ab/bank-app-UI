@@ -6,7 +6,7 @@ import constant.RegularAccountType;
 import model.Nominee;
 
 public class CurrentAccount extends RegularAccount {
-    private static int minimumBalance = 10000;
+    private static int minimumBalance;
     
     
     public CurrentAccount(long accountNo, long customerId, String customerName, 
@@ -29,7 +29,7 @@ public class CurrentAccount extends RegularAccount {
     
     // Getters
     public static int getMinimumBalance() {
-    	return minimumBalance;
+    	return CurrentAccount.minimumBalance;
     }
     
     // Setters
