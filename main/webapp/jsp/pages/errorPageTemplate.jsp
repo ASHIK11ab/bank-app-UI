@@ -17,7 +17,11 @@
 	</c:if>
 	<main class="container">
 		<div class="wrapper">
+			<jsp:include page="/jsp/components/generalNavbar.jsp" />
+		
 			<h1 style="color: red">${ param.text }</h1>
+			
+			<jsp:include page="/jsp/components/footer.jsp" />
 		</div>
 	</main>
 </body>

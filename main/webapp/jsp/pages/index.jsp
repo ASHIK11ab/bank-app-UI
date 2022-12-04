@@ -3,11 +3,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Your Bank</title>
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="Your Bank | Home Page" />
+	</jsp:include>
 </head>
 <body>
-	<h1>Your bank home page</h1>
-	<p>Trust at tip</p>
+	
+	<jsp:include page="/jsp/components/generalNavbar.jsp" />
+	
+	<main class="container">
+		<h1>Welcome to <span class="bank-name">Your Bank</span></h1>
+		<section>
+			<h2>About <span class="bank-name">Your Bank</span></h2>
+			<p> For the past 50 years <span class="bank-name">Your Bank</span> has been the serving
+			the people. <span class="bank-name">Your Bank</span> has been a key player in the Digital 
+			India initiative.</p>
+		</section>
+	</main>
+	
+	
+	<jsp:include page="/jsp/components/footer.jsp" />
 </body>
 </html>
