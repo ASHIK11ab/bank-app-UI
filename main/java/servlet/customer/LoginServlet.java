@@ -46,8 +46,8 @@ public class LoginServlet extends HttpServlet {
 	        	// create session.
 	        	session = req.getSession();
 	        	session.setAttribute("id", customer.getId());
-	        	// 2 days.
-	        	session.setMaxInactiveInterval(60*60*24*2);
+	        	// 1 hour.
+	        	session.setMaxInactiveInterval(60*60);
 	        	session.setAttribute("role", Role.CUSTOMER);
 	            res.sendRedirect("/bank-app/customer/dashboard");
 	        } else {
