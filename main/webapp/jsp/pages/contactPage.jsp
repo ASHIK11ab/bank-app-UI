@@ -19,5 +19,7 @@
 			<p><strong>Phone:</strong> ${ supportPhone }</p>
 		</div>
 	</main>
+	
+	<jsp:include page="/jsp/components/footer.jsp" />
 </body>
 </html>

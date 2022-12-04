@@ -4,6 +4,12 @@
 	position: relative;
 	width: 80%;
 	margin: 8rem auto auto auto;
+	font-size: 18px;
+    font-family: sans-serif;
+}
+
+ul li, ol li {
+	padding-bottom: 10px;
 }
 
 .wrapper {
@@ -151,6 +157,16 @@ a.button.danger, button.danger {
 
 .beneficiary-group .details {
 	margin-left: 50px;
+}
+
+.footer {
+	position: relative;
+    margin-top: 5rem;
+    text-align: center;
+    background-color: #0f4880;
+    padding: 1rem;
+    font-size: 20px;
+    color: #fff;
 }
 
 
