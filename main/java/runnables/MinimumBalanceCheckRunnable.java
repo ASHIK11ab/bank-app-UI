@@ -26,7 +26,7 @@ import util.Factory;
  */
 public class MinimumBalanceCheckRunnable implements Runnable {
 	public boolean exit = false;
-	private static final int MINIMUM_BALANCE_DEBIT_DATE = 2;
+	private static final int MINIMUM_BALANCE_DEBIT_DATE = 4;
 	
 	@Override
 	public void run() {
@@ -67,13 +67,16 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 					
 					bankAccountBranchId = accountDAO.getBranchId(conn, bankAccountNo);
 					
-					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.sum_closing_balance, ra.closing_balance_calculated_days, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ?");
+					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.sum_closing_balance, ra.closing_balance_calculated_days, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ? AND (ra.closing_balance_calculated_on IS NULL OR ra.closing_balance_calculated_on != ?)");
 					
 					stmt2 = conn.prepareStatement("SELECT t.from_account_no, t.amount, at.before_balance FROM transaction t JOIN account_transaction at ON t.id = at.transaction_id WHERE at.account_no = ? AND t.date < ? ORDER BY t.id DESC LIMIT 1");
 				
-					stmt3 = conn.prepareStatement("UPDATE regular_account SET sum_closing_balance = ?, closing_balance_calculated_days = ? WHERE account_no = ?");
+					stmt3 = conn.prepareStatement("UPDATE regular_account SET sum_closing_balance = ?, closing_balance_calculated_days = ?, closing_balance_calculated_on = ? WHERE account_no = ?");
 					
 					stmt1.setInt(1, RegularAccountType.SAVINGS.id);
+					// Prevent calculating intrest again in same day. (Occurs when server restarted in same day).
+					stmt1.setDate(2, Date.valueOf(today));
+					
 					rs1 = stmt1.executeQuery();
 					
 					// Get all active savings accounts along with the previously calculated closing balance details.
@@ -143,7 +146,8 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 							
 							stmt3.setFloat(1, sum_closing_balance);
 							stmt3.setInt(2, closing_balance_calculated_days);
-							stmt3.setLong(3, accountNo);
+							stmt3.setDate(3, Date.valueOf(today));
+							stmt3.setLong(4, accountNo);
 							stmt3.executeUpdate();
 						}
 						// End of 'if' block on result set 2.
@@ -164,6 +168,8 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 					        stmt1.close();
 					    if(stmt2 != null)
 					        stmt2.close();
+					    if(stmt3 != null)
+					        stmt3.close();
 					} catch(SQLException e) { System.out.println(e.getMessage()); }
 					
 					try {
