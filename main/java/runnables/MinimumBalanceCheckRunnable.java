@@ -22,7 +22,7 @@ import model.account.SavingsAccount;
 import util.Factory;
 
 /* Calculates the closing balance of savings accounts on each day and
- * debit's charges when the monthly average balance is lesser than the
+ * debit's charges when  monthly average balance is lesser than the
  * required minimum balance.
  */
 public class MinimumBalanceCheckRunnable implements Runnable {
@@ -74,7 +74,7 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 				
 					stmt3 = conn.prepareStatement("UPDATE regular_account SET sum_closing_balance = ?, closing_balance_calculated_days = ?, closing_balance_calculated_on = ? WHERE account_no = ?");
 					
-					// Prevent calculating intrest again in same day. (Occurs when server restarted in same day).
+					// Prevent calculating intrest again in same day. (Occurs when server is restarted on same day).
 					stmt1.setDate(1, Date.valueOf(today));
 					
 					rs1 = stmt1.executeQuery();

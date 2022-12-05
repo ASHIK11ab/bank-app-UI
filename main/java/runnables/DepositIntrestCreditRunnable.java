@@ -24,6 +24,7 @@ import model.account.RegularAccount;
 import util.Factory;
 
 
+// Intrest is credited on monthly basis.
 public class DepositIntrestCreditRunnable implements Runnable {
 	private final int DEPOSIT_INTREST_CREDIT_DATE = 21;
 	
@@ -64,8 +65,8 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		float intrestRate, intrestAmount = 0, fromAccountBeforeBalance, toAccountBeforeBalance;
 		byte typeId;
 		
-		// FD -> deposit amount is the amount deposited.
-		// RD -> deposit amount is the monthly installment.
+		// FD -> variable 'deposit amount' is the amount deposited.
+		// RD -> variable 'deposit amount' is the monthly installment.
 		int depositAmount = 0, intrestCreditedMonthCnt, branchId;
 		long accountNo, transactionId;
 		
@@ -82,6 +83,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 					try {
 						conn = Factory.getDataSource().getConnection();
 						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?)");
+						// Check whether monthly installment paid for RD.
 						stmt2 = conn.prepareStatement("SELECT to_account_no FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ?, intrest_credited_date = ? WHERE account_no = ?");
 						

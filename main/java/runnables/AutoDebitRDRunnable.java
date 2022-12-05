@@ -53,7 +53,7 @@ public class AutoDebitRDRunnable implements Runnable {
 					if(today.getDayOfMonth() <= 15) {
 						conn = Factory.getDataSource().getConnection();
 						
-						// Get all RD's whose recurring date is today.
+						// Get all unclosed RD's whose recurring date is today.
 						stmt1 = conn.prepareStatement("SELECT da.account_no, da.deposit_amount, da.debit_from_account_no, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE da.type_id = ? AND da.recurring_date = ? AND a.closing_date IS NULL");
 						stmt2 = conn.prepareStatement("SELECT COUNT(*) FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET recurring_date = ? WHERE account_no = ?");
@@ -119,7 +119,7 @@ public class AutoDebitRDRunnable implements Runnable {
 													System.out.println("Cannot auto debit for RD: " + rdAccountNo);
 												}
 											}
-											// End of synchronised block on debit from account.
+											// End of synchronized block on debit from account.
 										} else {
 											System.out.println("Montly installment aldready paid rd A/C: " + rdAccountNo);
 										}
