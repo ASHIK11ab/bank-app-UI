@@ -96,13 +96,7 @@ public class TransactionDAO {
         LinkedList<Transaction> transactions = new LinkedList<Transaction>(); 
         Transaction transaction = null;
         boolean exceptionOccured = false;
-        long transactionId, fromAccountNo, toAccountNo;
-        String description, msg = "";
-        float amount, balanceBeforeTransaction;
-        int typeId;
-        Date date;
-        Time time;
-        LocalDateTime dateTime;
+        String msg = "";
 
         try {
             conn = Factory.getDataSource().getConnection();
@@ -116,18 +110,7 @@ public class TransactionDAO {
             rs = stmt.executeQuery();
 
             while(rs.next()) {
-                transactionId = rs.getLong("id");
-                typeId = rs.getInt("type_id");
-                description = rs.getString("description");
-                fromAccountNo = rs.getLong("from_account_no");
-                toAccountNo = rs.getLong("to_account_no");
-                amount = rs.getFloat("amount");
-                balanceBeforeTransaction = rs.getFloat("before_balance");
-                date = rs.getDate("date");
-                time = rs.getTime("time");
-                dateTime = LocalDateTime.parse(date.toString() + 'T' + time.toString());
-
-                transaction = new Transaction(transactionId, typeId, fromAccountNo, toAccountNo, amount, dateTime, description, balanceBeforeTransaction);
+            	transaction = _loadTransactionFromResultSet(rs);
                 transactions.add(transaction);
             }
         }  catch(SQLException e) {
@@ -150,5 +133,107 @@ public class TransactionDAO {
         	throw new SQLException(msg);
         else
         	return transactions;
+	}
+	
+	
+	// Returns the recent 10 transactions of an account or the list of transactions
+	// performed today.
+	LinkedList<Transaction> getRecentTransactions(Connection conn, long accountNo) throws SQLException {
+        PreparedStatement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+
+        LinkedList<Transaction> recentTransactions = new LinkedList<Transaction>(); 
+        Transaction transaction = null;
+        boolean exceptionOccured = false;
+        String msg = "";
+        int remainingTransactionsCnt;
+        LocalDate today = LocalDate.now();
+
+        try {
+            stmt1 = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND date = ? ORDER BY id DESC");            
+            stmt1.setLong(1, accountNo);
+            stmt1.setLong(2, accountNo);
+            stmt1.setLong(3, accountNo);
+            stmt1.setDate(4, Date.valueOf(today));
+
+            rs1 = stmt1.executeQuery();
+
+            while(rs1.next()) {
+                transaction = _loadTransactionFromResultSet(rs1);
+                
+                // Transactions are added to the begining every time, the recent transaction will be at the end of 
+                // the list. In 'RegularAccountDAO' adding a transaction will add it to the begining 
+                // of the list. Ultimately the recent transaction will be at the begining of the list
+                // in 'recentTransactions' field of 'RegularAccount' class.                
+                recentTransactions.addFirst(transaction);
+            }
+            
+            // Load the remaining transaction (used for mini statement).
+            if(recentTransactions.size() < 10) {
+            	remainingTransactionsCnt = 10 - recentTransactions.size();
+            	stmt2 = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND date < ? ORDER BY id DESC LIMIT 10");
+                stmt2.setLong(1, accountNo);
+                stmt2.setLong(2, accountNo);
+                stmt2.setLong(3, accountNo);
+                stmt2.setDate(4, Date.valueOf(today));
+                
+                rs2 = stmt2.executeQuery();
+
+                while(rs2.next() && remainingTransactionsCnt > 0) {
+                	transaction = _loadTransactionFromResultSet(rs2);
+                    recentTransactions.addFirst(transaction);
+                
+                    remainingTransactionsCnt--;
+                }
+            	
+            }
+        }  catch(SQLException e) {
+        	System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } finally {
+            try {
+                if(stmt1 != null)
+                    stmt1.close();
+                if(stmt2 != null)
+                    stmt2.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+
+            try {
+                if(rs1 != null)
+                    rs1.close();
+                if(rs2 != null)
+                    rs2.close();
+            } catch(SQLException e) { System.out.println(e.getMessage()); }
+        }
+        
+        if(exceptionOccured)
+        	throw new SQLException(msg);
+        else
+        	return recentTransactions;
+	}
+	
+	
+	private Transaction _loadTransactionFromResultSet(ResultSet rs) throws SQLException {
+        long transactionId, fromAccountNo, toAccountNo;
+        String description;
+        float amount, balanceBeforeTransaction;
+        int typeId;
+        Date date;
+        Time time;
+        LocalDateTime dateTime;
+        
+        transactionId = rs.getLong("id");
+        typeId = rs.getInt("type_id");
+        description = rs.getString("description");
+        fromAccountNo = rs.getLong("from_account_no");
+        toAccountNo = rs.getLong("to_account_no");
+        amount = rs.getFloat("amount");
+        balanceBeforeTransaction = rs.getFloat("before_balance");
+        date = rs.getDate("date");
+        time = rs.getTime("time");
+        dateTime = LocalDateTime.parse(date.toString() + 'T' + time.toString());
+
+        return new Transaction(transactionId, typeId, fromAccountNo, toAccountNo, amount, dateTime, description, balanceBeforeTransaction);
 	}
 }

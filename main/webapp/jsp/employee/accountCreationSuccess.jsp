@@ -18,14 +18,17 @@
 		<div class="wrapper">
 			<c:set var="account" value="${ requestScope.account }" />
 			<h1 style="color: green">Account Creation Successfull</h1>
-			<section>
-				<h2>Account Details:</h2>
-				<p>A/C No: ${ account.getAccountNo() }<p>
-				<p>A/C Type: ${ RegularAccountType.getName(account.getTypeId()) }
-				<p>Balance: ${ account.getBalance() }</p>
-				<p>Status: <c:out value='${ account.getIsActive() ? "Active" : "Not Active" }' /></p>
-				<p>A/C opened on: ${ account.getOpeningDate() }</p>
-			</section>
+
+			<jsp:include page="/jsp/components/account.jsp" />
+			
+			<h2>Card Details:</h2>
+			<jsp:include page="/jsp/components/card.jsp" />
+			
+			<!-- Display card credentials on account creation -->
+			<h3>Card Credentials:</h3>
+			<p>Pin: ${ card.getPin() }</p>
+			<p>CVV: ${ card.getCvv() }</p>
+			
 			<section>
 				<h2>Account holder details:</h2>
 				<p>Customer Id: ${ account.getCustomerId() }

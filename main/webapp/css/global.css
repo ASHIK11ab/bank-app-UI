@@ -4,6 +4,12 @@
 	position: relative;
 	width: 80%;
 	margin: 8rem auto auto auto;
+	font-size: 18px;
+    font-family: sans-serif;
+}
+
+ul li, ol li {
+	padding-bottom: 10px;
 }
 
 .wrapper {
@@ -135,6 +141,32 @@ a.button.secondary {
 a.button.danger, button.danger {
 	background-color: #ff1e2f;
 	color: #fff;
+}
+
+.beneficiary-container {
+	height: 200px;
+	overflow-y: scroll;
+}
+
+.beneficiary-group {
+	display: flex;
+    align-items: center;
+    border-top: 2px solid #000;
+    margin-top: 30px;
+}
+
+.beneficiary-group .details {
+	margin-left: 50px;
+}
+
+.footer {
+	position: relative;
+    margin-top: 5rem;
+    text-align: center;
+    background-color: #0f4880;
+    padding: 1rem;
+    font-size: 20px;
+    color: #fff;
 }
 
 

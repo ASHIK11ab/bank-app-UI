@@ -1,15 +1,29 @@
 package model.user;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import comparator.BeneficiaryComparator;
 import constant.AccountCategory;
 import constant.BeneficiaryType;
 import constant.RegularAccountType;
+import dao.RegularAccountDAO;
 import model.Address;
 import model.Beneficiary;
+import model.Transaction;
+import model.account.RegularAccount;
+import model.card.DebitCard;
+import util.Factory;
 
 
 public class Customer extends User {
@@ -24,8 +38,8 @@ public class Customer extends User {
     private Address address;
     private LocalDate removedDate;
     
-    private ArrayList<Beneficiary> ownBankBeneficiaries;
-    private ArrayList<Beneficiary> otherBankBeneficiaries;
+    private SortedSet<Beneficiary> ownBankBeneficiaries;
+    private SortedSet<Beneficiary> otherBankBeneficiaries;
     
     // Mapping of A/C(s) no's to corresponding branch Id.
     private ConcurrentHashMap<Long, Integer> savingsAccounts;
@@ -37,7 +51,7 @@ public class Customer extends User {
 
     // A/C no to branch id mapping.
     private ConcurrentHashMap<Long, Integer> depositAccounts;
-
+   
 
     public Customer(long id, String name, String password, long phone,
                         String email, byte age, char gender, String martialStatus,
@@ -45,6 +59,9 @@ public class Customer extends User {
                         String transPassword, Address address, LocalDate removedDate) {
 
         super(id, name, password, email, phone);
+        
+        BeneficiaryComparator beneficiaryComparator = new BeneficiaryComparator();
+        
         this.age = age;
         this.gender = gender;
         this.martialStatus = martialStatus;
@@ -55,9 +72,9 @@ public class Customer extends User {
         this.transPassword = transPassword;
         this.address = address;
         this.removedDate = removedDate;
-        
-        this.ownBankBeneficiaries = new ArrayList<Beneficiary>();
-        this.otherBankBeneficiaries = new ArrayList<Beneficiary>();
+
+        this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
+        this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
         this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
 
         this.currentAccountNo = -1;
@@ -114,7 +131,7 @@ public class Customer extends User {
 
 
     public void addBeneficiary(BeneficiaryType type, Beneficiary beneficiary) {
-        ArrayList<Beneficiary> beneficiaries;
+        SortedSet<Beneficiary> beneficiaries;
         beneficiaries =  (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
         beneficiaries.add(beneficiary);
     }
@@ -122,19 +139,31 @@ public class Customer extends User {
 
     // Removes a beneficiary from cache.
     public void removeBeneficiary(BeneficiaryType type, long beneficiaryId) {
-        int index = 0;
-        ArrayList<Beneficiary> beneficiaries;
-        beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-
-        for(Beneficiary beneficiary : beneficiaries)
-            if(beneficiaryId == beneficiary.getId())
-                break;
-            else
-                ++index;
-
-        beneficiaries.remove(index);
+    	SortedSet<Beneficiary> beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+        
+    	Beneficiary beneficiary = this.getBeneficiary(type, beneficiaryId);
+        
+    	beneficiaries.remove(beneficiary);
     }
     
+    
+    public SortedSet<Beneficiary> getBeneficiaries(BeneficiaryType type) {
+    	return (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    }
+    
+    
+    // Returns a beneficiary with the given id.
+    public Beneficiary getBeneficiary(BeneficiaryType type, long id) {
+    	SortedSet<Beneficiary> beneficiaries;    	
+    	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    
+    	for(Beneficiary beneficiary : beneficiaries)
+    		if(beneficiary.getId() == id)
+    			return beneficiary;
+    	
+    	return null;
+    }
+        
     
     // Getters
     public int getAccountBranchId(AccountCategory category, long accountNo) {
@@ -162,6 +191,71 @@ public class Customer extends User {
     	return branchId;
     }
     
+    public Properties getActiveAccounts(AccountCategory category) throws SQLException {
+    	Properties activeAccounts = new Properties();
+    	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+    	RegularAccount account = null;
+    	LinkedList<Long> activeSavingsAccounts = new LinkedList<Long>();
+    	
+    	if(category == AccountCategory.REGULAR) {
+    		
+	    	// Add all active savings account to list.
+			for(Entry<Long, Integer> set  : this.savingsAccounts.entrySet()) {
+	    		account = accountDAO.get(set.getKey(), set.getValue());
+	    		synchronized (account) {
+					if(account.getIsActive())
+						activeSavingsAccounts.add(account.getAccountNo());
+				}
+			}
+			
+			if(activeSavingsAccounts.size() > 0)
+				activeAccounts.put(RegularAccountType.SAVINGS, activeSavingsAccounts);
+			
+			// Check if current account exists and active.
+			// If so, add current account to active accounts.
+			if(this.currentAccountNo != -1) {
+				account = accountDAO.get(this.currentAccountNo, this.currentAccountBranchId);
+				synchronized (account) {
+					if(account.getIsActive())
+						activeAccounts.put(RegularAccountType.CURRENT, this.currentAccountNo);
+				}
+			}
+    	}
+		
+		return activeAccounts;
+    }
+    
+    // Returns all of the debit cards associated with this customer.
+    public TreeSet<DebitCard> getCards() throws SQLException {
+    	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+    	
+    	RegularAccount account = null;
+    	TreeSet<DebitCard> cards = new TreeSet<DebitCard>();
+    	
+    	int branchId;
+    	
+    	for(Long accountNo : this.getSavingsAccounts()) {
+    		branchId = this.getAccountBranchId(AccountCategory.REGULAR, accountNo);
+    		account = accountDAO.get(accountNo, branchId);
+    		
+    		for(DebitCard card : account.getCards())
+    			if(!card.isDeactivated())
+    				cards.add(card);
+    	}
+    	
+    	if(this.currentAccountNo != -1) {
+    		branchId = this.getAccountBranchId(AccountCategory.REGULAR, this.currentAccountNo);
+    		account = accountDAO.get(this.currentAccountNo, branchId);
+    		
+    		for(DebitCard card : account.getCards())
+    			if(!card.isDeactivated())
+    				cards.add(card);
+    	}
+    	
+    	return cards;
+    }
+    
+    
     public Collection<Long> getSavingsAccounts() {
     	return this.savingsAccounts.keySet();
     }
@@ -172,22 +266,6 @@ public class Customer extends User {
     
     public Collection<Long> getDepositAccounts() {
     	return this.depositAccounts.keySet();
-    }
-    
-    public ArrayList<Beneficiary> getBeneficiaries(BeneficiaryType type) {
-    	return (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-    }
-    
-    // Returns a beneficiary with the given id.
-    public Beneficiary getBeneficiary(BeneficiaryType type, int id) {
-    	ArrayList<Beneficiary> beneficiaries;    	
-    	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-    
-    	for(Beneficiary beneficiary : beneficiaries)
-    		if(beneficiary.getId() == id)
-    			return beneficiary;
-    	
-    	return null;
     }
     
     public byte getAge() {
@@ -273,5 +351,24 @@ public class Customer extends User {
     
     public void setAddress(Address address) {
     	this.address = address;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        Customer target = (Customer) obj;
+        
+        return (this.getName().equals(target.getName()) && this.getEmail().equals(target.getEmail()) 
+        		&& this.getPhone() == target.getPhone() && this.getAge() == target.getAge() &&
+        		this.getGender() == target.getGender() && this.getOccupation().equals(target.getOccupation())
+        		&& this.getIncome() == target.getIncome() && this.getAdhaar() == target.getAdhaar() &&
+        		this.getPan().equals(target.getPan()) && this.getAddress().equals(target.getAddress()));
     }
 }

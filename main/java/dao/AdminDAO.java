@@ -11,7 +11,7 @@ import model.user.User;
 import util.Factory;
 
 public class AdminDAO {
-	public User get(long id) throws SQLException {
+	synchronized public User get(long id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

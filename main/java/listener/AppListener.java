@@ -9,19 +9,27 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import cache.AppCache;
+import constant.RegularAccountType;
+import dao.AccountDAO;
 import model.Address;
 import model.Bank;
 import model.Branch;
 import model.IntegratedBank;
+import model.account.CurrentAccount;
+import model.account.SavingsAccount;
 import model.user.Employee;
 import runnables.AutoDebitRDRunnable;
 import runnables.DepositIntrestCreditRunnable;
+import runnables.MinimumBalanceCheckRunnable;
+import runnables.SavingsIntrestCreditRunnable;
 import util.Factory;
 
 
 public class AppListener implements ServletContextListener {
 	private Thread depositIntrestCreditThread;
 	private Thread autoDebitRDThread;
+	private Thread minimumBalanceCheckThread;
+	private Thread savingsIntrestCreditThread;
 	
 	public void contextInitialized(ServletContextEvent sce)  { 
     	try {    		    		
@@ -39,6 +47,14 @@ public class AppListener implements ServletContextListener {
     		autoDebitRDThread.start();
     		System.out.println("\nAuto Debit RD thread started in context");
     		
+    		minimumBalanceCheckThread = new Thread(new MinimumBalanceCheckRunnable());
+    		minimumBalanceCheckThread.start();
+    		System.out.println("\nMinimum balance check thread started in context");
+    		
+    		savingsIntrestCreditThread = new Thread(new SavingsIntrestCreditRunnable());
+    		savingsIntrestCreditThread.start();
+    		System.out.println("\nSavings intrest credit thread started in context");
+    		
     	} catch(Exception e) {
     		System.out.println(e.getMessage());
     	}
@@ -48,14 +64,18 @@ public class AppListener implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent sce) {
 		depositIntrestCreditThread.interrupt();
 		autoDebitRDThread.interrupt();
+		minimumBalanceCheckThread.interrupt();
+		savingsIntrestCreditThread.interrupt();
 		System.out.println("context destroyed");
 	}
 	
 	
 	private void loadCache() {
         Connection conn = null;
-        PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null;
-        ResultSet rs1 = null, rs2 = null, rs3 = null;
+        PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null, stmt4 = null;
+        ResultSet rs1 = null, rs2 = null, rs3 = null, rs4 = null;
+        
+        AccountDAO accountDAO = Factory.getAccountDAO();
 
         Bank bank;
         Branch branch;
@@ -73,13 +93,17 @@ public class AppListener implements ServletContextListener {
         String integratedBankApiURL;
 
         long bankAccountNo = -1;
-
+        int bankAccountBranchId = -1;
+        	
         int branchId, pincode;
         String branchName;
         String doorNo;
         String street;
         String city;
         String state;
+        
+        int accountTypeId, minimumBalance, dailyLimit;
+        float intrestRate;
         
         Employee manager = null;
         long managerId, managerPhone;
@@ -90,6 +114,7 @@ public class AppListener implements ServletContextListener {
             stmt1 = conn.prepareStatement("SELECT * FROM bank");
             stmt2 = conn.prepareStatement("SELECT b.id, b.name, b.door_no, b.street, b.city, b.state, b.pincode, m.id as manager_id, m.name as manager_name, m.password as manager_password, m.phone as manager_phone, m.email as manager_email FROM branch b JOIN manager m ON b.id = m.branch_id");
             stmt3 = conn.prepareStatement("SELECT * FROM banks");
+            stmt4 = conn.prepareStatement("SELECT * FROM regular_account_type");
 
             rs1 = stmt1.executeQuery();
             if(rs1.next()) {
@@ -99,8 +124,10 @@ public class AppListener implements ServletContextListener {
                 bankWebsiteURL = rs1.getString("website_url");
                 bankAccountNo = rs1.getLong("account_no");
                 
+                bankAccountBranchId = accountDAO.getBranchId(conn, bankAccountNo);
+                
                 // Cache bank
-                bank = new Bank(bankName, bankContactEmail, bankContactPhone, bankWebsiteURL, bankAccountNo);
+                bank = new Bank(bankName, bankContactEmail, bankContactPhone, bankWebsiteURL, bankAccountNo, bankAccountBranchId);
 
 	            rs2 = stmt2.executeQuery();
 	            // Cache branches.
@@ -140,6 +167,24 @@ public class AppListener implements ServletContextListener {
 	            }
 	            
                 AppCache.cacheBank(bank);
+                
+                // load regular account configuration.
+                rs4 = stmt4.executeQuery();
+                while(rs4.next()) {
+                	accountTypeId = rs4.getInt("id");
+                	minimumBalance = rs4.getInt("minimum_balance");
+                	
+                	if(accountTypeId == RegularAccountType.SAVINGS.id) {
+                		intrestRate = rs4.getFloat("rate_of_intrest");
+                		dailyLimit = rs4.getInt("daily_limit");
+                		
+                		SavingsAccount.setDailyLimit(dailyLimit);
+                		SavingsAccount.setIntrestRate(intrestRate);
+                		SavingsAccount.setMinimumBalance(minimumBalance);
+                	} else {
+                		CurrentAccount.setMinimumBalance(minimumBalance);
+                	}
+                }
             }
         } catch(SQLException e) {
             System.out.println(e);
@@ -151,6 +196,8 @@ public class AppListener implements ServletContextListener {
                     rs2.close();
                 if(rs3 != null)
                     rs3.close();
+                if(rs4 != null)
+                    rs4.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {
@@ -160,6 +207,8 @@ public class AppListener implements ServletContextListener {
                     stmt2.close();
                 if(stmt3 != null)
                     stmt3.close();
+                if(stmt4 != null)
+                    stmt4.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {

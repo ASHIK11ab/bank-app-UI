@@ -8,7 +8,7 @@
 	
 	<h2>Deposit Account Details:</h2>
 	<p>A/C No: ${ account.getAccountNo() }<p>
-	<p>Balance: ${ account.getBalance() }</p>
+	<p>Balance: ${ String.format("%.2f", account.getBalance()) }</p>
 	<p>Deposit Type: ${ DepositAccountType.getName(account.getTypeId()) }
 	<p>Intrest Rate (p.a): ${ Math.round(account.getIntrestRate() * 100) }%</p>
 	<p>A/C opening date: ${ account.getOpeningDate() }</p>

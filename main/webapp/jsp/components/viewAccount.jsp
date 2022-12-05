@@ -37,11 +37,18 @@
 							<c:when test="${ role == Role.CUSTOMER }">
 								<select name="account-no" id="account-no-input">
 									<option value="-1" selected disabled hidden>select account</option>
-									<c:forEach items="${ requestScope.customerAccounts }" var="account">
-										<option value="${ account.getAccountNo() }">
-											( ${ account.getAccountNo() } ) ${ RegularAccountType.getName(account.getTypeId()) }
+									<c:forEach items="${ savingsAccounts }" var="accountNo">
+										<option value="${ accountNo }">
+											${ accountNo } (Savings)
 										</option>
 									</c:forEach>
+									
+									<c:if test="${ currentAccount != null }">
+										<option value="${ currentAccount }">
+											${ currentAccount } (Current)
+										</option>
+									</c:if>
+									
 								</select>
 							</c:when>
 							
@@ -57,16 +64,28 @@
 				<jsp:include page="/jsp/components/account.jsp" />
 				
 				<!-- Only display account holder details when employee views -->
-				<c:if test="${ role == Role.EMPLOYEE }">
-					<section>
-						<h2>Account holder details:</h2>
-						<p>Customer Id: ${ account.getCustomerId() }
-						<p>Customer Name: ${ account.getCustomerName() }
-					</section>				
-				</c:if>
+				<c:choose>
+					<c:when test="${ role == Role.EMPLOYEE }">
+						<section>
+							<h2>Account holder details:</h2>
+							<p>Customer Id: ${ account.getCustomerId() }
+							<p>Customer Name: ${ account.getCustomerName() }
+						</section>				
+					</c:when>
+					
+					<c:when test="${ role == Role.CUSTOMER }">
+						<h2>Branch Details:</h2>
+						<p>Branch Name: ${ account.getBranchName() }</p>
+					</c:when>
+				
+				</c:choose>
 				
 				<a class="button" href="/bank-app/${ userType }/account/${ account.getAccountNo() }/transaction-history">
 					Transaction history
+				</a>
+				
+				<a class="button secondary" href="/bank-app/${ userType }/account/${ account.getAccountNo() }/mini-statement">
+					Mini Statement
 				</a>
 				
 				<c:if test="${ role == Role.EMPLOYEE && !account.isClosed() }">

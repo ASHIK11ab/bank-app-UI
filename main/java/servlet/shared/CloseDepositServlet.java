@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,11 +17,14 @@ import constant.AccountCategory;
 import constant.Constants;
 import constant.DepositAccountType;
 import constant.Role;
+import constant.TransactionType;
 import dao.AccountDAO;
 import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Bank;
+import model.Transaction;
 import model.account.DepositAccount;
 import model.account.RegularAccount;
 import model.user.Customer;
@@ -40,13 +44,24 @@ public class CloseDepositServlet extends HttpServlet {
 		
 		Customer customer = null;
 		RegularAccount payoutAccount = null;
+		RegularAccount bankAccount = null;
 		DepositAccount account = null;
+		Transaction transaction = null;
+		LocalDateTime dateTime = null;
+		
+		Bank bank = AppCache.getBank();
 		
 		Role role = null;
 		String msg = "", description = "", userType = "", redirectURI = "";
 		float fromAccountBeforeBalance, toAccountBeforeBalance, totalAmount;
+		
 		boolean exceptionOccured = false, isError = false, prematureClosing = false;
-		long accountNo = -1, bankAccountNo = AppCache.getBank().getBankAccountNo(), customerId = -1;
+		long accountNo = -1, customerId = -1;
+		
+		long bankAccountNo = bank.getBankAccountNo();
+		int bankAccountBranchId = bank.getAccountBranchId();
+		
+		long transactionId;
 		int branchId = -1, actionType = 0, payoutAccountBranchId;
 		
 		try {
@@ -100,6 +115,7 @@ public class CloseDepositServlet extends HttpServlet {
 			if(!isError && ((actionType == 0 && !prematureClosing) ||  actionType == 1)) {
 				
 				synchronized (account) {
+					dateTime = LocalDateTime.now();
 					
 					totalAmount = account.getBalance();
 					
@@ -111,15 +127,25 @@ public class CloseDepositServlet extends HttpServlet {
 					
 					// Debit charges for premature closing
 					if(prematureClosing) {
-						// credit 500 to bank account.
-						fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, Constants.PREMATURE_CLOSING_CHARGES);
-						toAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 1, Constants.PREMATURE_CLOSING_CHARGES);
 						
-						// update in cache.
-						account.deductAmount(Constants.PREMATURE_CLOSING_CHARGES);
+						bankAccount = regularAccountDAO.get(bankAccountNo, bankAccountBranchId);
 						
-						description = "Premature closing charges on A/C: " + account.getAccountNo();
-						transactionDAO.create(conn, 1, description, account.getAccountNo(), bankAccountNo, Constants.PREMATURE_CLOSING_CHARGES, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+						synchronized (bankAccount) {
+							// credit 500 to bank account.
+							fromAccountBeforeBalance = accountDAO.updateBalance(conn, account.getAccountNo(), 0, Constants.PREMATURE_CLOSING_CHARGES);
+							toAccountBeforeBalance = accountDAO.updateBalance(conn, bankAccountNo, 1, Constants.PREMATURE_CLOSING_CHARGES);
+							
+							// update in cache.
+							account.deductAmount(Constants.PREMATURE_CLOSING_CHARGES);
+							bankAccount.addAmount(Constants.PREMATURE_CLOSING_CHARGES);
+							
+							description = "Premature closing charges on A/C: " + account.getAccountNo();
+							transactionId = transactionDAO.create(conn, TransactionType.NEFT.id , description, account.getAccountNo(), bankAccountNo, Constants.PREMATURE_CLOSING_CHARGES, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+							transaction = new Transaction(transactionId, TransactionType.NEFT.id, account.getAccountNo(), bankAccountNo, Constants.PREMATURE_CLOSING_CHARGES, LocalDateTime.now(), description, toAccountBeforeBalance);
+							
+							bankAccount.addTransaction(transaction);
+						
+						}
 					}
 					
 					payoutAccountBranchId = accountDAO.getBranchId(conn, account.getPayoutAccountNo());
@@ -136,7 +162,12 @@ public class CloseDepositServlet extends HttpServlet {
 						payoutAccount.addAmount(totalAmount);
 						
 						description = DepositAccountType.getType(account.getTypeId()).toString() + " closing on A/C: " + account.getAccountNo();
-						transactionDAO.create(conn, 1, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+						
+						transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
+						
+						// Update transaction record in cache.
+						transaction = new Transaction(transactionId, TransactionType.NEFT.id,  account.getAccountNo(), account.getPayoutAccountNo(), totalAmount, dateTime, description, toAccountBeforeBalance);						
+						payoutAccount.addTransaction(transaction);
 						
 						accountDAO.closeAccount(conn, account, AccountCategory.DEPOSIT);
 					}

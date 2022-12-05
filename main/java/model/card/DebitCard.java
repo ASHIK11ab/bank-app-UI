@@ -2,7 +2,7 @@ package model.card;
 
 import java.time.LocalDate;
 
-public class DebitCard {	
+public class DebitCard implements Comparable<DebitCard> {	
 	private final long cardNo;
 	private final long linkedAccountNo;
 	private final LocalDate validFromDate;
@@ -82,5 +82,30 @@ public class DebitCard {
 	// setters	
     public void setIsActive(boolean status) {
     	this.isActive = status;
+    }
+    
+    
+    public void activateCard() {
+    	if(!this.isActivated()) {
+    		this.activatedDate = LocalDate.now();
+    		this.setIsActive(true);
+    	}
+    }
+    
+    
+    public void deactivateCard() {
+    	if(!this.isDeactivated()) {
+    		this.deactivatedDate = LocalDate.now();
+    		this.setIsActive(false);
+    	}
+    }
+    
+    
+    @Override
+    public int compareTo(DebitCard card) {    	
+    	if(this.cardNo == card.getCardNo())
+    		return 0;
+    	else
+    		return (this.cardNo < card.getCardNo()) ? -1 : 1;
     }
 }

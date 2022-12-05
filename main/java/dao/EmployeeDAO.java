@@ -140,7 +140,7 @@ public class EmployeeDAO {
 	}
 	
 	
-	public Employee get(long id, int branchId) throws SQLException {
+	synchronized public Employee get(long id, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;

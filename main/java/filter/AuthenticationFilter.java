@@ -18,7 +18,7 @@ public class AuthenticationFilter extends HttpFilter {
 		// Redirect to respective index page if not authenticated.
 		HttpSession session = req.getSession(false);
 		if(session == null || session.getAttribute("role") == null) {
-			res.getWriter().println("<h1>In app homepage</h1>");
+			res.sendRedirect("/bank-app/");
 			return;
 		}
 		

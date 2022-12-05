@@ -22,7 +22,8 @@ public class DepositAccountDAO {
 	public DepositAccount create(Connection conn, long customerId, String customerName,
 										int branchId, int depositType, Nominee nominee,
 										int amount, int tenureMonths, long payoutAccountNo,
-										long debitFromAccountNo, LocalDate recurringDate) throws SQLException {
+										long debitFromAccountNo, LocalDate recurringDate,
+										int depositAmount) throws SQLException {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null;
 		
@@ -64,7 +65,7 @@ public class DepositAccountDAO {
             stmt2.setFloat(4, intrestRate);
             stmt2.setInt(5, tenureMonths);
             stmt2.setLong(6, debitFromAccountNo);
-            stmt2.setFloat(7, amount);
+            stmt2.setFloat(7, depositAmount);
             
             if(type == DepositAccountType.RD)
             	stmt2.setDate(8, Date.valueOf(recurringDate));            	
@@ -76,11 +77,11 @@ public class DepositAccountDAO {
             switch(type) {
 	            case RD: account = new DepositAccount(generatedAccountNo, customerId, customerName, nominee, 
 	            															branchId, amount, payoutAccountNo, debitFromAccountNo,
-	            															tenureMonths, intrestRate, today, null, amount, recurringDate);
+	            															tenureMonths, intrestRate, today, null, depositAmount, recurringDate);
 	            								break;
 	            case FD: account = new DepositAccount(generatedAccountNo, customerId, customerName, nominee, 
 																			branchId, amount, payoutAccountNo, debitFromAccountNo,
-																			tenureMonths, intrestRate, today, null, amount);
+																			tenureMonths, intrestRate, today, null, depositAmount);
 	            								break;
             }
             
@@ -117,7 +118,7 @@ public class DepositAccountDAO {
 	}
 	
 	
-	public DepositAccount get(long accountNo, int branchId) throws SQLException {
+	synchronized public DepositAccount get(long accountNo, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;

@@ -11,7 +11,7 @@
 	<p>Card Activated on: ${ card.getActivatedDate() }</p>
 </c:if>
 <c:if test="${ !card.isActivated() && !card.isDeactivated() }">
-	<p><strong>Card yet to be activated by customer</strong></p>
+	<p><strong>Card yet to be activated</strong></p>
 </c:if>
 <c:if test="${ card.isDeactivated() }">
 	<p><strong>Card deactivated on: ${ card.getDeactivatedDate() }</strong></p>

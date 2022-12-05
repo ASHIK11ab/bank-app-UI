@@ -23,31 +23,40 @@
 			<c:if test="${ actionType == 0 }">
 				<section>
 					<h1>View Deposit</h1>
-					<form action="/bank-app/${ userType }/deposit" method="post">
-						<label>Account No:</label>
-						
+					<form action="/bank-app/${ userType }/deposit" method="post">						
 						<c:choose>
 						
 							<c:when test="${ role == Role.EMPLOYEE }">
+								<label>Deposit Account No:</label>
 								<input type="number" placeholder="Enter account no" 
 									name="account-no" id="account-no-input" required>
 							</c:when>
 							
 							<c:when test="${ role == Role.CUSTOMER }">
-								<select name="account-no">
-									<option value="-1" selected disabled hidden>select account</option>
-									<c:forEach items="${ requestScope.customerDeposits }" var="account">
-										<option value="${ account.getAccountNo() }">
-											( ${ account.getAccountNo() } ) ${ RegularAccountType.getName(account.getTypeId()) }
-										</option>
-									</c:forEach>
-								</select>
+								<c:if test="${ customerDeposits.size() > 0 }">
+									<label>Select Deposit:</label>
+									<select name="account-no">
+										<option value="-1" selected disabled hidden>select account</option>
+										<c:forEach items="${ requestScope.customerDeposits }" var="accountNo">
+											<option value="${ accountNo }">
+												${ accountNo }
+											</option>
+										</c:forEach>
+									</select>
+								</c:if>
+								
+								<c:if test="${ customerDeposits.size() == 0 }">
+									<h1>No deposits</h1>
+									<a class="button" href="/bank-app/customer/deposit/create">Create Deposit</a>
+								</c:if>
 							</c:when>
 							
 						</c:choose>
 						
-
-						<button>submit</button>
+						<!-- Hide submit button when no deposit account to display for customer. -->
+						<c:if test="${ role == Role.EMPLOYEE || customerDeposits.size() > 0 }">
+							<button>submit</button>
+						</c:if>
 					</form>
 				</section>
 			</c:if>

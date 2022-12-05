@@ -38,7 +38,7 @@
 				
 				<c:if test="${ role == Role.CUSTOMER }">
 					<label>Enter Pin:</label>
-					<input type="number" name="pin" placeholder="4 digit pin of your card" required>
+					<input type="password" name="pin" placeholder="4 digit pin of your card" required>
 				</c:if>
 				<button class="danger">submit</button>
 			</form>

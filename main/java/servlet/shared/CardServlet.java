@@ -36,7 +36,8 @@ public class CardServlet extends HttpServlet {
 		
 		Role role = null;
 		boolean isError = false, exceptionOccured = false;
-		String path = req.getPathInfo(), action = "", msg = "", queryMsg = null, status = null;
+		String path = req.getPathInfo(), action = "", msg = "";
+		String queryMsg = null, status = null, redirectURI = "", userType;
 		String [] result;
 		long cardNo = -1, customerId = -1;
 		int branchId = -1;
@@ -48,14 +49,25 @@ public class CardServlet extends HttpServlet {
 		if(queryMsg != null && status != null)
 			out.println(Util.createNotification(queryMsg, status));
 		
-		if(path == null || path.equals("/")) {
-			req.setAttribute("actionType", 0);
-			req.getRequestDispatcher("/jsp/components/viewCard.jsp").include(req, res);
-			return;
-		}
-		
 		try {
 			role = (Role) req.getSession(false).getAttribute("role"); 
+			
+			if(role == Role.CUSTOMER) {
+				customerId = (Long) req.getSession(false).getAttribute("id");
+				customer = customerDAO.get(customerId);
+			}
+			
+			
+			if(path == null || path.equals("/")) {
+				req.setAttribute("actionType", 0);
+				
+				if(role == Role.CUSTOMER)
+					req.setAttribute("cards", customer.getCards());
+				
+				req.getRequestDispatcher("/jsp/components/viewCard.jsp").include(req, res);
+				return;
+			}
+			
 			path = path.substring(1);
 			result = path.split("/");
 			
@@ -89,12 +101,11 @@ public class CardServlet extends HttpServlet {
 		        					}
 		        					break;
 		        	case CUSTOMER: 
-		        					customerId = (Long) req.getSession(false).getAttribute("id");
-		        					customer = customerDAO.get(customerId);
 		        					// Card nunber entered does not belong to this customer.
-		        					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1) {
+		        					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1
+		        							|| card.isDeactivated()) {
 		        						isError = true;
-		        						msg = "Account not exist !!!";
+		        						msg = "Invalid card details !!!";
 		        					}
 		        					break;
 		        	default: break;
@@ -122,10 +133,23 @@ public class CardServlet extends HttpServlet {
 										
 										if(!isError) {
 											req.setAttribute("actionType", 0);
-											req.setAttribute("cardNo", cardNo);
 											req.getRequestDispatcher("/jsp/components/blockUnblockCard.jsp").include(req, res); break;	
 										}
 										break;
+					case "activate":
+									if(role == Role.EMPLOYEE) {
+										isError = true;
+										msg = "page not found !!!";
+									}
+									
+									if(!isError && card.isActivated()) {
+										isError = true;
+										msg = "card is aldready activated !!!";
+									}
+									
+									if(!isError)
+										req.getRequestDispatcher("/jsp/customer/activateCard.jsp").forward(req, res);
+									break;
 					default: 
 							isError = true;
 							msg = "page not found !!!";
@@ -145,20 +169,17 @@ public class CardServlet extends HttpServlet {
 		} finally {
 			
 			if(isError || exceptionOccured) {
-				out.println(Util.createNotification(msg, "danger"));
-				req.setAttribute("actionType", 0);
-				req.getRequestDispatcher("/jsp/components/viewCard.jsp").include(req, res);
-				out.close();
+				userType = Role.getName(role);
+				redirectURI = String.format("/bank-app/%s/card?msg=%s&status=danger", userType, msg);
+				res.sendRedirect(redirectURI);
 			}
 		}
 	}
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		PrintWriter out = res.getWriter();
-		
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {		
 		Role role = null;
 		boolean exceptionOccured = false, isError = false;
-		String errorMsg = "", userType = "", redirectURI = "";
+		String userType = "", redirectURI = "";
 		long cardNo;
 		
 		try {
@@ -169,16 +190,12 @@ public class CardServlet extends HttpServlet {
 			res.sendRedirect(redirectURI);
 		} catch(NumberFormatException e) {
 			exceptionOccured = true;
-			errorMsg = "internal error";
 		} finally {
 			
 			if(isError || exceptionOccured) {
-				out.println(Util.createNotification(errorMsg, "danger"));
-				req.setAttribute("actionType", 0);
-				req.getRequestDispatcher("/jsp/components/viewCard.jsp").include(req, res);
+				res.sendError(500);
 			}
 			
-			out.close();
 		}
 	}
 }

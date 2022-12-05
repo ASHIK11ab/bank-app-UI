@@ -8,7 +8,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.LinkedList;
+import java.util.Properties;
 
+import cache.AppCache;
+import model.Bank;
+import model.account.RegularAccount;
 import model.card.DebitCard;
 import util.Factory;
 import util.Util;
@@ -28,8 +32,8 @@ public class DebitCardDAO {
 		try {
             stmt = conn.prepareStatement("INSERT INTO debit_card (account_no, valid_from, expiry_date, type_id, pin, cvv) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 
-            pin = (byte) Util.genPin(4);
-            cvv = (byte) Util.genPin(3);
+            pin = Util.genPin(4);
+            cvv = Util.genPin(3);
             
             validFromDate = today.plusDays(10);
             expiryDate = validFromDate.plusYears(3);
@@ -72,53 +76,61 @@ public class DebitCardDAO {
 	
 	
 	// Returns a debit card.
-	public DebitCard get(long cardNo) throws SQLException {
+	/* Checks for mapping in cache, if exists gets the card from the linked
+	 * account object if exits.
+	 */
+	synchronized public DebitCard get(long cardNo) throws SQLException {
 		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		
+		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
+		
+		RegularAccount account = null;
+		Bank bank = AppCache.getBank();
 		DebitCard card = null;
-		LocalDate validFromDate, expiryDate, activatedDate, deactivatedDate;
+		
+		Properties props = null;
+		
 		long linkedAccountNo;
-		byte typeId;
-		int pin, cvv;
-		boolean exceptionOccured = false, isActive;
+		int linkedAccountBranchId;
+		boolean exceptionOccured = false;
 		String msg = "";
 		
 		try {
-			conn = Factory.getDataSource().getConnection();
-            stmt = conn.prepareStatement("SELECT * FROM debit_card WHERE card_no = ?");
-            stmt.setLong(1, cardNo);
+			// Try getting from cache.
+			props = bank.getCardAccountBranch(cardNo);
+			
+			// Mapping does not exist, load linked account from db.
+			if(props == null) {
+				conn = Factory.getDataSource().getConnection();
+				props = getCardAccountBranch(conn, cardNo);
+				System.out.println("Card A/C Mapping does not exist, fetched props from DB");
+			} else {
+				System.out.println("Card A/C Mapping exists");
+			}
+			
+			if(props != null) {
+				linkedAccountNo = (Long) props.get("account-no"); 
+				linkedAccountBranchId = (Integer) props.get("branch-id");
+				
+				account = regularAccountDAO.get(linkedAccountNo, linkedAccountBranchId);
+				
+				if(account != null) {
+					card = account.getCard(cardNo);
+					
+					// update mapping in cache.
+					bank.addCardAccountBranchMapping(cardNo, props);
+				}
+			}
             
-            rs = stmt.executeQuery();
-            if(rs.next()) {
-                linkedAccountNo = rs.getLong("account_no");
-                validFromDate = rs.getDate("valid_from").toLocalDate();
-                expiryDate = rs.getDate("expiry_date").toLocalDate();
-                typeId = rs.getByte("type_id");
-                pin = rs.getInt("pin");
-                cvv = rs.getInt("cvv");
-                isActive = rs.getBoolean("is_active");
-                activatedDate = (rs.getDate("activated_date") != null) ? rs.getDate("activated_date").toLocalDate() : null;
-                deactivatedDate = (rs.getDate("deactivated_date") != null) ? rs.getDate("deactivated_date").toLocalDate() : null;
-                
-                card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, isActive, pin, cvv, activatedDate, deactivatedDate);
-            }
-            
-		} catch(SQLException e) {
+		} catch(ClassCastException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
         } finally {
-            try {
-                if(rs != null)
-                    rs.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
             
             try {
                 if(conn != null)
@@ -134,8 +146,7 @@ public class DebitCardDAO {
 	
 	
 	// Returns all debit cards linked with a account.
-	public LinkedList<DebitCard> getAll(long accountNo) throws SQLException {
-		Connection conn = null;
+	public LinkedList<DebitCard> getAll(Connection conn, long accountNo) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
@@ -183,11 +194,6 @@ public class DebitCardDAO {
                 if(stmt != null)
                     stmt.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
         }
 		
 		if(exceptionOccured)
@@ -226,7 +232,64 @@ public class DebitCardDAO {
 	}
 	
 	
-	// internal method
+	// public interface
+	public void activateCard(Connection conn, long cardNo) throws SQLException {
+		_setCardActivationStatus(conn, cardNo, true);
+	}
+	
+	
+	public void deactivateCard(Connection conn, long cardNo) throws SQLException {
+		_setCardActivationStatus(conn, cardNo, false);
+	}
+	
+	
+	// Internal method, returns the account number linked with an account and its branch id
+	// as a properties object.
+	private Properties getCardAccountBranch(Connection conn, long cardNo) throws SQLException {
+		Properties props = null;
+		long accountNo = -1;
+		int branchId = -1;
+		boolean exceptionOccured = false;
+		
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = conn.prepareStatement("SELECT c.account_no, a.branch_id FROM debit_card c LEFT JOIN account a ON c.account_no = a.account_no WHERE c.card_no = ?");
+			stmt.setLong(1, cardNo);
+			rs = stmt.executeQuery();
+			
+			if(rs.next()) {
+				accountNo = rs.getLong("account_no");
+				branchId = rs.getInt("branch_id");
+				
+				props = new Properties();
+				props.put("account-no", accountNo);
+				props.put("branch-id", branchId);				
+			}
+		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+		} finally { 
+			try {
+				if(rs != null)
+					rs.close();
+			} catch(SQLException e) { System.out.println(e.getMessage()); }
+			
+			try {
+				if(stmt != null)
+					stmt.close();
+			} catch(SQLException e) { System.out.println(e.getMessage()); }
+		}
+		
+		if(exceptionOccured)
+			throw new SQLException("internal error");
+		else
+			return props;
+	}
+	
+	
+	// internal method used when activating / deactivating a card.
 	private void _setCardActivationStatus(Connection conn, long cardNo, boolean activationStatus) throws SQLException {
 		PreparedStatement stmt = null;
 		
@@ -259,16 +322,5 @@ public class DebitCardDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
-	}
-	
-	
-	// public interface
-	public void activateCard(Connection conn, long cardNo) throws SQLException {
-		_setCardActivationStatus(conn, cardNo, true);
-	}
-	
-	
-	public void deactivateCard(Connection conn, long cardNo) throws SQLException {
-		_setCardActivationStatus(conn, cardNo, false);
 	}
 }

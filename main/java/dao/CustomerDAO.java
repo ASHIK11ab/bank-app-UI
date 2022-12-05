@@ -129,7 +129,7 @@ public class CustomerDAO {
 	}
 	
 	
-	public Customer get(long customerId) throws SQLException {
+	synchronized public Customer get(long customerId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null, stmt2 = null, stmt3 = null, stmt4 = null, stmt5 = null;
 		ResultSet rs = null, rs2 = null, rs3 = null, rs4 = null, rs5 = null;
@@ -141,7 +141,7 @@ public class CustomerDAO {
 		
         Beneficiary beneficiary;
         long beneficiaryAccountNo, beneficiaryId = -1;
-        String beneficiaryName, beneficiaryNickName, beneficiaryIfsc = "";
+        String beneficiaryName, beneficiaryNickName, beneficiaryIfsc = "", beneficiaryBankName;
         int bankId = -1;
         
         long accountNo;
@@ -166,8 +166,8 @@ public class CustomerDAO {
 	            stmt = conn.prepareStatement("SELECT * FROM customer c JOIN customer_info c_info ON c.id = c_info.customer_id WHERE c.id = ?");
                 stmt2 = conn.prepareStatement("SELECT * from own_bank_beneficiary WHERE customer_id = ?");
                 stmt3 = conn.prepareStatement("SELECT * from other_bank_beneficiary WHERE customer_id = ?");
-                stmt4 = conn.prepareStatement("SELECT a.account_no, a.branch_id, ra.type_id FROM regular_account ra LEFT JOIN account a ON a.account_no = ra.account_no where a.customer_id = ?");
-                stmt5 = conn.prepareStatement("SELECT a.account_no, a.branch_id, da.type_id FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no where a.customer_id = ?");
+                stmt4 = conn.prepareStatement("SELECT a.account_no, a.branch_id, ra.type_id FROM regular_account ra LEFT JOIN account a ON a.account_no = ra.account_no where a.customer_id = ? AND a.closing_date IS NULL");
+                stmt5 = conn.prepareStatement("SELECT a.account_no, a.branch_id, da.type_id FROM deposit_account da LEFT JOIN account a ON a.account_no = da.account_no where a.customer_id = ? AND a.closing_date IS NULL");
 	            
 	            stmt.setLong(1, customerId);
 	            
@@ -226,7 +226,9 @@ public class CustomerDAO {
                         beneficiaryName = rs3.getString("name");
                         beneficiaryNickName = rs3.getString("nick_name");
 
-                        beneficiary = new Beneficiary(beneficiaryId, bankId, beneficiaryAccountNo, beneficiaryIfsc, beneficiaryName, beneficiaryNickName);
+                        beneficiaryBankName = AppCache.getIntegratedBank(bankId).getName();
+                        
+                        beneficiary = new Beneficiary(beneficiaryId, beneficiaryAccountNo, beneficiaryName, beneficiaryNickName, bankId, beneficiaryBankName, beneficiaryIfsc);
                         customer.addBeneficiary(BeneficiaryType.OTHER_BANK, beneficiary);
                     }
 
@@ -266,11 +268,27 @@ public class CustomerDAO {
             try {
                 if(rs != null)
                     rs.close();
+				if(rs2 != null)
+					rs2.close();
+				if(rs3 != null)
+					rs3.close();
+				if(rs4 != null)
+					rs4.close();
+				if(rs5 != null)
+					rs5.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {
                 if(stmt != null)
                     stmt.close();
+				if(stmt2 != null)
+					stmt2.close();
+				if(stmt3 != null)
+					stmt3.close();
+				if(stmt4 != null)
+					stmt4.close();
+				if(stmt5 != null)
+					stmt5.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {

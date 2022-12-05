@@ -45,8 +45,8 @@ public class LoginServlet extends HttpServlet {
 	        if((admin != null) && admin.getPassword().equals(password)) {
 	        	HttpSession session = req.getSession();
 	        	session.setAttribute("id", admin.getId());
-	        	// 2 days.
-	        	session.setMaxInactiveInterval(60*60*24*2);
+	        	// 1 hour.
+	        	session.setMaxInactiveInterval(60*60);
 	        	session.setAttribute("role", Role.ADMIN);
 	            res.sendRedirect("/bank-app/admin/dashboard");
 	        } else {

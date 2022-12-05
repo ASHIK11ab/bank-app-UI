@@ -164,7 +164,7 @@ public class AccountDAO {
 			}
 			
 			// deactivate all linked cards
-			linkedCards = cardDAO.getAll(account.getAccountNo());
+			linkedCards = cardDAO.getAll(conn, account.getAccountNo());
 			for(DebitCard card : linkedCards)
 				cardDAO.deactivateCard(conn, card.getCardNo());
 			

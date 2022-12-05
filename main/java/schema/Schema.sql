@@ -161,6 +161,10 @@ CREATE TABLE regular_account (
     account_no BIGINT NOT NULL,
     type_id SMALLINT NOT NULL,
     active BOOLEAN NOT NULL,
+    sum_closing_balance FLOAT DEFAULT 0 NOT NULL,
+    closing_balance_calculated_days INT DEFAULT 0 NOT NULL,
+    intrest_calculated_on DATE,
+    closing_balance_calculated_on DATE,
     FOREIGN KEY (account_no) REFERENCES account (account_no) ON DELETE CASCADE,
     FOREIGN KEY (type_id) REFERENCES regular_account_type (id)
 );
@@ -217,7 +221,7 @@ CREATE TABLE other_bank_beneficiary (
     customer_id BIGINT NOT NULL,
     bank_id SMALLINT NOT NULL,
     account_no BIGINT NOT NULL,
-    ifsc VARCHAR(30) NOT NULL,
+    ifsc VARCHAR(11) NOT NULL,
     name VARCHAR(20) NOT NULL,
     nick_name VARCHAR(15) NOT NULL,
     FOREIGN KEY (bank_id) REFERENCES banks (id) ON DELETE CASCADE,
@@ -228,7 +232,9 @@ CREATE TABLE other_bank_beneficiary (
 -- NEFT / ATM / UPI.
 CREATE TABLE transaction_type (
     id SMALLSERIAL PRIMARY KEY,
-    name VARCHAR(15) UNIQUE NOT NULL
+    name VARCHAR(15) UNIQUE NOT NULL,
+    min_amount INT NOT NULL,
+    max_amount INT NOT NULL
 );
 
 
@@ -238,7 +244,7 @@ CREATE TABLE transaction (
     description VARCHAR NOT NULL,
     from_account_no BIGINT NULL,
     to_account_no BIGINT NULL,
-    amount INT NOT NULL,
+    amount FLOAT NOT NULL,
     date date not null,
     time time not null,
     FOREIGN KEY (type_id) REFERENCES transaction_type (id)
@@ -251,7 +257,7 @@ ALTER SEQUENCE transaction_id_seq RESTART 1000000000001;
 CREATE TABLE account_transaction (
     account_no BIGINT NOT NULL,
     transaction_id BIGINT NOT NULL,
-    before_balance INT NOT NULL,    -- balance in account before this transaction.
+    before_balance FLOAT NOT NULL,    -- balance in account before this transaction.
     FOREIGN KEY (account_no) REFERENCES account (account_no) ON DELETE CASCADE,
     FOREIGN KEY (transaction_id) REFERENCES transaction (id)
 );

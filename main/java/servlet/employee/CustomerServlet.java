@@ -55,7 +55,7 @@ public class CustomerServlet extends HttpServlet {
 				
 				switch(action) {
 					case "view": req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res); break;
-					case "update": req.getRequestDispatcher("/jsp/employee/updateCustomer.jsp").include(req, res); break;
+					case "update": req.getRequestDispatcher("/jsp/components/updateCustomer.jsp").include(req, res); break;
 					case "password-reset": 
 											req.setAttribute("id", customerId);
 											req.setAttribute("name", customer.getName());

@@ -3,6 +3,8 @@ package servlet.shared;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -13,6 +15,7 @@ import constant.AccountCategory;
 import constant.Role;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
+import model.Transaction;
 import model.account.RegularAccount;
 import model.user.Customer;
 import util.Factory;
@@ -21,13 +24,15 @@ import util.Util;
 
 public class AccountServlet extends HttpServlet {
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+		
 		RegularAccount account = null;
 		Customer customer = null;
+		LinkedList<Transaction> transactions = null;
 		
 		Role role = null;
 		boolean isError = false, exceptionOccured = false, pageFound = true, isAccessGranted = false;
@@ -43,17 +48,29 @@ public class AccountServlet extends HttpServlet {
 		if(queryMsg != null && status != null)
 			out.println(Util.createNotification(queryMsg, status));
 		
-		if(path == null || path.equals("/")) {
-			req.setAttribute("actionType", 0);
-			req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
-			return;
-		}
-		
 		try {
+			role = (Role) req.getSession(false).getAttribute("role");
+			
+			// load customer's regular Accounts.
+			if(role == Role.CUSTOMER) {
+				customerId = (Long) req.getSession(false).getAttribute("id");
+				customer = customerDAO.get(customerId);
+			}
+			
+			if(path == null || path.equals("/")) {
+				
+				// Set customer's account in request for displaying accounts as a dropdown.
+				if(role == Role.CUSTOMER)
+					setCustomerAccountsInRequest(req, customer);
+				
+				req.setAttribute("actionType", 0);
+				req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
+				return;
+			}
+			
 			path = path.substring(1);
 			result = path.split("/");
 			
-			role = (Role) req.getSession(false).getAttribute("role"); 
 			
 			accountNo = Long.parseLong(result[0]);
 			action = result[1];
@@ -69,10 +86,7 @@ public class AccountServlet extends HttpServlet {
 	        					break;
 	        	case CUSTOMER: 
 	        					// customer cannot access closed account.
-	        					customerId = (Long) req.getSession(false).getAttribute("id");
-	        					customer = customerDAO.get(customerId);
 	        					branchId = customer.getAccountBranchId(AccountCategory.REGULAR, accountNo);
-	        					
         						account = accountDAO.get(accountNo, branchId);
 	        					if(account != null && !account.isClosed())
 	        						isAccessGranted = true;
@@ -94,11 +108,17 @@ public class AccountServlet extends HttpServlet {
 				switch(action) {
 					case "view":
 								req.setAttribute("actionType", 1);
-								req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res); break;
+								req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
+								break;
 					case "transaction-history":
 												req.setAttribute("actionType", 0);
-												req.setAttribute("accountCategory", 0);
-												req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").include(req, res); break;
+												req.setAttribute("accountCategory", AccountCategory.REGULAR.id);
+												req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").include(req, res);
+												break;
+					case "mini-statement":
+											req.getRequestDispatcher("/jsp/components/miniStatement.jsp").forward(req, res);
+											break;
+											
 					default: pageFound = false;
 				}
 				
@@ -128,10 +148,18 @@ public class AccountServlet extends HttpServlet {
 				isError = true;
 				msg = "page not found !!!";
 			}
+		} catch(NullPointerException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Page not found !!!";
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "internal error !!!";
+		} catch(IndexOutOfBoundsException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Page not found !!!";
 		} catch(NumberFormatException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
@@ -142,8 +170,11 @@ public class AccountServlet extends HttpServlet {
 		} finally {
 			
 			if(isError || exceptionOccured) {
-				System.out.println(msg);
 				out.println(Util.createNotification(msg, "danger"));
+				
+				if(role == Role.CUSTOMER)
+					setCustomerAccountsInRequest(req, customer);
+				
 				req.setAttribute("actionType", 0);
 				req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
 			}
@@ -154,7 +185,7 @@ public class AccountServlet extends HttpServlet {
 	
 	
 	// Handles the post request and redirects to the view page.
-	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {		
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {		
 		PrintWriter out = res.getWriter();
 		
 		Role role = null;
@@ -181,5 +212,18 @@ public class AccountServlet extends HttpServlet {
 			
 			out.close();
 		}
+	}
+	
+	
+	// Internally used method, since customer accounts are set at multiple places 
+	// in the servlet.
+	private void setCustomerAccountsInRequest(HttpServletRequest req, Customer customer) {
+		Collection<Long> savingsAccounts = customer.getSavingsAccounts();
+		long currentAccount = customer.getCurrentAccount();
+		
+		req.setAttribute("savingsAccounts", savingsAccounts);
+		
+		if(currentAccount != -1)
+			req.setAttribute("currentAccount", currentAccount);
 	}
 }

@@ -53,7 +53,23 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
 
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        
+        User target = (User) obj;
+        return (this.name.equals(target.getName()) && this.email.equals(target.getEmail()) 
+        		&& this.phone == target.getPhone());
+    }
+
+    
     public String toString() {
         String repr = "";
         repr += "\nId      : " + this.id;

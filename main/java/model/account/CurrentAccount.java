@@ -6,7 +6,7 @@ import constant.RegularAccountType;
 import model.Nominee;
 
 public class CurrentAccount extends RegularAccount {
-    private static int minimumBalance = 10000;
+    private static int minimumBalance;
     
     
     public CurrentAccount(long accountNo, long customerId, String customerName, 
@@ -18,11 +18,18 @@ public class CurrentAccount extends RegularAccount {
     
 
     @Override
-    public int initiateTransaction(float amount) { return 200; }
+    public int initiateTransaction(float amount) {        
+        //Insufficient balance.
+        if(super.getBalance() < amount)
+            return 401;
+
+        //Transaction can proceed.
+        return 200;
+    }
     
     // Getters
     public static int getMinimumBalance() {
-    	return minimumBalance;
+    	return CurrentAccount.minimumBalance;
     }
     
     // Setters

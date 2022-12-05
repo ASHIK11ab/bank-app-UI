@@ -1,4 +1,31 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">	
+	<servlet>
+		<servlet-name>HomePageServlet</servlet-name>
+		<servlet-class>servlet.HomePageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>HomePageServlet</servlet-name>
+		<url-pattern></url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ServicesPageServlet</servlet-name>
+		<servlet-class>servlet.ServicesPageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ServicesPageServlet</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ContactPageServlet</servlet-name>
+		<servlet-class>servlet.ContactPageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ContactPageServlet</servlet-name>
+		<url-pattern>/contact</url-pattern>
+	</servlet-mapping>
+	
 	<!-- Shared servlets -->
 	<servlet>
 		<servlet-name>AccountTransactionServlet</servlet-name>
@@ -11,6 +38,19 @@
 	<servlet-mapping>
 		<servlet-name>AccountTransactionServlet</servlet-name>
 		<url-pattern>/customer/account/transaction-history</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>CreateDepositServlet</servlet-name>
+		<servlet-class>servlet.shared.CreateDepositServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CreateDepositServlet</servlet-name>
+		<url-pattern>/employee/deposit/create</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CreateDepositServlet</servlet-name>
+		<url-pattern>/customer/deposit/create</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
@@ -106,6 +146,19 @@
 	<servlet-mapping>
 		<servlet-name>ProfileServlet</servlet-name>
 		<url-pattern>/customer/profile/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>UpdateCustomerServlet</servlet-name>
+		<servlet-class>servlet.shared.UpdateCustomerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UpdateCustomerServlet</servlet-name>
+		<url-pattern>/employee/customer/update</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>UpdateCustomerServlet</servlet-name>
+		<url-pattern>/customer/update</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
@@ -307,11 +360,6 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>CreateDepositServlet</servlet-name>
-		<servlet-class>servlet.employee.CreateDepositServlet</servlet-class>
-	</servlet>
-	
-	<servlet>
 		<servlet-name>ViewCardsServlet</servlet-name>
 		<servlet-class>servlet.employee.ViewCardsServlet</servlet-class>
 	</servlet>
@@ -327,15 +375,6 @@
 	<servlet-mapping>
 		<servlet-name>CustomerServlet</servlet-name>
 		<url-pattern>/employee/customer/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
-		<servlet-class>servlet.employee.UpdateCustomerServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmployeeUpdateCustomerServlet</servlet-name>
-		<url-pattern>/employee/customer/update</url-pattern>
 	</servlet-mapping>
 	<!-- End of employee servlets -->
 	
@@ -426,10 +465,6 @@
 		<servlet-name>CreateAccountServlet</servlet-name>
 		<url-pattern>/employee/account/create/existing-customer</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>CreateDepositServlet</servlet-name>
-		<url-pattern>/employee/deposit/create</url-pattern>
-	</servlet-mapping>
 	<!-- End of employee servlet mappings -->
 	
 	<!-- Customer servlets and mappings -->
@@ -449,6 +484,51 @@
 	<servlet-mapping>
 		<servlet-name>CustomerDashboardServlet</servlet-name>
 		<url-pattern>/customer/dashboard</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>FundTransferServlet</servlet-name>
+		<servlet-class>servlet.customer.FundTransferServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FundTransferServlet</servlet-name>
+		<url-pattern>/customer/fund-transfer</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>BeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.BeneficiaryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/beneficiaries/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>AddEditBeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.AddEditBeneficiaryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AddEditBeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/add-edit-beneficiary</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RemoveBeneficiaryServlet</servlet-name>
+		<servlet-class>servlet.customer.RemoveBeneficiaryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RemoveBeneficiaryServlet</servlet-name>
+		<url-pattern>/customer/remove-beneficiary</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ActivateCardServlet</servlet-name>
+		<servlet-class>servlet.customer.ActivateCardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ActivateCardServlet</servlet-name>
+		<url-pattern>/customer/activate-card</url-pattern>
 	</servlet-mapping>
 	<!-- End of customer servlets and mappings -->
 	
