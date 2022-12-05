@@ -168,6 +168,7 @@ public class Branch {
         }
         
         Branch target = (Branch) obj;
-        return (this.name.equals(target.getName()) && this.address.equals(target.getAddress()));
+        return (this.id == target.getId() && this.name.equals(target.getName()) &&
+        		this.address.equals(target.getAddress()));
     }
 }

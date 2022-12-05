@@ -50,7 +50,8 @@ public class IntegratedBank {
         
         IntegratedBank target = (IntegratedBank) obj;
         
-        return (this.name.equals(target.name) && this.email.equals(target.getEmail()) &&
-        			this.phone == target.getPhone() && this.apiURL.equals(target.getApiURL()));
+        return (this.id == target.getId() && this.name.equals(target.name) && 
+        			this.email.equals(target.getEmail()) && this.phone == target.getPhone() &&
+        			this.apiURL.equals(target.getApiURL()));
     }
 }

@@ -102,7 +102,7 @@ public class Beneficiary {
     	
     	Beneficiary target = (Beneficiary) obj;
     	
-    	return (this.getName().equals(target.getName()) && this.getNickName().equals(target.getNickName())
+    	return (this.getId() == target.getId() && this.getName().equals(target.getName()) && this.getNickName().equals(target.getNickName())
     			&& this.getAccountNo() == target.getAccountNo() && this.getIFSC().equals(target.getIFSC())
     			&& this.getBankId() == target.getBankId());
     }

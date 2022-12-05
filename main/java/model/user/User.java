@@ -68,14 +68,4 @@ public class User {
         return (this.name.equals(target.getName()) && this.email.equals(target.getEmail()) 
         		&& this.phone == target.getPhone());
     }
-
-    
-    public String toString() {
-        String repr = "";
-        repr += "\nId      : " + this.id;
-        repr += "\nName    : " + this.name;
-        repr += "\nPhone   : " + this.phone;
-        repr += "\nEmail   : " + this.email;
-        return repr;
-    }
 }

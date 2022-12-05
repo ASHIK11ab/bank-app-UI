@@ -135,7 +135,7 @@ public class CreateEditBranchServlet extends HttpServlet {
 							break;
 					// edit
 					case 1: 
-							temp = new Branch(-1, name, address);
+							temp = new Branch(branchId, name, address);
 							
 							// update in DB only when data has changed.
 							if(!branch.equals(temp))

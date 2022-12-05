@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.servlet.ServletException;
@@ -35,7 +36,7 @@ public class ViewCardsServlet extends HttpServlet {
 		String msg = "";
 		long accountNo;
 		int branchId;
-		TreeSet<DebitCard> cards = null;
+		SortedSet<DebitCard> cards = null;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id"); 

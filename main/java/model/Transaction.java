@@ -65,17 +65,4 @@ public class Transaction {
     public int getType() {
         return this.type;
     }
-
-    public String toString() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyy hh:mm a");
-        
-        String repr = "";
-        repr += "\nTransaction id : " + this.id;
-        repr += "\nDate & Time    : " + fmt.format(dateTime);
-        repr += "\nPayer A/C      : " + this.fromAccountNo;
-        repr += "\nPayee A/C      : " + this.toAccountNo;
-        repr += "\nDescription    : " + this.description;
-        repr += "\nAmount         : " + this.amount;
-        return repr;
-    }
 }

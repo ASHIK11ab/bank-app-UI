@@ -21,18 +21,22 @@ public class Bank {
     private long accountNo;
     private int accountBranchId;
     
+    // Internal hashmap '_branches' used by branch comparator for sorting branches
+    // based on values.
     private HashMap<Integer, Branch> _branches;
     private SortedMap<Integer, Branch> branches; 
     
     private ConcurrentHashMap<Long, Customer> customers;
     
+    // Internal hashmap '_integratedBanks' used by Integrated banks comparator for 
+    // sorting branches based on values.
     private HashMap<Integer, IntegratedBank> _integratedBanks;
     private SortedMap<Integer, IntegratedBank> integratedBanks;
     
     private Comparator<Integer> branchComparator; 
     private Comparator<Integer> integratedBankComparator;
     
-    // Mapping of debit card no to its associated account number, branchId.
+    // Mapping of debit card no to its associated (account number, branchId).
     private ConcurrentHashMap<Long, Properties> cardAccountBranchMap = null; 
 
     public Bank(String name, String supportEmail, long supportPhone, String websiteURL,

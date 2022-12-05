@@ -10,7 +10,7 @@ import model.Transaction;
 public class SavingsAccount extends RegularAccount {
     private static float intrestRate;
     private static int minimumBalance;
-    public static int dailyLimit;
+    private static int dailyLimit;
     
     
     public SavingsAccount(long accountNo, long customerId, String customerName, 
