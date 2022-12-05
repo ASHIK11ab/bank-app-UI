@@ -179,6 +179,8 @@ CREATE TABLE deposit_account (
     recurring_date DATE NULL,
     tenure_months INT NOT NULL,
     debit_from_account_no BIGINT NULL, -- optional auto debit from account.
+  	intrest_credited_month_cnt INT DEFAULT 0,
+  	intrest_credited_date DATE,
     FOREIGN KEY (account_no) REFERENCES account (account_no) ON DELETE CASCADE,
     FOREIGN KEY (type_id) REFERENCES deposit_account_type (id),
     FOREIGN KEY (payout_account_no) REFERENCES account (account_no),
