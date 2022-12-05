@@ -51,6 +51,10 @@ public class EmployeeDAO {
         	System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "Internal error";
+        } catch(ClassCastException e) {
+        	System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "Internal error";
         } finally {
             try {
                 if(rs != null)
@@ -75,6 +79,7 @@ public class EmployeeDAO {
 	}
 	
 	
+	// Returns all employees associated with a branch.
 	public LinkedList<Employee> getAll(int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -104,15 +109,17 @@ public class EmployeeDAO {
                 email = rs.getString("email");
                 phone = rs.getLong("phone");
 				
-                // Get from cache
-				if(branchName.equals(""))
-					branchName = Factory.getBranchDAO().get(branchId).name;
+				branchName = Factory.getBranchDAO().get(branchId).name;
 					
 				employee = new Employee(id, name, password, email, phone, branchId, branchName);	
                 
                 employees.add(employee);
 			}
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "Internal error";
+        } catch(ClassCastException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "Internal error";
@@ -209,19 +216,19 @@ public class EmployeeDAO {
 	}
 	
 	
-	public boolean delete(long id, int branchId) throws SQLException {
+	public void delete(long id, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 				
 		boolean exceptionOccured = false;
 		String msg = "";
-		int rowsAffected = 0;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM employee WHERE id = ?");
 			stmt.setLong(1, id);
-			rowsAffected = stmt.executeUpdate();
+			stmt.executeUpdate();
+			
 			// update in cache if exists.
 			AppCache.getBank().getBranch(branchId).removeEmployee(id);
 		} catch(SQLException e) {
@@ -243,7 +250,5 @@ public class EmployeeDAO {
 		
         if(exceptionOccured)
         	throw new SQLException(msg);
-        else
-        	return rowsAffected == 1;
 	}
 }

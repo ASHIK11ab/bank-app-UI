@@ -150,6 +150,7 @@ public class TransactionDAO {
         LocalDate today = LocalDate.now();
 
         try {
+        	// Get transactions performed today.
             stmt1 = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND date = ? ORDER BY id DESC");            
             stmt1.setLong(1, accountNo);
             stmt1.setLong(2, accountNo);
@@ -161,14 +162,14 @@ public class TransactionDAO {
             while(rs1.next()) {
                 transaction = _loadTransactionFromResultSet(rs1);
                 
-                // Transactions are added to the begining every time, the recent transaction will be at the end of 
+                // Transactions are added to the begining every time, the most recent transaction will be at the end of 
                 // the list. In 'RegularAccountDAO' adding a transaction will add it to the begining 
                 // of the list. Ultimately the recent transaction will be at the begining of the list
                 // in 'recentTransactions' field of 'RegularAccount' class.                
                 recentTransactions.addFirst(transaction);
             }
             
-            // Load the remaining transaction (used for mini statement).
+            // Load the remaining transactions (used for mini statement).
             if(recentTransactions.size() < 10) {
             	remainingTransactionsCnt = 10 - recentTransactions.size();
             	stmt2 = conn.prepareStatement("SELECT * FROM account_transaction at LEFT JOIN transaction t ON at.transaction_id = t.id WHERE at.account_no = ? AND (t.from_account_no = ? OR t.to_account_no = ?) AND date < ? ORDER BY id DESC LIMIT 10");

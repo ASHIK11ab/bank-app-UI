@@ -160,7 +160,6 @@ public class DepositAccountDAO {
 	                openingDate = rs1.getDate("opening_date").toLocalDate();
 	                balance = rs1.getFloat("balance");
 	                rateOfIntrest = rs1.getFloat("rate_of_intrest");
-	                branchId = rs1.getInt("branch_id");
 	                payoutAccountNo = rs1.getLong("payout_account_no");
 	                debitFromAccountNo = rs1.getLong("debit_from_account_no");
 	                
@@ -173,10 +172,7 @@ public class DepositAccountDAO {
 	                	amountDeposited = rs1.getInt("deposit_amount");
 	                }
 	                
-			        if(rs1.getDate("closing_date") != null)
-			        	closingDate = rs1.getDate("closing_date").toLocalDate();
-			        else
-			        	closingDate = null;
+			        closingDate = (rs1.getDate("closing_date") != null) ? rs1.getDate("closing_date").toLocalDate() : null;
 			        
 	                stmt2.setLong(1, customerId);
 	                rs2 = stmt2.executeQuery();

@@ -6,11 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import cache.AppCache;
 import constant.AccountCategory;
 import model.account.Account;
+import model.account.RegularAccount;
 import model.card.DebitCard;
 import model.user.Customer;
 import util.Factory;
@@ -142,9 +144,10 @@ public class AccountDAO {
 		PreparedStatement stmt1 = null, stmt2 = null;
 		
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
+		RegularAccount regularAccount = null;
 		
 		Customer customer = null;
-		LinkedList<DebitCard> linkedCards = null;
+		Collection<DebitCard> linkedCards = null;
 		LocalDate today = LocalDate.now();
 		String msg = "";
 		boolean exceptionOccured = false;
@@ -158,15 +161,18 @@ public class AccountDAO {
 			
 			// category 0 - regular account, update active status to false.
 			if(category == AccountCategory.REGULAR) {
+				
+				regularAccount = (RegularAccount) account;
+				
 				stmt2 = conn.prepareStatement("UPDATE regular_account SET active = false WHERE account_no = ?");
 				stmt2.setLong(1, account.getAccountNo());
 				stmt2.executeUpdate();
+				
+				// deactivate all linked cards
+				linkedCards = regularAccount.getCards();
+				for(DebitCard card : linkedCards)
+					cardDAO.deactivateCard(conn, card.getCardNo());
 			}
-			
-			// deactivate all linked cards
-			linkedCards = cardDAO.getAll(conn, account.getAccountNo());
-			for(DebitCard card : linkedCards)
-				cardDAO.deactivateCard(conn, card.getCardNo());
 			
 			// update in cache.
 			account.setClosingDate(today);
@@ -179,6 +185,10 @@ public class AccountDAO {
 				}
 			}
 		} catch(SQLException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
+        } catch(ClassCastException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";

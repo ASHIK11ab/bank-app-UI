@@ -19,13 +19,6 @@ public class UserDAO {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		
-		User user = null;
-		Customer customer = null;
-		AdminDAO adminDAO = Factory.getAdminDAO();
-		ManagerDAO managerDAO = Factory.getManagerDAO();
-		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
-		CustomerDAO customerDAO = Factory.getCustomerDAO();
-		
 		boolean exceptionOccured = false;
 		String msg = "";
 		
@@ -49,25 +42,6 @@ public class UserDAO {
             stmt.setString(1, password);
             stmt.setLong(2, id);
             stmt.executeUpdate();
-            
-            // update in cache.
-            switch(role) {
-	            case ADMIN: user = adminDAO.get(id); break;
-	            case MANAGER: user = managerDAO.get(id, branchId); break;
-	            case EMPLOYEE: user = employeeDAO.get(id, branchId); break;
-	            case CUSTOMER: customer = customerDAO.get(id); break;
-            }
-            
-            // if user exists in cache, update.
-            if((role != Role.CUSTOMER && user != null) || (role == Role.CUSTOMER && customer != null))
-            	if(role == Role.CUSTOMER) {
-            		if(type == 0)
-            			customer.setPassword(password);
-            		else
-            			customer.setTransPassword(password);
-            	} else
-            		user.setPassword(password);
-            
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
@@ -112,7 +86,6 @@ public class UserDAO {
             stmt.setLong(4, id);
             
             stmt.executeUpdate();
-            // update in cache.
         } catch(SQLException e) {
         	System.out.println(e.getMessage());
             exceptionOccured = true;

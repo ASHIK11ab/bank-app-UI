@@ -91,19 +91,19 @@ public class CustomerDAO {
 	}
 	
 	
-	public boolean delete(long customerId) throws SQLException {
+	public void delete(long customerId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		
 		String msg = "";
 		boolean exceptionOccured = false;
-		int rowsAffected = -1;
 		
 		try {
 			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("DELETE FROM customer WHERE id = ?");
 			stmt.setLong(1, customerId);
-			rowsAffected = stmt.executeUpdate();
+			stmt.executeUpdate();
+			
 			// remove from cache if exists
 			AppCache.getBank().removeCustomer(customerId);
 		} catch(SQLException e) {
@@ -124,8 +124,6 @@ public class CustomerDAO {
 		
 		if(exceptionOccured)
 			throw new SQLException(msg);
-		else
-			return rowsAffected == 1;
 	}
 	
 	
@@ -226,7 +224,11 @@ public class CustomerDAO {
                         beneficiaryName = rs3.getString("name");
                         beneficiaryNickName = rs3.getString("nick_name");
 
-                        beneficiaryBankName = AppCache.getIntegratedBank(bankId).getName();
+                        try {
+                        	beneficiaryBankName = AppCache.getIntegratedBank(bankId).getName();
+                        } catch(NullPointerException e) {
+                        	beneficiaryBankName = "Bank removed";
+                        }
                         
                         beneficiary = new Beneficiary(beneficiaryId, beneficiaryAccountNo, beneficiaryName, beneficiaryNickName, bankId, beneficiaryBankName, beneficiaryIfsc);
                         customer.addBeneficiary(BeneficiaryType.OTHER_BANK, beneficiary);
@@ -386,7 +388,7 @@ public class CustomerDAO {
 	
 	
 	// Customer is removed only when his last account is closed.
-	// sets the remove date of customer to today and prevents from further usage of the customer account.
+	// set the remove date of customer to today to further usage.
 	public void removeCustomer(Connection conn, long customerId, long accountNo) throws SQLException {
 		PreparedStatement stmt = null;
 		

@@ -25,7 +25,7 @@ public class IntegratedBankDAO {
 		try {
             conn = Factory.getDataSource().getConnection();
             
-            // add
+            // Creation
             if(type == 0)
             	stmt = conn.prepareStatement("INSERT INTO banks (name, contact_mail, contact_phone, api_url) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             else

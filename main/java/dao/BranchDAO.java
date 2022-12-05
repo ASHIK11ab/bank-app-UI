@@ -52,6 +52,7 @@ public class BranchDAO {
             
             stmt.executeUpdate();
             
+            // Branch creation.
             if(type == 0) {
 	            rs = stmt.getGeneratedKeys();
 	
@@ -61,8 +62,7 @@ public class BranchDAO {
 	            branch = new Branch(branchId, name, address);
 	            AppCache.getBank().addBranch(branch);
             } else {
-            	branchId = id;
-            	branch = AppCache.getBranch(branchId);
+            	branch = AppCache.getBranch(id);
             	branch.setName(name);
             	branch.setAddress(address);
             }

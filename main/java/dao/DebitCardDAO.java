@@ -47,11 +47,13 @@ public class DebitCardDAO {
             stmt.executeUpdate();
             
             rs = stmt.getGeneratedKeys();
-            if(rs.next())
+            if(rs.next()) {
+            	
             	cardNo = rs.getLong("card_no");
             
-            // On creation, card is not activated and active status is false.
-            card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, false, pin, cvv, null, null);
+	            // On creation, card is not activated and active status is false by default.
+	            card = new DebitCard(cardNo, linkedAccountNo, validFromDate, expiryDate, typeId, false, pin, cvv, null, null);
+            }
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
@@ -76,8 +78,8 @@ public class DebitCardDAO {
 	
 	
 	// Returns a debit card.
-	/* Checks for mapping in cache, if exists gets the card from the linked
-	 * account object if exits.
+	/* Checks for mapping in cache, if exists returns the card from the linked
+	 * account.
 	 */
 	synchronized public DebitCard get(long cardNo) throws SQLException {
 		Connection conn = null;
@@ -102,7 +104,7 @@ public class DebitCardDAO {
 			// Mapping does not exist, load linked account from db.
 			if(props == null) {
 				conn = Factory.getDataSource().getConnection();
-				props = getCardAccountBranch(conn, cardNo);
+				props = this._getCardAccountBranch(conn, cardNo);
 				System.out.println("Card A/C Mapping does not exist, fetched props from DB");
 			} else {
 				System.out.println("Card A/C Mapping exists");
@@ -245,7 +247,7 @@ public class DebitCardDAO {
 	
 	// Internal method, returns the account number linked with an account and its branch id
 	// as a properties object.
-	private Properties getCardAccountBranch(Connection conn, long cardNo) throws SQLException {
+	private Properties _getCardAccountBranch(Connection conn, long cardNo) throws SQLException {
 		Properties props = null;
 		long accountNo = -1;
 		int branchId = -1;

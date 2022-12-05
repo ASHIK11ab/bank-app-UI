@@ -60,6 +60,10 @@ public class BeneficiaryDAO {
 			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
+        } catch(NullPointerException e) {
+			System.out.println(e.getMessage());
+            exceptionOccured = true;
+            msg = "internal error";
         } finally {
             try {
                 if(rs != null)
@@ -114,7 +118,6 @@ public class BeneficiaryDAO {
 
                 stmt.executeUpdate();
 		} catch(SQLException e) {
-			System.out.println("sql excep");
 			System.out.println(e.getMessage());
             exceptionOccured = true;
             msg = "internal error";
