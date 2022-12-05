@@ -55,7 +55,7 @@
 				
 				<div class="${ actionType != 1 ? 'hidden' : '' }">
 					<label>Select transaction type:</label>
-					<select name="transaction-type">
+					<select name="transaction-type" required>
 						<option value="-1" selected disabled hidden>select type</option>
 						<option value='${ neftId }' ${ transactionTypeId == neftId ? "selected" : "" }>
 							NEFT
@@ -69,7 +69,7 @@
 					</select>
 					
 					<label>Transfer type</label>
-					<select name="beneficiary-type">
+					<select name="beneficiary-type" required>
 						<option value="-1" hidden disabled selected>select type</option>
 						<option value='${ ownBankId }' ${ beneficiaryTypeId == ownBankId ? "selected" : "" }>Own Bank</option>
 						<option value='${ otherBankId }' ${ beneficiaryTypeId == otherBankId ? "selected" : "" }>Other Bank</option>
@@ -124,7 +124,7 @@
 					
 					<label>Enter amount:</label>
 					<input type="number" name="amount" value="${ amount }"
-						placeholder="Amount (minimum 500)" min="500" >
+						placeholder="amount to transfer">
 					
 					<label>Description (optional):</label>
 					<input type="text" name="description" 

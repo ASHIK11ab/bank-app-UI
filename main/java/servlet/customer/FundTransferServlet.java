@@ -161,10 +161,10 @@ public class FundTransferServlet extends HttpServlet {
 						}
 					}
 					
-					// Validate amount.
-					if(!isError && amount < 500) {
+					// Validate amount based on the selected transction.
+					if(!isError && !(amount >= transactionType.minAmount && amount <= transactionType.maxAmount)) {
 						isError = true;
-						msg = "Minimum transaction amount is 500 !!!";
+						msg = "Invalid amount for selected transaction !!!";
 					}
 				}
 				// End of validating step 2 input

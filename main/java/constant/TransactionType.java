@@ -1,16 +1,22 @@
 package constant;
 
 public enum TransactionType {
-	NEFT(1),
-	IMPS(2),
-	RTGS(3),
-	UPI(4),
-	ATM(5),
-	CASH(6);
+	NEFT(1, 1, 500000),
+	IMPS(2, 1, 200000),
+	RTGS(3, 200000, 1000000),
+	UPI(4, 1, 50000),
+	ATM(5, 100, 80000),
+	CASH(6, 100, 1000000);
 	
 	public final int id;
+	public final int minAmount;
+	public final int maxAmount;
 	
-	private TransactionType(int id) { this.id = id; }	
+	private TransactionType(int id, int minAmount, int maxAmount) {
+		this.id = id;
+		this.minAmount = minAmount;
+		this.maxAmount = maxAmount;
+	}	
 	
 	public static TransactionType getType(int id) {
 		switch(id) {
