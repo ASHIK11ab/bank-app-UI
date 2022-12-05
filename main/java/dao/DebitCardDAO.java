@@ -79,7 +79,7 @@ public class DebitCardDAO {
 	/* Checks for mapping in cache, if exists gets the card from the linked
 	 * account object if exits.
 	 */
-	public DebitCard get(long cardNo) throws SQLException {
+	synchronized public DebitCard get(long cardNo) throws SQLException {
 		Connection conn = null;
 		
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();

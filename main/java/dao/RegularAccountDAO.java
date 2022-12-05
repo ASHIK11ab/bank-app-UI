@@ -113,7 +113,7 @@ public class RegularAccountDAO {
 	}
 	
 	
-	public RegularAccount get(long accountNo, int branchId) throws SQLException {
+	synchronized public RegularAccount get(long accountNo, int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;

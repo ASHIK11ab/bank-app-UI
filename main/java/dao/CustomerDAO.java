@@ -129,7 +129,7 @@ public class CustomerDAO {
 	}
 	
 	
-	public Customer get(long customerId) throws SQLException {
+	synchronized public Customer get(long customerId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null, stmt2 = null, stmt3 = null, stmt4 = null, stmt5 = null;
 		ResultSet rs = null, rs2 = null, rs3 = null, rs4 = null, rs5 = null;
