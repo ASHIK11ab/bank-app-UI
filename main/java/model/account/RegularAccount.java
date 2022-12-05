@@ -1,9 +1,12 @@
 package model.account;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import model.Nominee;
@@ -12,9 +15,9 @@ import model.card.DebitCard;
 
 public abstract class RegularAccount extends Account {
     private boolean isActive;
-    private TreeSet<DebitCard> cards;
+    private SortedSet<DebitCard> cards;
     
-    private LinkedList<Transaction> recentTransactions;
+    private List<Transaction> recentTransactions;
 
 
     public abstract int initiateTransaction(float amount);
@@ -24,8 +27,8 @@ public abstract class RegularAccount extends Account {
     						LocalDate openingDate, LocalDate closingDate, int typeId, boolean activeStatus) {
 		super(accountNo, customerId, customerName, nominee, branchId, amount, openingDate, closingDate, typeId);
 		this.isActive = activeStatus;
-		this.recentTransactions = new LinkedList<Transaction>();
-		this.cards = new TreeSet<DebitCard>();
+		this.recentTransactions = Collections.synchronizedList(new LinkedList<Transaction>());
+		this.cards = Collections.synchronizedSortedSet(new TreeSet<DebitCard>());
 	}
     
     
@@ -33,8 +36,8 @@ public abstract class RegularAccount extends Account {
     	LocalDate today = LocalDate.now();
     	ListIterator<Transaction> it = null;
     	Transaction transaction = null;
-    	    	
-    	this.recentTransactions.addFirst(newTransaction);
+
+    	this.recentTransactions.add(0, newTransaction);
     	
     	// Only keep recent 10 transactions or transactions that were performed
     	// today, if limit exceedes, remove unwanted transactions from the end.
@@ -46,8 +49,7 @@ public abstract class RegularAccount extends Account {
     			if(transaction.getDate().isBefore(today))
     				it.remove();
     		}
-    	}
-    	
+    	}    	
     }
     
     
@@ -67,13 +69,12 @@ public abstract class RegularAccount extends Account {
     }
     
     
-    public TreeSet<DebitCard> getCards() {
+    public SortedSet<DebitCard> getCards() {
     	return this.cards;
     }
     
     
     public DebitCard getCard(long cardNo) {
-    	System.out.println("cards: " + this.cards);
     	DebitCard card = null;
     	
     	for(DebitCard debitCard : this.cards)
@@ -86,7 +87,7 @@ public abstract class RegularAccount extends Account {
     }
     
     
-    protected LinkedList<Transaction> getRecentTransactions() {
+    protected List<Transaction> getRecentTransactions() {
     	return this.recentTransactions;
     }
     

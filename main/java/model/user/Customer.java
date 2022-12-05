@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -13,14 +14,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import comparator.BeneficiaryComparator;
 import constant.AccountCategory;
 import constant.BeneficiaryType;
 import constant.RegularAccountType;
 import dao.RegularAccountDAO;
 import model.Address;
 import model.Beneficiary;
-import model.Transaction;
 import model.account.RegularAccount;
 import model.card.DebitCard;
 import util.Factory;
@@ -51,6 +50,8 @@ public class Customer extends User {
 
     // A/C no to branch id mapping.
     private ConcurrentHashMap<Long, Integer> depositAccounts;
+    
+    private Comparator<Beneficiary> beneficiaryComparator; 
    
 
     public Customer(long id, String name, String password, long phone,
@@ -59,9 +60,7 @@ public class Customer extends User {
                         String transPassword, Address address, LocalDate removedDate) {
 
         super(id, name, password, email, phone);
-        
-        BeneficiaryComparator beneficiaryComparator = new BeneficiaryComparator();
-        
+                
         this.age = age;
         this.gender = gender;
         this.martialStatus = martialStatus;
@@ -72,6 +71,40 @@ public class Customer extends User {
         this.transPassword = transPassword;
         this.address = address;
         this.removedDate = removedDate;
+        
+        // Anonymous implementation.
+        this.beneficiaryComparator = new Comparator<Beneficiary>() {
+        	
+        	// Beneficiaries are compared based on their names (dictionary format).
+            @Override
+            public int compare(Beneficiary base, Beneficiary target) {
+            	if(base == null || target == null)
+            		return -1;
+            	
+            	if(base.equals(target))
+            		return 0;
+            	
+            	char baseCharacter, targetCharacter;
+            	    	
+            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
+            	
+            	for(int index = 0; index < minLength; ++index) {
+            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
+            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
+            		
+            		if(baseCharacter != targetCharacter) {
+            			return baseCharacter - targetCharacter;
+            		}
+            	}
+            	
+            	// When first 'minLength' characters are same, string with lesser length
+            	// is stored first.
+            	if(base.getName().length() <= target.getName().length())
+            		return -1;
+            	else
+            		return 1;
+            }
+        };
 
         this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
         this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
@@ -191,6 +224,7 @@ public class Customer extends User {
     	return branchId;
     }
     
+    // Returns a list of active accoutn no's of the customer.
     public Properties getActiveAccounts(AccountCategory category) throws SQLException {
     	Properties activeAccounts = new Properties();
     	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
@@ -365,7 +399,7 @@ public class Customer extends User {
         
         Customer target = (Customer) obj;
         
-        return (this.getName().equals(target.getName()) && this.getEmail().equals(target.getEmail()) 
+        return (this.getId() == target.getId() && this.getName().equals(target.getName()) && this.getEmail().equals(target.getEmail()) 
         		&& this.getPhone() == target.getPhone() && this.getAge() == target.getAge() &&
         		this.getGender() == target.getGender() && this.getOccupation().equals(target.getOccupation())
         		&& this.getIncome() == target.getIncome() && this.getAdhaar() == target.getAdhaar() &&
