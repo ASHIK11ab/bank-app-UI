@@ -45,8 +45,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 	@Override
 	public void run() {
 		Connection conn = null;
-		Statement stmt1 = null;
-		PreparedStatement stmt2 = null, stmt3 = null;
+		PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null;
 		ResultSet rs1 = null, rs2 = null;
 		
 		AccountDAO accountDAO = Factory.getAccountDAO();
@@ -82,12 +81,14 @@ public class DepositIntrestCreditRunnable implements Runnable {
 					
 					try {
 						conn = Factory.getDataSource().getConnection();
-						stmt1 = conn.createStatement();
-						
+						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?)");
 						stmt2 = conn.prepareStatement("SELECT to_account_no FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
-						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ? WHERE account_no = ?");
+						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ?, intrest_credited_date = ? WHERE account_no = ?");
 						
-						rs1 = stmt1.executeQuery("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL");
+						// Prevent crediting intrest again when server is restarted on 'DEPOSIT_INTREST_CREDIT_DATE'.
+						stmt1.setDate(1, Date.valueOf(today));
+						
+						rs1 = stmt1.executeQuery();
 						
 						// Get all deposit unclosed accounts.
 						while(rs1.next()) {
@@ -101,7 +102,6 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							branchId = rs1.getInt("branch_id");
 														
 							if(typeId == DepositAccountType.RD.id) {
-								System.out.println("RD: " + accountNo);
 								stmt2.setLong(1, accountNo);
 								stmt2.setDate(2, Date.valueOf(today.withDayOfMonth(1)));
 								stmt2.setDate(3, Date.valueOf(today.withDayOfMonth(20)));
@@ -141,7 +141,8 @@ public class DepositIntrestCreditRunnable implements Runnable {
 											transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 											
 											stmt3.setInt(1, intrestCreditedMonthCnt);
-											stmt3.setLong(2, accountNo);
+											stmt3.setDate(2, Date.valueOf(today));
+											stmt3.setLong(3, accountNo);
 											stmt3.executeUpdate();
 											
 											transaction = new Transaction(transactionId, TransactionType.NEFT.id, bankAccountNo, accountNo, intrestAmount, LocalDateTime.now(), description, fromAccountBeforeBalance);
