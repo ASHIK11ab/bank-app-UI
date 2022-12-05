@@ -138,12 +138,15 @@ public class CreateEditBranchServlet extends HttpServlet {
 							temp = new Branch(branchId, name, address);
 							
 							// update in DB only when data has changed.
-							if(!branch.equals(temp))
-								synchronized (branch) {									
-									branchDAO.createUpdate(conn, name, address, (byte) 1, branch.getId());
+								synchronized (branch) {							
+									if(!branch.equals(temp)) {
+										branchDAO.createUpdate(conn, name, address, (byte) 1, branch.getId());
+						            	branch.setName(name);
+						            	branch.setAddress(address);						            	
+									}
+						            	
 								}
-							
-							res.sendRedirect(String.format("/bank-app/admin/branches/%d/view?msg=branch details updated successfully&status=success", branch.getId()));
+							res.sendRedirect(String.format("/bank-app/admin/branches/%d/view?msg=branch details updated successfully&status=success", branchId));
 							break;
 					default: 
 							isError = true;
@@ -166,6 +169,7 @@ public class CreateEditBranchServlet extends HttpServlet {
             } catch(SQLException e) { System.out.println(e.getMessage()); }
             
             if(isError || exceptionOccured) {
+            	System.out.println("in error");
             	out.println(Util.createNotification(msg, "danger"));
             	
             	// create dummy object to store user input values

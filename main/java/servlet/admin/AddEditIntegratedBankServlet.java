@@ -75,10 +75,10 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 	        				temp = new IntegratedBank(bankId, name, email, phone, apiURL);
 	        				
 	        				// only update in DB when data is changed.
-	        				if(!bank.equals(temp)) {
-	        					synchronized (bank) {									
-	        						integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
-								}
+        					synchronized (bank) {									
+        						if(!bank.equals(temp)) {
+        							integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
+        						}
 	        				}
 	        				
 	        				msg = "bank details updated successfully";
@@ -99,19 +99,13 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 		} finally {			
 			
 			if(isError || exceptionOccured) {
-				
-				// Incase of bank id invalid on edit action redirect to all integrated banks page.
-				if(type == 1 && bank == null) {
-					res.sendRedirect(String.format("/bank-app/admin/integrated-banks?msg=%s&status=danger", msg));
-				} else {				
-					out.println(Util.createNotification(msg, "danger"));
-					// create a temporary object to store user input values to prefill
-					// the form with user input.
-					temp = new IntegratedBank(bankId, name, email, phone, apiURL);
-					req.setAttribute("bank", temp);
-					req.setAttribute("type", type);
-					req.getRequestDispatcher("/jsp/admin/addEditIntegratedBank.jsp").include(req, res);
-				}
+				out.println(Util.createNotification(msg, "danger"));
+				// create a temporary object to store user input values to prefill
+				// the form with user input.
+				temp = new IntegratedBank(bankId, name, email, phone, apiURL);
+				req.setAttribute("bank", temp);
+				req.setAttribute("type", type);
+				req.getRequestDispatcher("/jsp/admin/addEditIntegratedBank.jsp").include(req, res);
 			} else {
 				res.sendRedirect(String.format("/bank-app/admin/integrated-banks/%d/view?msg=%s&status=success", bank.getId(), msg));
 			}

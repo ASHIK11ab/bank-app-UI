@@ -4,10 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Admin dashboard</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="Dashboard | Admin" />
+	</jsp:include>
 </head>
 <body>
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />

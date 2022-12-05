@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import cache.AppCache;
 import model.Address;
+import model.Bank;
 import model.Branch;
 import util.Factory;
 
@@ -29,6 +30,7 @@ public class BranchDAO {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
+		Bank bank = AppCache.getBank();
 		Branch branch = null;
 		String msg = null;
 		boolean exceptionOccured = false;
@@ -60,11 +62,7 @@ public class BranchDAO {
 	                branchId = rs.getInt(1);
 	            }
 	            branch = new Branch(branchId, name, address);
-	            AppCache.getBank().addBranch(branch);
-            } else {
-            	branch = AppCache.getBranch(id);
-            	branch.setName(name);
-            	branch.setAddress(address);
+	            bank.addBranch(branch);
             }
             
         } catch(SQLException e) {

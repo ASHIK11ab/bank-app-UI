@@ -84,11 +84,11 @@ public class BranchServlet extends HttpServlet {
 		} catch(IndexOutOfBoundsException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
-			msg = "page not found !!!";
+			msg = "internal error !!!";
 		} catch(NumberFormatException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
-			msg = "Page not found !!!";
+			msg = "internal error !!!";
 		} finally {			
 			
 			if(isError || exceptionOccured) {

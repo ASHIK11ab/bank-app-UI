@@ -138,7 +138,7 @@ public class ProfileServlet extends HttpServlet {
 		} finally {			
 			
 			if(isError || exceptionOccured) {
-				res.sendRedirect(String.format("/bank-app/login/%s", roleName));
+				res.sendRedirect(String.format("/bank-app/%s/dashboard", roleName));
 			}
 			
 			out.close();

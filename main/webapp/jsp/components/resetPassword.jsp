@@ -55,6 +55,7 @@
 					<input name="branch-id" value="${ branchId }" class="hidden" required>
 				</c:if>
 				
+				<!-- Type 0 -> login password, type 1 -> transaction password -->
 				<c:if test="${ forRole == Role.CUSTOMER }">
 					<input name="type" value="${ type }" class="hidden" required>
 				</c:if>

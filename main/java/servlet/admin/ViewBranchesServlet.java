@@ -28,6 +28,7 @@ public class ViewBranchesServlet extends HttpServlet {
 		
 		BranchDAO branchDAO = Factory.getBranchDAO();
 		Collection<Branch> branches = branchDAO.getAll();
+		
 		req.setAttribute("branches", branches);
 		req.getRequestDispatcher("/jsp/admin/branches.jsp").include(req, res);
 	}

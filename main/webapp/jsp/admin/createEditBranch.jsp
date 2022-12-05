@@ -34,7 +34,7 @@
 					<jsp:include page="/jsp/components/addressForm.jsp" />		
 				</section>
 				
-				<!-- Only display form on creation -->
+				<!-- Only display manager form on branch creation -->
 				<c:if test="${ type == 0 }">
 					<section class="manager">
 						<h3>Manager Details:</h3>

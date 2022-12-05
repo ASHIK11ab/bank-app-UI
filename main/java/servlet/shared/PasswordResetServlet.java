@@ -153,15 +153,21 @@ public class PasswordResetServlet extends HttpServlet {
 				if(forRole == Role.ADMIN) {
 					synchronized (user) {					
 						userDAO.updatePassword(id, newPassword, Role.ADMIN, (byte) 0, -1);
+						user.setPassword(newPassword);
 					}
 				} else 
 					if(forRole == Role.EMPLOYEE || forRole == Role.MANAGER) {
 						synchronized (employeeObject) {					
 							userDAO.updatePassword(id, newPassword, forRole, (byte) 0, branchId);
+							employeeObject.setPassword(newPassword);
 						}
 					} else {
 						synchronized (customer) {
 							userDAO.updatePassword(id, newPassword, Role.CUSTOMER, type, -1);
+							if(type == 0)
+								customer.setPassword(newPassword);
+							else
+								customer.setTransPassword(newPassword);
 						}
 					}
 				msg = "password updated successfully";
@@ -171,6 +177,14 @@ public class PasswordResetServlet extends HttpServlet {
 			isError = true;
 			msg = "Invalid input !!!";
 		} catch(SQLException e) {
+			isError = true;
+			msg = e.getMessage();
+		} catch(ClassCastException e) {
+			System.out.println(e.getMessage());
+			isError = true;
+			msg = e.getMessage();
+		} catch(NullPointerException e) {
+			System.out.println(e.getMessage());
 			isError = true;
 			msg = e.getMessage();
 		} finally {
