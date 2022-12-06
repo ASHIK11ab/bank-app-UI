@@ -19,6 +19,11 @@ public class Branch {
     private ConcurrentHashMap<Long, SavingsAccount> savingsAccounts;
     private ConcurrentHashMap<Long, CurrentAccount> currentAccounts;
     private ConcurrentHashMap<Long, DepositAccount> depositAccounts;
+    
+    private int employeeCnt;
+    private int savingsAccountCnt;
+    private int currentAccountCnt;
+    private int depositAccountCnt;
 
     
     // Used loading data from DB.
@@ -31,6 +36,11 @@ public class Branch {
         this.savingsAccounts = new ConcurrentHashMap<Long, SavingsAccount>();
         this.currentAccounts = new ConcurrentHashMap<Long, CurrentAccount>();
         this.depositAccounts = new ConcurrentHashMap<Long, DepositAccount>();
+        
+        this.employeeCnt = 0;
+        this.savingsAccountCnt = 0;
+        this.currentAccountCnt = 0;
+        this.depositAccountCnt = 0;
     }
 
 
@@ -58,13 +68,13 @@ public class Branch {
 	    					type = RegularAccountType.getType(accountType);
 				            switch(type) {
 					            case SAVINGS: this.savingsAccounts.put(account.getAccountNo(), (SavingsAccount) account);
-					                                      			break;
+					            			  break;
 					            case CURRENT: this.currentAccounts.put(account.getAccountNo(), (CurrentAccount) account);
-					                                      			break;
+					            			  break;
 				            }
 				            break;
 	    	case DEPOSIT: this.depositAccounts.put(account.getAccountNo(), (DepositAccount) account);
-	    	              break;
+	    				  break;
 	    	default: break;
     	}
         
@@ -147,6 +157,22 @@ public class Branch {
         return this.id;
     }
     
+    public int getEmployeeCnt() {
+    	return this.employeeCnt;
+    }
+    
+    public int getSavingsAccountCnt() {
+    	return this.savingsAccountCnt;
+    }
+    
+    public int getCurrentAccountCnt() {
+    	return this.currentAccountCnt;
+    }
+    
+    public int getDepositAccountCnt() {
+    	return this.depositAccountCnt;
+    }
+    
     // setters
     public void setName(String name) {
     	this.name = name;
@@ -155,7 +181,22 @@ public class Branch {
     public void setAddress(Address address) {
     	this.address = address;
     }
-
+    
+    public void setEmployeeCnt(int cnt) {
+    	this.employeeCnt = cnt;
+    }
+    
+    public void setSavingsAccountCnt(int cnt) {
+    	this.savingsAccountCnt = cnt;
+    }
+    
+    public void setCurrentAccountCnt(int cnt) {
+    	this.currentAccountCnt = cnt;
+    }
+    
+    public void setDepositAccountCnt(int cnt) {
+    	this.depositAccountCnt = cnt;
+    }
 
     @Override
     public boolean equals(Object obj) {

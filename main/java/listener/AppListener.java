@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -72,8 +73,9 @@ public class AppListener implements ServletContextListener {
 	
 	private void loadCache() {
         Connection conn = null;
-        PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null, stmt4 = null;
-        ResultSet rs1 = null, rs2 = null, rs3 = null, rs4 = null;
+        PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null, stmt4 = null, stmt5 = null;
+        PreparedStatement stmt6 = null, stmt7 = null;
+        ResultSet rs1 = null, rs2 = null, rs3 = null, rs4 = null, rs5 = null, rs6 = null, rs7 = null;
         
         AccountDAO accountDAO = Factory.getAccountDAO();
 
@@ -115,6 +117,10 @@ public class AppListener implements ServletContextListener {
             stmt2 = conn.prepareStatement("SELECT b.id, b.name, b.door_no, b.street, b.city, b.state, b.pincode, m.id as manager_id, m.name as manager_name, m.password as manager_password, m.phone as manager_phone, m.email as manager_email FROM branch b JOIN manager m ON b.id = m.branch_id");
             stmt3 = conn.prepareStatement("SELECT * FROM banks");
             stmt4 = conn.prepareStatement("SELECT * FROM regular_account_type");
+            
+            stmt5 = conn.prepareStatement("SELECT COUNT(*) FROM employee WHERE branch_id = ?");
+			stmt6 = conn.prepareStatement("SELECT ra.type_id, COUNT(*) FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.branch_id = ? GROUP BY ra.type_id;");
+			stmt7 = conn.prepareStatement("SELECT COUNT(*) FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.branch_id = ?");
 
             rs1 = stmt1.executeQuery();
             if(rs1.next()) {
@@ -150,9 +156,30 @@ public class AppListener implements ServletContextListener {
 	                manager = new Employee(managerId, managerName, managerPassword, managerEmail, managerPhone, branchId, branchName);
 	                branch.assignManager(manager);
 	                
+	                // Load branch stats
+	    			stmt5.setInt(1, branchId);
+	    			rs5 = stmt5.executeQuery();
+	    			if(rs5.next())
+	    				branch.setEmployeeCnt(rs5.getInt("count"));
+	    			
+	    			stmt6.setInt(1, branchId);
+	    			rs6 = stmt6.executeQuery();
+	    			while(rs6.next()) {
+	    				switch(RegularAccountType.getType(rs6.getInt("type_id"))) {
+		    				case SAVINGS: branch.setSavingsAccountCnt(rs6.getInt("count")); break;
+		    				case CURRENT: branch.setCurrentAccountCnt(rs6.getInt("count")); break;
+	    				}
+	    			}
+	    			
+	    			stmt7.setInt(1, branchId);
+	    			rs7 = stmt7.executeQuery();
+	    			if(rs7.next())
+	    				branch.setDepositAccountCnt(rs7.getInt("count"));	
+	                
 	                bank.addBranch(branch);
 	            }
-
+	            
+	            // load integrated banks
 	            rs3 = stmt3.executeQuery();
 	            while(rs3.next()) {
 	                integratedBankId = rs3.getInt("id");
@@ -198,6 +225,12 @@ public class AppListener implements ServletContextListener {
                     rs3.close();
                 if(rs4 != null)
                     rs4.close();
+                if(rs5 != null)
+                    rs5.close();
+                if(rs6 != null)
+                    rs6.close();
+                if(rs7 != null)
+                    rs7.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {
@@ -209,6 +242,12 @@ public class AppListener implements ServletContextListener {
                     stmt3.close();
                 if(stmt4 != null)
                     stmt4.close();
+                if(stmt5 != null)
+                    stmt5.close();
+                if(stmt6 != null)
+                    stmt6.close();
+                if(stmt7 != null)
+                    stmt7.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
 
             try {
