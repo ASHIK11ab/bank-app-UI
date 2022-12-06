@@ -14,6 +14,7 @@ import cache.AppCache;
 import dao.BranchDAO;
 import dao.ManagerDAO;
 import model.Address;
+import model.Bank;
 import model.Branch;
 import model.user.Employee;
 import util.Factory;
@@ -28,6 +29,7 @@ public class CreateEditBranchServlet extends HttpServlet {
 		Connection conn = null;
 		PrintWriter out = res.getWriter();
 		
+		Bank bank = AppCache.getBank();
 		Branch branch = null, temp = null;
 		Employee manager = null;
 		Address address = null;
@@ -141,8 +143,6 @@ public class CreateEditBranchServlet extends HttpServlet {
 								synchronized (branch) {							
 									if(!branch.equals(temp)) {
 										branchDAO.createUpdate(conn, name, address, (byte) 1, branch.getId());
-						            	branch.setName(name);
-						            	branch.setAddress(address);						            	
 									}
 						            	
 								}

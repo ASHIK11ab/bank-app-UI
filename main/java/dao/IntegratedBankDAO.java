@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.Collection;
 
 import cache.AppCache;
+import model.Bank;
 import model.IntegratedBank;
 import util.Factory;
 
@@ -17,6 +18,7 @@ public class IntegratedBankDAO {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
+		Bank bank = AppCache.getBank();
 		IntegratedBank integratedBank = null;
 		String msg = "";
 		int bankId = -1;
@@ -47,13 +49,22 @@ public class IntegratedBankDAO {
 
                 if(rs.next())
                     bankId = rs.getInt(1);	
+                
+                // update in cache.
+                integratedBank = new IntegratedBank(bankId, name, email, phone, apiURL);
+                AppCache.getBank().addIntegratedBank(integratedBank);
             } else {
-            	bankId = id;
+            	integratedBank = bank.getIntegratedBank(id);
+            	// Remove and add again to maintain order in treemap.
+            	bank.removeIntegratedBank(integratedBank.getId());
+            	
+            	integratedBank.setName(name);
+            	integratedBank.setEmail(email);
+            	integratedBank.setPhone(phone);
+            	integratedBank.setApiURL(apiURL);
+            	
+            	bank.addIntegratedBank(integratedBank);
             }
-            
-            // update in cache.
-            integratedBank = new IntegratedBank(bankId, name, email, phone, apiURL);
-            AppCache.getBank().addIntegratedBank(integratedBank);
         } catch(SQLException e) {
         	System.out.println(e.getMessage());
             exceptionOccured = true;

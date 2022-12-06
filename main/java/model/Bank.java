@@ -49,89 +49,86 @@ public class Bank {
         this.accountBranchId = accountBranchId;
         
         // Comparators (anonymous implementation).
-//        branchComparator = new Comparator<Integer>() {
-//        	
-//        	// Branches are compared based on their names (dictionary format).
-//            @Override
-//            public int compare(Integer key1, Integer key2) {            	
-//            	Branch base = _branches.get(key1);
-//            	Branch target = _branches.get(key2);
-//            	
-//            	if(base == null || target == null)
-//            		return -1;
-//            	
-//            	System.out.println("\nkey: " + key1 + ", " + key2);
-//            	
-//            	// When using get method of map.
-//            	if(key1 == key2) {
-//            		System.out.println("equal");
-//            		return 0;
-//            	}
-//            	
-//            	char baseCharacter, targetCharacter;
-//            	    	
-//            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
-//            	
-//            	for(int index = 0; index < minLength; ++index) {
-//            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
-//            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
-//            		
-//            		if(baseCharacter != targetCharacter) {
-//            			return baseCharacter - targetCharacter;
-//            		}
-//            	}
-//            	
-//            	// When first 'minLength' characters are same, string with lesser length
-//            	// is stored first.
-//            	if(base.getName().length() >= target.getName().length())
-//            		return 1;
-//            	else
-//            		return -1;
-//            }
-//        };
-//        
-//        integratedBankComparator = new Comparator<Integer>() {
-//        	
-//        	// Integrated banks are compared based on their names (dictionary format).
-//            @Override
-//            public int compare(Integer key1, Integer key2) {            	
-//            	IntegratedBank base = _integratedBanks.get(key1);
-//            	IntegratedBank target = _integratedBanks.get(key2);
-//            	
-//            	if(base == null || target == null)
-//            		return -1;
-//            	
-//            	// When using get method of map.
-//            	if(key1 == key2)
-//            		return 0;
-//            	
-//            	char baseCharacter, targetCharacter;
-//            	    	
-//            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
-//            	
-//            	for(int index = 0; index < minLength; ++index) {
-//            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
-//            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
-//            		
-//            		if(baseCharacter != targetCharacter) {
-//            			return baseCharacter - targetCharacter;
-//            		}
-//            	}
-//            	
-//            	// When first 'minLength' characters are same, string with lesser length
-//            	// is stored first.
-//            	if(base.getName().length() <= target.getName().length())
-//            		return -1;
-//            	else
-//            		return 1;
-//            }
-//        };
+        branchComparator = new Comparator<Integer>() {
+        	
+        	// Branches are compared based on their names (dictionary format).
+            @Override
+            public int compare(Integer key1, Integer key2) {            	
+            	Branch base = _branches.get(key1);
+            	Branch target = _branches.get(key2);
+            	
+            	if(base == null || target == null)
+            		return -1;
+            	            	
+            	// When using get method of map.
+            	if(key1 == key2) {
+            		return 0;
+            	}
+            	
+            	char baseCharacter, targetCharacter;
+            	    	
+            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
+            	
+            	for(int index = 0; index < minLength; ++index) {
+            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
+            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
+            		
+            		if(baseCharacter != targetCharacter) {
+            			return baseCharacter - targetCharacter;
+            		}
+            	}
+            	
+            	// When first 'minLength' characters are same, string with lesser length
+            	// is stored first.
+            	if(base.getName().length() >= target.getName().length())
+            		return 1;
+            	else
+            		return -1;
+            }
+        };
+        
+        integratedBankComparator = new Comparator<Integer>() {
+        	
+        	// Integrated banks are compared based on their names (dictionary format).
+            @Override
+            public int compare(Integer key1, Integer key2) {            	
+            	IntegratedBank base = _integratedBanks.get(key1);
+            	IntegratedBank target = _integratedBanks.get(key2);
+            	
+            	if(base == null || target == null)
+            		return -1;
+            	
+            	// When using get method of map.
+            	if(key1 == key2)
+            		return 0;
+            	
+            	char baseCharacter, targetCharacter;
+            	    	
+            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
+            	
+            	for(int index = 0; index < minLength; ++index) {
+            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
+            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
+            		
+            		if(baseCharacter != targetCharacter) {
+            			return baseCharacter - targetCharacter;
+            		}
+            	}
+            	
+            	// When first 'minLength' characters are same, string with lesser length
+            	// is stored first.
+            	if(base.getName().length() >= target.getName().length())
+            		return 1;
+            	else
+            		return -1;
+            }
+        };
         
         this._branches = new HashMap<Integer, Branch>();
-        this.branches = Collections.synchronizedSortedMap(new TreeMap<Integer, Branch>()); 
+        this.branches = Collections.synchronizedSortedMap(new TreeMap<Integer, Branch>(branchComparator)); 
         
         this._integratedBanks = new HashMap<Integer, IntegratedBank>();
-        this.integratedBanks = Collections.synchronizedSortedMap(new TreeMap<Integer, IntegratedBank>());
+        this.integratedBanks = Collections.synchronizedSortedMap(new TreeMap<Integer, IntegratedBank>(integratedBankComparator));
         
         this.customers = new ConcurrentHashMap<Long, Customer>();
         this.cardAccountBranchMap = new ConcurrentHashMap<Long, Properties>();
@@ -145,7 +142,6 @@ public class Bank {
 
 
     public void addBranch(Branch branch) {
-    	// Add to the interal branch map
         this._branches.put(branch.getId(), branch);
         
         // Branches are stored in sorted order by their name.
@@ -170,14 +166,14 @@ public class Bank {
     }
 
 
-    public void removeBranch(int branchId) {    	
+    public void removeBranch(int branchId) {  	
+    	this.branches.remove(branchId);
     	this._branches.remove(branchId);
-        this.branches.remove(branchId);
     }
     
     public void removeIntegratedBank(int bankId) {
+    	this.integratedBanks.remove(bankId);
     	this._integratedBanks.remove(bankId);
-        this.integratedBanks.remove(bankId);
     }
 
 

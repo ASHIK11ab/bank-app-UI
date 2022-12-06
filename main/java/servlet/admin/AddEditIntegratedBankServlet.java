@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 
 import dao.IntegratedBankDAO;
+import model.Bank;
 import model.IntegratedBank;
 import util.Factory;
 import util.Util;
@@ -22,7 +23,7 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 		IntegratedBankDAO integratedBankDAO = Factory.getIntegratedBankDAO();
 		PrintWriter out = res.getWriter();
 		
-		IntegratedBank temp, bank = null;
+		IntegratedBank temp, integratedBank = null;
 		boolean isError = false, exceptionOccured = false;
 		String name = "", email = "", apiURL = "", msg = "";
 		long phone = 0;
@@ -59,8 +60,8 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
         	// edit
         	if(type == 1) {
         		bankId = Integer.parseInt(req.getParameter("bank-id"));
-        		bank = integratedBankDAO.get(bankId);
-        		if(bank == null) {
+        		integratedBank = integratedBankDAO.get(bankId);
+        		if(integratedBank == null) {
         			isError = true;
         			msg = "Invalid bank selected !!!";
         		}
@@ -68,15 +69,15 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 			
         	if(!isError) {
         		switch(type) {
-	        		case 0: bank = integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 0, -1); 
+	        		case 0: integratedBank = integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 0, -1); 
 	        				msg = "bank created successfully";
 	        				break;
 	        		case 1: 
 	        				temp = new IntegratedBank(bankId, name, email, phone, apiURL);
 	        				
 	        				// only update in DB when data is changed.
-        					synchronized (bank) {									
-        						if(!bank.equals(temp)) {
+        					synchronized (integratedBank) {									
+        						if(!integratedBank.equals(temp)) {
         							integratedBankDAO.createUpdate(name, email, apiURL, phone, (byte) 1, bankId);
         						}
 	        				}
@@ -107,7 +108,7 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 				req.setAttribute("type", type);
 				req.getRequestDispatcher("/jsp/admin/addEditIntegratedBank.jsp").include(req, res);
 			} else {
-				res.sendRedirect(String.format("/bank-app/admin/integrated-banks/%d/view?msg=%s&status=success", bank.getId(), msg));
+				res.sendRedirect(String.format("/bank-app/admin/integrated-banks/%d/view?msg=%s&status=success", integratedBank.getId(), msg));
 			}
 			
 			out.close();

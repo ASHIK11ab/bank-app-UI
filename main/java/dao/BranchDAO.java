@@ -63,6 +63,15 @@ public class BranchDAO {
 	            }
 	            branch = new Branch(branchId, name, address);
 	            bank.addBranch(branch);
+            } else {
+            	branch = bank.getBranch(id);
+            	bank.removeBranch(branch.getId());
+            	
+            	branch.setName(name);
+            	branch.setAddress(address);
+            	
+            	// To main sorted order after update.
+            	bank.addBranch(branch);
             }
             
         } catch(SQLException e) {

@@ -38,6 +38,22 @@ public class IntegratedBank {
         return this.apiURL;
     }
     
+    public void setName(String name) {
+    	this.name = name;
+    }
+    
+    public void setEmail(String email) {
+    	this.email = email;
+    }
+    
+    public void setPhone(long phone) {
+    	this.phone = phone;
+    }
+    
+    public void setApiURL(String url) {
+    	this.apiURL = url;
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
