@@ -4,11 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-	<title>Remove employee</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/form.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="Remove Employee" />
+	</jsp:include>
 </head>
 <body>
 	<jsp:include page="/jsp/manager/components/navbar.jsp" />
@@ -16,24 +14,26 @@
 	<main class="container">
 		<section class="wrapper">
 			<h1>Remove Employee</h1>
-			
-			<c:if test="${ requestScope.values.size() > 0 }">
-				<form action="/bank-app/manager/employees/employee/remove" method="post">
+			<c:choose>
+				<c:when test="${ employees.size() > 0 }">
+					<form action="/bank-app/manager/employee/remove" method="post">
+						
+						<c:set var="values" value="${ employees }" scope="request" />
+						<jsp:include page="/jsp/components/genericDropdown.jsp">
+							<jsp:param name="labelName" value="Select Employee" />
+							<jsp:param name="name" value="id" />
+							<jsp:param name="placeholderOptionText" value="Select employee" />
+							<jsp:param name="displayId" value="${ true }" />
+						</jsp:include>
+						
+						<button>Remove employee</button>
+					</form>
+				</c:when>
 				
-					<jsp:include page="/jsp/components/genericDropdown.jsp">
-						<jsp:param name="labelName" value="Select Employee" />
-						<jsp:param name="name" value="id" />
-						<jsp:param name="placeholderOptionText" value="Select employee" />
-						<jsp:param name="displayId" value="${ true }" />
-					</jsp:include>
-					
-					<button>Remove employee</button>
-				</form>
-			</c:if>
-			
-			<c:if test="${ requestScope.values.size() == 0 }">
-				<h2>No employees in branch</h2>
-			</c:if>
+				<c:when test="${ employees.size() == 0 }">
+					<h2>No employees in branch</h2>
+				</c:when>
+			</c:choose>
 		</section>
 	</main>
 </body>

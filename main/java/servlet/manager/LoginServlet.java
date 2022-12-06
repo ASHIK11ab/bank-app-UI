@@ -40,38 +40,41 @@ public class LoginServlet extends HttpServlet {
 		Employee manager = null;
 		long id = 0;
 		int branchId;
-		String password = "";
+		String password = "", msg = "";
+		
+		boolean isError = false, exceptionOccured = false;
 				
 		try {
 			branchId = Integer.parseInt(req.getParameter("branch-id"));
 			id = Long.parseLong(req.getParameter("id"));
 			password = req.getParameter("password");
-		} catch(NumberFormatException e) {
-			req.setAttribute("error", "Invliad input for id");
-			doGet(req, res);
-			return;
-		}
-		
-		try {
+			
 			manager = managerDAO.get(id, branchId); 
+			
+	        if((manager != null) && manager.getPassword().equals(password)) {
+	        	HttpSession session = req.getSession();
+	        	session.setAttribute("id", manager.getId());
+	        	session.setAttribute("branch-id", manager.getBranchId());
+	        	// 1 hour.
+	        	session.setMaxInactiveInterval(60*60);
+	        	session.setAttribute("role", Role.MANAGER);
+	            res.sendRedirect("/bank-app/manager/dashboard");
+	        } else {
+	        	isError = true;
+	        	msg = "Invalid id or password !!!";
+	        }
+		} catch(NumberFormatException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "invalid input !!!";
 		} catch(SQLException e) {
-			res.setStatus(500);
-			out.println("<h1>Internal error</h1>");
-			out.close();
-			return;
+			exceptionOccured = true;
+			msg = e.getMessage();
+		} finally {
+			if(isError || exceptionOccured) {
+				out.println(Util.createNotification(msg, "danger"));
+				doGet(req, res);
+			}
 		}
-		
-        if((manager != null) && manager.getPassword().equals(password)) {
-        	HttpSession session = req.getSession();
-        	session.setAttribute("id", manager.getId());
-        	session.setAttribute("branch-id", manager.getBranchId());
-        	// 1 hour.
-        	session.setMaxInactiveInterval(60*60);
-        	session.setAttribute("role", Role.MANAGER);
-            res.sendRedirect("/bank-app/manager/dashboard");
-        } else {
-			out.println(Util.createNotification("Invalid id or password", "danger"));
-            doGet(req, res);
-        }
 	}
 }

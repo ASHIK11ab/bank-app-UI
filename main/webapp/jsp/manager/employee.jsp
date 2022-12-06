@@ -4,10 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>${ requestScope.employee.getName() } employee | ${ requestScope.employee.getBranchName() }</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="${ employee.getName() } | Employee" />
+	</jsp:include>
 </head>
 <body>
 	<jsp:include page="/jsp/manager/components/navbar.jsp" />
@@ -29,6 +28,12 @@
 			<section>
 				<h2 class="title">Branch details:</h2>
 				<p>Branch Name: ${ employee.getBranchName() }</p>
+			</section>
+			
+			<section>
+				<a class="button" href="/bank-app/manager/employee/${ employee.getId() }/password-reset">
+					Reset password
+				</a>
 			</section>
 		</div>
 	</main>

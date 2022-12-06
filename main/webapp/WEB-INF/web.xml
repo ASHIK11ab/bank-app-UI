@@ -307,14 +307,6 @@
 		<servlet-name>RemoveEmployeeServlet</servlet-name>
 		<servlet-class>servlet.manager.RemoveEmployeeServlet</servlet-class>
 	</servlet>
-	<servlet>
-		<servlet-name>EmployeePasswordResetServlet</servlet-name>
-		<servlet-class>servlet.manager.EmployeePasswordResetServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>ManagerLogoutServlet</servlet-name>
-		<servlet-class>servlet.manager.LogoutServlet</servlet-class>
-	</servlet>
 	<!-- End of manager servlets -->
 	
 	
@@ -423,23 +415,15 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>EmployeeServlet</servlet-name>
-		<url-pattern>/manager/employees/employee/*</url-pattern>
+		<url-pattern>/manager/employee/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>AddEmployeeServlet</servlet-name>
-		<url-pattern>/manager/employees/employee/create</url-pattern>
+		<url-pattern>/manager/employee/create</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>RemoveEmployeeServlet</servlet-name>
-		<url-pattern>/manager/employees/employee/remove</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>EmployeePasswordResetServlet</servlet-name>
-		<url-pattern>/manager/employees/employee/password-reset</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ManagerLogoutServlet</servlet-name>
-		<url-pattern>/manager/logout</url-pattern>
+		<url-pattern>/manager/employee/remove</url-pattern>
 	</servlet-mapping>
 	<!-- End of manager servlet mappings -->
 

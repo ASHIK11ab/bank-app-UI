@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
 import dao.BranchDAO;
 import dao.EmployeeDAO;
 import dao.ManagerDAO;
@@ -23,68 +24,75 @@ import util.Util;
 
 public class RemoveEmployeeServlet extends HttpServlet {
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		PrintWriter out = res.getWriter();
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
 		LinkedList<Employee> employees;
 		int branchId;
+		boolean exceptionOccured = false;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id"); 
 			employees = employeeDAO.getAll(branchId);
-			req.setAttribute("values", employees);
+			req.setAttribute("employees", employees);
 			req.getRequestDispatcher("/jsp/manager/removeEmployee.jsp").include(req, res);
-		}  catch(NumberFormatException e) {
-			res.setStatus(500);
-			out.println("<h1>Internal error</h1>");
-		} catch(ClassCastException e) {
-			res.setStatus(500);
-			out.println("<h1>Internal error</h1>");
-		}  catch(SQLException e) {
-			res.setStatus(500);
-			out.println(e.getMessage());
+		}  catch(ClassCastException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+		} catch(SQLException e) {
+			exceptionOccured = true;
 		} finally {
-			out.close();
+			if(exceptionOccured)
+				res.sendError(500);
 		}
 	}
 	
 	
-	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
 		PrintWriter out = res.getWriter();
 		
+		Branch branch = null;
 		Employee employee = null;
+		String msg = "";
 		long employeeId = -1;
 		int branchId = -1;
-		boolean isDeletionSuccessfull = false;
+		boolean exceptionOccured = false;
 		
 		try {
 			employeeId = Long.parseLong(req.getParameter("id"));
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
+			branch = AppCache.getBranch(branchId);
 			
 			employee = employeeDAO.get(employeeId, branchId);
 			
-			// Ensure that employee belongs to the branch.
 			if(employee != null) {
-				isDeletionSuccessfull = employeeDAO.delete(employeeId, branchId);
-				
-				if(isDeletionSuccessfull)
-					out.println("<div class='notification success'>" + "employee removed successfully" + "</div>");
-				else
-					out.println("<div class='notification danger'>" + "error removing employee" + "</div>");
+				synchronized (employee) {
+					employeeDAO.delete(employeeId, branchId);
+					synchronized (branch) {
+						branch.setEmployeeCnt(branch.getEmployeeCnt() - 1);
+					}
+					out.println(Util.createNotification("Employee removed successfully", "success"));
+				}
 			} else {
 				out.println(Util.createNotification("employee does not exist !!!", "danger"));
 			}
 			
-		} catch(NumberFormatException e) {
-			out.println("<div class='notification danger'>" + "invalid input" + "</div>");
 		} catch(ClassCastException e) {
-			out.println("<div class='notification danger'>" + "internal error" + "</div>");
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "internal error !!!";
+		} catch(NumberFormatException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Invalid input !!!";
 		} catch(SQLException e) {
-			out.println("<div class='notification danger'>" + e.getMessage() + "</div>");
+			exceptionOccured = true;
+			msg = e.getMessage();
 		} finally {
-            doGet(req, res);
-			out.close();
+			if(exceptionOccured)
+				out.println(Util.createNotification(msg, "danger"));
+			
+			doGet(req, res);
 		}
 	}
 }

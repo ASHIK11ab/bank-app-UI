@@ -15,25 +15,26 @@ import util.Factory;
 
 public class EmployeesServlet extends HttpServlet {
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {		
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
 		LinkedList<Employee> employees;
+		
 		int branchId;
+		boolean exceptionOccured = false;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id"); 
 			employees = employeeDAO.getAll(branchId);
 			req.setAttribute("employees", employees);
 			req.getRequestDispatcher("/jsp/manager/employees.jsp").forward(req, res);
-		}  catch(NumberFormatException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal error</h1>");
 		} catch(ClassCastException e) {
-			res.setStatus(500);
-			res.getWriter().println("<h1>Internal error</h1>");
-		}  catch(SQLException e) {
-			res.setStatus(500);
-			res.getWriter().println(e.getMessage());
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+		} catch(SQLException e) {
+			exceptionOccured = true;
+		} finally {
+			if(exceptionOccured)
+				res.sendError(500);
 		}
 	}
 }
