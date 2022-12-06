@@ -5,10 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
-import java.util.LinkedList;
-
-import org.postgresql.sspi.NTDSAPIWrapper;
+import java.util.Collection;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import cache.AppCache;
 import model.Branch;
@@ -80,12 +79,13 @@ public class EmployeeDAO {
 	
 	
 	// Returns all employees associated with a branch.
-	public LinkedList<Employee> getAll(int branchId) throws SQLException {
+	public Collection<Employee> getAll(int branchId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		LinkedList<Employee> employees = new LinkedList<Employee>();
+		Branch branch = AppCache.getBranch(branchId);
+		TreeSet<Employee> employees = new TreeSet<Employee>();
 		Employee employee = null;
 		
 		boolean exceptionOccured = false;
@@ -97,23 +97,38 @@ public class EmployeeDAO {
         String email;
 		
 		try {
+	        // Check whether all employee's accounts are cached, if so return from cache.
+//	        if(branch.getEmployeeCnt() == branch.getEmployees().size()) {
+//	        	System.out.println("Branch employees served from cache");
+//	        	return branch.getEmployees();
+//	        }
+	        	
 			conn = Factory.getDataSource().getConnection();
 			stmt = conn.prepareStatement("SELECT * FROM employee WHERE branch_id = ?");
 			stmt.setInt(1, branchId);
 			rs = stmt.executeQuery();
 			
-			while(rs.next()) {
-				id = rs.getLong("id");
-                name = rs.getString("name");
-                password = rs.getString("password");
-                email = rs.getString("email");
-                phone = rs.getLong("phone");
-				
-				branchName = Factory.getBranchDAO().get(branchId).name;
+			synchronized (branch) {	
+				while(rs.next()) {
+					id = rs.getLong("id");
+	                name = rs.getString("name");
+	                password = rs.getString("password");
+	                email = rs.getString("email");
+	                phone = rs.getLong("phone");
 					
-				employee = new Employee(id, name, password, email, phone, branchId, branchName);	
-                
-                employees.add(employee);
+					branchName = branch.getName();
+						
+	                
+					// Create object and add to cache if does not exist.
+					if(branch.getEmployee(id) == null) {
+						employee = new Employee(id, name, password, email, phone, branchId, branchName);							
+						branch.addEmployee(employee);
+					} else {
+						employee = branch.getEmployee(id);
+					}
+					
+	                employees.add(employee);
+				}
 			}
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());

@@ -1,6 +1,5 @@
 package util;
 
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -28,7 +27,7 @@ public class Factory {
 	
 	public static void init() throws Exception {
 		try {
-			Context ctx = new InitialContext();
+			InitialContext ctx = new InitialContext();
 			dataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/newbankdb");
 			
 			branchDAO = new BranchDAO();

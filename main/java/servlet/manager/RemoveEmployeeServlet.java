@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import javax.servlet.ServletException;
@@ -26,7 +27,7 @@ public class RemoveEmployeeServlet extends HttpServlet {
 	
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
-		LinkedList<Employee> employees;
+		Collection<Employee> employees;
 		int branchId;
 		boolean exceptionOccured = false;
 		
