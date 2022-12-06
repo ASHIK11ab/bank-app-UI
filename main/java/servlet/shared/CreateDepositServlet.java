@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
 import constant.AccountCategory;
 import constant.DepositAccountType;
 import constant.Role;
@@ -24,6 +25,7 @@ import dao.CustomerDAO;
 import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Branch;
 import model.Transaction;
 import model.account.DepositAccount;
 import model.account.RegularAccount;
@@ -83,6 +85,7 @@ public class CreateDepositServlet extends HttpServlet {
 		Transaction transaction = null;
 		RegularAccount debitFromAccount = null, payoutAccount = null;
 		DepositAccount account = null;
+		Branch branch = null;
 		
 		LocalDate today = LocalDate.now();
 		boolean isError = false, exceptionOccured = false, isSufficientBalance = false;
@@ -105,6 +108,8 @@ public class CreateDepositServlet extends HttpServlet {
 				branchId = Integer.parseInt(req.getParameter("branch"));
 			}
 			
+			branch = AppCache.getBranch(branchId);
+			
 			actionType = Integer.parseInt(req.getParameter("action-type"));
 			depositType = Integer.parseInt(req.getParameter("deposit-type"));
 			debitFromAccountNo = Long.parseLong(req.getParameter("debit-from-account-no"));
@@ -114,6 +119,11 @@ public class CreateDepositServlet extends HttpServlet {
 			if(DepositAccountType.getType(depositType) == null) {
 				isError = true;
 				msg = "Invalid deposit type";
+			}
+			
+			if(!isError && branch == null) {
+				isError = true;
+				msg = "Invalid branch id !!!";
 			}
 			
 			if(actionType != 0 && actionType != 1) {
@@ -148,7 +158,7 @@ public class CreateDepositServlet extends HttpServlet {
 				msg = "Mimimum amount is 1000 !!!";
 			}
 			
-			if(!isError && (tenureMonths < 2 || tenureMonths > 20)) {
+			if(!isError && !(tenureMonths >= 2 && tenureMonths <= 20)) {
 				isError = true;
 				msg = "Tenure months should be between 2 to 20 !!!";
 			}
@@ -159,7 +169,7 @@ public class CreateDepositServlet extends HttpServlet {
 				debitFromAccountBranchId = accountDAO.getBranchId(conn, debitFromAccountNo);
 				debitFromAccount = regularAccountDAO.get(debitFromAccountNo, debitFromAccountBranchId);
 				
-				if(debitFromAccount != null && debitFromAccount.getIsActive() && !debitFromAccount.isClosed()) {
+				if(debitFromAccount != null && debitFromAccount.getIsActive()) {
 					if(debitFromAccountNo == payoutAccountNo)
 						payoutAccount = debitFromAccount;
 					else {
@@ -167,8 +177,7 @@ public class CreateDepositServlet extends HttpServlet {
 						payoutAccountBranchId = accountDAO.getBranchId(conn, payoutAccountNo);
 						payoutAccount = regularAccountDAO.get(payoutAccountNo, payoutAccountBranchId);
 						
-						if(payoutAccount == null || !payoutAccount.getIsActive() || payoutAccount.isClosed()
-								|| payoutAccount.getCustomerId() != debitFromAccount.getCustomerId()) {
+						if(payoutAccount == null || !payoutAccount.getIsActive() || payoutAccount.isClosed()) {
 							isError = true;
 							msg = "Invalid payout account details !!!";
 						}
@@ -182,7 +191,7 @@ public class CreateDepositServlet extends HttpServlet {
 				if(!isError && role == Role.CUSTOMER && 
 						(debitFromAccount.getCustomerId() != customerId || payoutAccount.getCustomerId() != customerId)) {
 					isError = true;
-					msg = "Selected accounts does not exist !!";
+					msg = "Account(s) does not exist !!";
 				}
 			}
 			
@@ -229,56 +238,49 @@ public class CreateDepositServlet extends HttpServlet {
 				
 				} else {
 					synchronized (debitFromAccount) {
-						/* Possibility that customer can manually set the input field to
-						 * a closed or inactive debit from account.
-						 */
-						if(!debitFromAccount.getIsActive() || debitFromAccount.isClosed()) {
-							isError = true;
-							msg = "Error debit from account !!!";
-						}
-						
-						if(!isError) {
-							
-							stmt = conn.prepareStatement("SELECT balance FROM account WHERE account_no = ?");
+						stmt = conn.prepareStatement("SELECT balance FROM account WHERE account_no = ?");
 				            
-							stmt.setLong(1, debitFromAccountNo);
-				            rs = stmt.executeQuery();
-			
-				            if(rs.next()) {
-				                balance = rs.getFloat("balance");
-				                if(balance >= amount)
-				                    isSufficientBalance = true;
-				            }
-		            
-				            if(isSufficientBalance) {
-				            	// Deduct amount from debit from account.
-				            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
-				            	
-				            	// create deposit account
-				            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
-				            	
-				            	// update debit from account amount in cache.
-				            	debitFromAccount.deductAmount(amount);
-				            	
-				            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
-				            	
-				            	transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
-				            	
-				            	// Add transaction record to cached debit from account.
-				            	transaction = new Transaction(transactionId, TransactionType.NEFT.id, debitFromAccountNo, account.getAccountNo(), amount, LocalDateTime.now(), description, beforeBalance);
-				            	debitFromAccount.addTransaction(transaction);
-				            	
-				            	req.setAttribute("account", account);
-				            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").forward(req, res);
-				            } else {
-				            	isError = true;
-				            	msg = "Insufficient balance in debit from account !!!";
-				            }
-						}
-						// End of error check block.
+						stmt.setLong(1, debitFromAccountNo);
+			            rs = stmt.executeQuery();
+		
+			            if(rs.next()) {
+			                balance = rs.getFloat("balance");
+			                if(balance >= amount)
+			                    isSufficientBalance = true;
+			            }
+	            
+			            if(isSufficientBalance) {
+			            	// Deduct amount from debit from account.
+			            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
+			            	
+			            	// create deposit account
+			            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
+			            	
+			            	// update debit from account amount in cache.
+			            	debitFromAccount.deductAmount(amount);
+			            	
+			            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
+			            	
+			            	transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
+			            	
+			            	// Add transaction record to cached debit from account.
+			            	transaction = new Transaction(transactionId, TransactionType.NEFT.id, debitFromAccountNo, account.getAccountNo(), amount, LocalDateTime.now(), description, beforeBalance);
+			            	debitFromAccount.addTransaction(transaction);
+			            	
+			            	req.setAttribute("account", account);
+			            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").forward(req, res);
+			            } else {
+			            	isError = true;
+			            	msg = "Insufficient balance in debit from account !!!";
+			            }
 					}
 					// End of synchronised block
 				}
+				
+				if(!isError)
+	        		synchronized (branch) {
+	        			branch.setDepositAccountCnt(branch.getDepositAccountCnt() + 1);									
+					}
 			}
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());

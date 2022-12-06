@@ -24,6 +24,7 @@ import dao.DepositAccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.Bank;
+import model.Branch;
 import model.Transaction;
 import model.account.DepositAccount;
 import model.account.RegularAccount;
@@ -49,6 +50,7 @@ public class CloseDepositServlet extends HttpServlet {
 		Transaction transaction = null;
 		LocalDateTime dateTime = null;
 		
+		Branch branch = null;
 		Bank bank = AppCache.getBank();
 		
 		Role role = null;
@@ -92,6 +94,14 @@ public class CloseDepositServlet extends HttpServlet {
 				if(account == null || account.isClosed()) {
 					isError = true;
 					msg = "Account does not exist !!!";
+				}
+				
+				if(!isError) {
+					branch = AppCache.getBranch(branchId);
+					if(branch == null) {
+						isError = true;
+						msg = "Invalid branch selected !!!";
+					}
 				}
         	
 			}
@@ -172,6 +182,10 @@ public class CloseDepositServlet extends HttpServlet {
 						accountDAO.closeAccount(conn, account, AccountCategory.DEPOSIT);
 					}
 					// End of payout account synchronized block.
+					
+					synchronized (branch) {
+	        			branch.setDepositAccountCnt(branch.getDepositAccountCnt() - 1);									
+					}
 				}
 			}
 		} catch(ClassCastException e) {

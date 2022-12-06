@@ -33,22 +33,24 @@
 							</c:when>
 							
 							<c:when test="${ role == Role.CUSTOMER }">
-								<c:if test="${ customerDeposits.size() > 0 }">
-									<label>Select Deposit:</label>
-									<select name="account-no">
-										<option value="-1" selected disabled hidden>select account</option>
-										<c:forEach items="${ requestScope.customerDeposits }" var="accountNo">
-											<option value="${ accountNo }">
-												${ accountNo }
-											</option>
-										</c:forEach>
-									</select>
-								</c:if>
-								
-								<c:if test="${ customerDeposits.size() == 0 }">
-									<h1>No deposits</h1>
-									<a class="button" href="/bank-app/customer/deposit/create">Create Deposit</a>
-								</c:if>
+								<c:choose>
+									<c:when test="${ customerDeposits.size() > 0 }">
+										<label>Select Deposit:</label>
+										<select name="account-no" required>
+											<option value="-1" selected disabled hidden>select account</option>
+											<c:forEach items="${ requestScope.customerDeposits }" var="accountNo">
+												<option value="${ accountNo }">
+													${ accountNo }
+												</option>
+											</c:forEach>
+										</select>
+									</c:when>
+									
+									<c:when test="${ customerDeposits.size() == 0 }">
+										<h1>No deposits</h1>
+										<a class="button" href="/bank-app/customer/deposit/create">Create Deposit</a>
+									</c:when>
+								</c:choose>
 							</c:when>
 							
 						</c:choose>
