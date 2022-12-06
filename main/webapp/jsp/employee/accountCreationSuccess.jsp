@@ -5,20 +5,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Account Created successfully</title>
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/components/navbar.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/global.css">
-	<link rel="stylesheet" href="http://localhost:8080/bank-app/css/form.css">
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="Account created successfully" />
+	</jsp:include>
 </head>
 <body>
 	<jsp:include page="/jsp/employee/components/navbar.jsp" />
 	
 	<main class="container">
 		<div class="wrapper">
-			<c:set var="account" value="${ requestScope.account }" />
 			<h1 style="color: green">Account Creation Successfull</h1>
-
+			
+			<!-- Renders using account object in request -->
 			<jsp:include page="/jsp/components/account.jsp" />
 			
 			<h2>Card Details:</h2>

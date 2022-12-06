@@ -79,14 +79,9 @@ public class RegularAccountDAO {
 	        
 	        account.addDebitCard(card);
 	        
-			// update in cache if exists.
-			customer = AppCache.getBank().getCustomer(customerId);
-			
-			if(customer != null) {
-				synchronized (customer) {
-					customer.addAccountBranchMapping(AccountCategory.REGULAR, accountType.id, generatedAccountNo, branchId);
-				}
-			}
+			// update in cache.
+			customer = Factory.getCustomerDAO().get(customerId);
+			customer.addAccountBranchMapping(AccountCategory.REGULAR, accountType.id, generatedAccountNo, branchId);
 	        
 		} catch(SQLException e) {
 			System.out.println(e.getMessage());

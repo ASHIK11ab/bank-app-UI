@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,10 +15,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import cache.AppCache;
 import constant.AccountCategory;
+import constant.RegularAccountType;
 import constant.TransactionType;
 import dao.AccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Branch;
+import model.Transaction;
 import model.account.RegularAccount;
 import util.Factory;
 import util.Util;
@@ -35,17 +39,21 @@ public class CloseAccountServlet extends HttpServlet {
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		AccountDAO accountDAO = Factory.getAccountDAO();
 		
+		Branch branch = null;
 		RegularAccount account = null;
+		Transaction transaction = null;
 		
 		String msg = "";
 		boolean exceptionOccured = false, isError = false, requireConfirmation = false;
-		long accountNo = -1, customerId = -1;
+		long accountNo = -1, customerId = -1, transactionId;
 		float beforeBalance = 0;
 		int branchId, noOfAccounts = -1;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			accountNo = Long.parseLong(req.getParameter("account-no"));
+			
+			branch = AppCache.getBranch(branchId);
 			
 			if(Util.getNoOfDigits(accountNo) != 11 ) {
 				isError = true;
@@ -95,8 +103,19 @@ public class CloseAccountServlet extends HttpServlet {
 	                    	// If account has balance, credit balance as cash to user, create a transaction record.
 	                    	if(account.getBalance() > 0) {
 	                    		beforeBalance = accountDAO.updateBalance(conn, accountNo, 0, account.getBalance());
-	                    		transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+	                    		transactionId = transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+	                    		transaction = new Transaction(transactionId, TransactionType.CASH.id, account.getAccountNo(), -1, account.getBalance(), LocalDateTime.now(), ("Closing of A/C: " + account.getAccountNo()), beforeBalance);
+	                    		
 	                    		account.deductAmount(beforeBalance);
+	                    		account.addTransaction(transaction);
+	                    		
+	                    		// update stats.
+			            		synchronized (branch) {
+			            			switch(RegularAccountType.getType(account.getTypeId())) {
+				            			case SAVINGS: branch.setSavingsAccountCnt(branch.getSavingsAccountCnt() - 1); break;
+				            			case CURRENT: branch.setCurrentAccountCnt(branch.getCurrentAccountCnt() - 1); break;
+			            			}									
+								}
 	                    	}
 	                    	
 	                    	// close account.

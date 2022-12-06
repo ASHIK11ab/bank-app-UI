@@ -16,11 +16,19 @@ public enum RegularAccountType {
 		}
 	}
 	
+	public static int getId(RegularAccountType type) {
+		switch(type) {
+			case SAVINGS: return SAVINGS.id;
+			case CURRENT: return CURRENT.id;
+			default: return -1;
+		}
+	}
+	
 	public static String getName(int id) {
 		switch(id) {
-		case 1: return SAVINGS.toString();
-		case 2: return CURRENT.toString();
-		default: return "";
-	}
+			case 1: return SAVINGS.toString();
+			case 2: return CURRENT.toString();
+			default: return "";
+		}
 	}
 }

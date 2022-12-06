@@ -93,19 +93,19 @@ public class AccountTransactionHistoryServlet extends HttpServlet {
 	        
 	        	if(account != null)
 	        		isAccountExists = true;
-	        }
 	        	
-			if(isAccountExists) {
-				transactions = transactionDAO.getAll(accountNo, fromDate, toDate);
-				req.setAttribute("actionType", 1);
-				req.setAttribute("account", account);
-				req.setAttribute("accountCategory", accountCategory);
-				req.setAttribute("transactions", transactions);
-				req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").forward(req, res);
-			} else {
-				isError = true;
-				msg = "Account not found !!!";
-			}
+				if(isAccountExists) {
+					transactions = transactionDAO.getAll(accountNo, fromDate, toDate);
+					req.setAttribute("actionType", 1);
+					req.setAttribute("account", account);
+					req.setAttribute("accountCategory", accountCategory);
+					req.setAttribute("transactions", transactions);
+					req.getRequestDispatcher("/jsp/components/accountTransactionHistory.jsp").forward(req, res);
+				} else {
+					isError = true;
+					msg = "Account not found !!!";
+				}
+	        }
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;

@@ -1,8 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="constant.RegularAccountType" %>
 
-<c:set var="account" value="${ requestScope.account }" />
-
 <section>
 	<c:if test="${ account.isClosed() }">
 		<h2 style="color: red">Account closed</h2>

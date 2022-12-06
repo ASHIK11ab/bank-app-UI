@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import constant.DebitCardType;
+import constant.RegularAccountType;
+import model.card.DebitCard;
 import util.Util;
 
 public class InitiateAccountCreationServlet extends HttpServlet {
@@ -27,16 +30,29 @@ public class InitiateAccountCreationServlet extends HttpServlet {
         	accountType = Integer.parseInt(req.getParameter("account-type"));
         	cardType = Integer.parseInt(req.getParameter("card-type"));
         	
-        	// Pass the data to next page.
-			req.setAttribute("accountType", accountType);
-			req.setAttribute("cardType", cardType);
+        	if(RegularAccountType.getType(accountType) == null) {
+        		isError = true;
+        		msg = "Invalid account selected !!!";
+        	}
         	
-        	switch(customerType) {
-        		case 0: req.getRequestDispatcher("/jsp/employee/createCustomer.jsp").forward(req, res); break;
-        		case 1: req.getRequestDispatcher("/jsp/employee/createAccount.jsp").forward(req, res); break;
-        		default:
-        			isError = true;
-        			msg = "invalid customer type !!!";
+        	if(!isError && DebitCardType.getType((byte) cardType) == null) {
+        		isError = true;
+        		msg = "Invalid card selected !!!";
+        	}
+        	
+        	if(!isError) {
+	        	// Pass the data to next page.
+				req.setAttribute("accountType", accountType);
+				req.setAttribute("cardType", cardType);
+	        	
+	        	switch(customerType) {
+	        		case 0: req.getRequestDispatcher("/jsp/employee/createCustomer.jsp").forward(req, res); break;
+	        		case 1: req.setAttribute("actionType", 0);
+	        				req.getRequestDispatcher("/jsp/employee/createAccount.jsp").forward(req, res); break;
+	        		default:
+	        			isError = true;
+	        			msg = "invalid customer type !!!";
+	        	}
         	}
         	
 		} catch(NumberFormatException e) {

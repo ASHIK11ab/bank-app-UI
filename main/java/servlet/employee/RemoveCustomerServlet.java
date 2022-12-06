@@ -10,13 +10,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cache.AppCache;
 import constant.AccountCategory;
 import constant.DepositAccountType;
+import constant.RegularAccountType;
 import constant.TransactionType;
 import dao.AccountDAO;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Branch;
 import model.account.RegularAccount;
 import model.user.Customer;
 import util.Factory;
@@ -37,12 +40,15 @@ public class RemoveCustomerServlet extends HttpServlet {
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		
+		Branch branch = null;
 		Customer customer = null;
 		RegularAccount account = null;
 		
 		try {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			accountNo = Long.parseLong(req.getParameter("account-no"));
+			
+			branch = AppCache.getBranch(branchId);
 			
 			if(Util.getNoOfDigits(accountNo) != 11 ) {
 				isError = true;
@@ -75,6 +81,14 @@ public class RemoveCustomerServlet extends HttpServlet {
                     	}
                     	accountDAO.closeAccount(conn, account, AccountCategory.REGULAR);
 						customerDAO.removeCustomer(conn, customer.getId(), accountNo);
+						
+                		// update stats.
+	            		synchronized (branch) {
+	            			switch(RegularAccountType.getType(account.getTypeId())) {
+		            			case SAVINGS: branch.setSavingsAccountCnt(branch.getSavingsAccountCnt() - 1); break;
+		            			case CURRENT: branch.setCurrentAccountCnt(branch.getCurrentAccountCnt() - 1); break;
+	            			}									
+						}
 					}
 				}
 			}

@@ -32,7 +32,6 @@ public class AccountServlet extends HttpServlet {
 		
 		RegularAccount account = null;
 		Customer customer = null;
-		LinkedList<Transaction> transactions = null;
 		
 		Role role = null;
 		boolean isError = false, exceptionOccured = false, pageFound = true, isAccessGranted = false;
@@ -61,7 +60,7 @@ public class AccountServlet extends HttpServlet {
 				
 				// Set customer's account in request for displaying accounts as a dropdown.
 				if(role == Role.CUSTOMER)
-					setCustomerAccountsInRequest(req, customer);
+					_setCustomerAccountsInRequest(req, customer);
 				
 				req.setAttribute("actionType", 0);
 				req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
@@ -70,7 +69,6 @@ public class AccountServlet extends HttpServlet {
 			
 			path = path.substring(1);
 			result = path.split("/");
-			
 			
 			accountNo = Long.parseLong(result[0]);
 			action = result[1];
@@ -173,7 +171,7 @@ public class AccountServlet extends HttpServlet {
 				out.println(Util.createNotification(msg, "danger"));
 				
 				if(role == Role.CUSTOMER)
-					setCustomerAccountsInRequest(req, customer);
+					_setCustomerAccountsInRequest(req, customer);
 				
 				req.setAttribute("actionType", 0);
 				req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
@@ -217,7 +215,7 @@ public class AccountServlet extends HttpServlet {
 	
 	// Internally used method, since customer accounts are set at multiple places 
 	// in the servlet.
-	private void setCustomerAccountsInRequest(HttpServletRequest req, Customer customer) {
+	private void _setCustomerAccountsInRequest(HttpServletRequest req, Customer customer) {
 		Collection<Long> savingsAccounts = customer.getSavingsAccounts();
 		long currentAccount = customer.getCurrentAccount();
 		
