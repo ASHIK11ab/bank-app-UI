@@ -24,7 +24,7 @@
 					<c:forEach items="${ employees }" var="employee" varStatus="loop">
 						<div class="item">
 							<a href="/bank-app/manager/employee/${ employee.getId() }/view">
-								${ loop.index + 1 }. ${ employee.getName() }
+								${ loop.index + 1 }) (${ employee.getId() }) ${ employee.getName() }
 							</a>				
 						</div>
 					</c:forEach>
