@@ -204,8 +204,7 @@ public class AccountServlet extends HttpServlet {
 			
 			if(isError || exceptionOccured) {
 				out.println(Util.createNotification(errorMsg, "danger"));
-				req.setAttribute("actionType", 0);
-				req.getRequestDispatcher("/jsp/components/viewAccount.jsp").include(req, res);
+				res.sendRedirect(String.format("/bank-app/%s/account?msg=%s&status=danger", userType, errorMsg));
 			}
 			
 			out.close();

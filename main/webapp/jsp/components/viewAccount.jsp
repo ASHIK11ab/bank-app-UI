@@ -35,7 +35,7 @@
 							</c:when>
 							
 							<c:when test="${ role == Role.CUSTOMER }">
-								<select name="account-no" id="account-no-input">
+								<select name="account-no" id="account-no-input" required>
 									<option value="-1" selected disabled hidden>select account</option>
 									<c:forEach items="${ savingsAccounts }" var="accountNo">
 										<option value="${ accountNo }">

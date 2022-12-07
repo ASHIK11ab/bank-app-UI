@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -172,11 +173,13 @@ public class Customer extends User {
 
     // Removes a beneficiary from cache.
     public void removeBeneficiary(BeneficiaryType type, long beneficiaryId) {
-    	SortedSet<Beneficiary> beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
-        
-    	Beneficiary beneficiary = this.getBeneficiary(type, beneficiaryId);
-        
-    	beneficiaries.remove(beneficiary);
+    	SortedSet<Beneficiary> beneficiaries;    	
+    	beneficiaries = (type == BeneficiaryType.OWN_BANK) ? this.ownBankBeneficiaries : this.otherBankBeneficiaries;
+    
+    	Iterator<Beneficiary> it = beneficiaries.iterator();
+    	while(it.hasNext())
+    		if(it.next().getId() == beneficiaryId)
+    			it.remove();
     }
     
     
@@ -229,7 +232,15 @@ public class Customer extends User {
     	Properties activeAccounts = new Properties();
     	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
     	RegularAccount account = null;
-    	LinkedList<Long> activeSavingsAccounts = new LinkedList<Long>();
+    	
+    	TreeSet<Long> activeSavingsAccounts = new TreeSet<Long>(new Comparator<Long>() {
+    		@Override
+    		public int compare(Long element1, Long element2) {
+    			if(element1 == element2)
+    				return 0;
+    			return (element1 < element2) ? -1 : 1;
+    		}
+    	});
     	
     	if(category == AccountCategory.REGULAR) {
     		
