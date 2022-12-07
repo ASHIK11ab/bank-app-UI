@@ -30,6 +30,7 @@ public class CustomerServlet extends HttpServlet {
 		long customerId;
 		
 		if(path == null || path.equals("/")) {
+			req.setAttribute("actionType", 0);
 			req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").forward(req, res);
 			return;
 		}
@@ -54,7 +55,9 @@ public class CustomerServlet extends HttpServlet {
 					out.println(Util.createNotification(queryMsg, status));
 				
 				switch(action) {
-					case "view": req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res); break;
+					case "view":
+								req.setAttribute("actionType", 1);
+								req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res); break;
 					case "update": req.getRequestDispatcher("/jsp/components/updateCustomer.jsp").include(req, res); break;
 					case "password-reset": 
 											req.setAttribute("id", customerId);
@@ -86,7 +89,7 @@ public class CustomerServlet extends HttpServlet {
 			
 			if(isError || exceptionOccured) {
 				out.println(Util.createNotification(msg, "danger"));
-				req.setAttribute("customer", null);
+				req.setAttribute("actionType", 0);
 				req.getRequestDispatcher("/jsp/employee/viewCustomer.jsp").include(req, res);
 				out.close();
 			}

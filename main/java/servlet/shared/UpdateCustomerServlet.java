@@ -72,52 +72,55 @@ public class UpdateCustomerServlet extends HttpServlet {
         		msg = "Invalid customer details !!!";
         	}
         	
+        	
         	if(!isError) {
-        		if(role == Role.CUSTOMER) {
-        			adhaar = customer.getAdhaar();
-        			pan = customer.getPan();
-        		} else {
-        			// Only employee can update customer ADHAAR and PAN.
-                	adhaar = Long.parseLong(req.getParameter("adhaar"));
-                	pan = req.getParameter("pan");
-                	
-	            	if(!isError && Util.getNoOfDigits(adhaar) != 12) {
+        		synchronized (customer) {
+	        		if(role == Role.CUSTOMER) {
+	        			adhaar = customer.getAdhaar();
+	        			pan = customer.getPan();
+	        		} else {
+	        			// Only employee can update customer ADHAAR and PAN.
+	                	adhaar = Long.parseLong(req.getParameter("adhaar"));
+	                	pan = req.getParameter("pan");
+	                	
+		            	if(!isError && Util.getNoOfDigits(adhaar) != 12) {
+		    				isError = true;
+		            		msg = "Invalid adhaar number";
+		            	}
+		            	
+		            	if(!isError && pan.length() != 10) {
+		    				isError = true;
+		            		msg = "Invalid PAN number"; 		
+		            	}
+	        		}
+	        		
+	            	if(!isError && Util.getNoOfDigits(phone) != 10) {
 	    				isError = true;
-	            		msg = "Invalid adhaar number";
+	            		msg = "Invalid phone number";
 	            	}
 	            	
-	            	if(!isError && pan.length() != 10) {
+	            	if(!isError && Util.getNoOfDigits(pincode) != 6 ) {
 	    				isError = true;
-	            		msg = "Invalid PAN number"; 		
+	            		msg = "Invalid pincode";	
+	            	}
+	            	
+	                tempCustomer = new Customer(customerId, name, "", phone, email, age,
+	                        gender, martialStatus, occupation, income, adhaar, pan, 
+	                        "", address, null);
+	        		
+	            	if(!isError) {
+	    	            
+	    	            if(!customer.equals(tempCustomer)) {
+	    	        		// only perform update when values are changed.
+	    		        	customerDAO.update(customerId, name, phone, email, age, gender, 
+	    		        									martialStatus, occupation, income, adhaar, 
+	    		        									pan, address);	 
+	    	            }
+	    	            
+	    	        	msg = "customer details updated successfully";
 	            	}
         		}
-        	}
-        	
-        	if(!isError && Util.getNoOfDigits(phone) != 10) {
-				isError = true;
-        		msg = "Invalid phone number";
-        	}
-        	
-        	if(!isError && Util.getNoOfDigits(pincode) != 6 ) {
-				isError = true;
-        		msg = "Invalid pincode";	
-        	}
-        	
-            tempCustomer = new Customer(customerId, name, "", phone, email, age,
-                    gender, martialStatus, occupation, income, adhaar, pan, 
-                    "", address, null);
-        	
-        	// Create new customer.
-        	if(!isError) {
-	            
-	            if(!customer.equals(tempCustomer)) {
-	        		// only perform update when values are changed.
-		        	customerDAO.update(customerId, name, phone, email, age, gender, 
-		        									martialStatus, occupation, income, adhaar, 
-		        									pan, address);	 
-	            }
-	            
-	        	msg = "customer details updated successfully";
+        		// End of synchronized block
         	}
         } catch(ClassCastException e) {
         	System.out.println(e.getMessage());

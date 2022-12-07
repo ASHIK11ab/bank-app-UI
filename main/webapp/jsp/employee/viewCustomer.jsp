@@ -4,9 +4,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-		<jsp:include page="/jsp/components/htmlHead.jsp">
-			<jsp:param name="title" value="View Customer" />
-		</jsp:include>
+	<jsp:include page="/jsp/components/htmlHead.jsp">
+		<jsp:param name="title" value="View Customer" />
+	</jsp:include>
 </head>
 <body>
 	<jsp:include page="/jsp/employee/components/navbar.jsp" />
@@ -15,7 +15,7 @@
 		<div class="wrapper">
 		
 			<c:choose>
-				<c:when test="${ customer == null }">
+				<c:when test="${ actionType == 0 }">
 					<h1>View Customer:</h1>
 					<form action="/bank-app/employee/customer/" method="post">
 						<label>Customer Id:</label>
@@ -24,7 +24,7 @@
 					</form>
 				</c:when>
 	
-				<c:when test="${ customer != null }">
+				<c:when test="${ actionType == 1 }">
 					<c:if test="${ customer.isRemoved() }">
 						<h1 style="color: red">Customer removed</h1>
 					</c:if>
