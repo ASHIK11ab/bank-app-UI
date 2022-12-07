@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"
 	import="constant.TransactionType"    
+	import = "util.Util"  
 %>
 <!DOCTYPE html>
 <html>
@@ -23,7 +24,7 @@
 				<p>To A/C: ${ transaction.getToAccountNo() }</p>
 				<p>Amount: ${ transaction.getAmount() }</p>
 				<p>Date: ${ transaction.getDate() }</p>
-				<p>Time: ${ transaction.getTime() }</p>
+				<p>Time: ${ Util.getFormattedTime(transaction.getTime()) }</p>
 				<p>Description: ${ transaction.getDescription() }</p>				
 			</div>
 		</div>

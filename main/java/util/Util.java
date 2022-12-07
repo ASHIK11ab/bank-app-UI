@@ -1,5 +1,7 @@
 package util;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 public class Util {
@@ -55,5 +57,11 @@ public class Util {
     	html += msg;
     	html += "</div>";
     	return html;
+    }
+    
+    
+    public static String getFormattedTime(LocalTime time) {
+    	DateTimeFormatter fmt = DateTimeFormatter.ofPattern("hh:mm a");
+    	return time.format(fmt);
     }
 }
