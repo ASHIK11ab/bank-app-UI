@@ -5,18 +5,13 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.Properties;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.jasper.tagplugins.jstl.core.If;
 
 import constant.AccountCategory;
 import constant.BeneficiaryType;
@@ -74,7 +69,7 @@ public class FundTransferServlet extends HttpServlet {
 			transactionPassword = req.getParameter("transaction-password");
 			
 			// Validate input data
-			if(actionType != 0 && actionType != 1 && actionType != 2 && actionType != 3) {
+			if(!(actionType >= 0 && actionType <= 3)) {
 				isError = true;
 				msg = "Invalid action !!!";
 				out.println(Util.createNotification(msg, "danger"));
@@ -132,11 +127,11 @@ public class FundTransferServlet extends HttpServlet {
 				
 				// Validate step 2 input.
 				if(!isError && actionType >= 2) {
-					amount = Float.parseFloat(req.getParameter("amount"));
-					selectedBeneficiaryId = Long.parseLong(req.getParameter("selected-beneficiary"));
-					selectedAccountNo = Long.parseLong(req.getParameter("selected-account"));
+					amount = Float.parseFloat(req.getParameter("amount").strip());
+					selectedBeneficiaryId = Long.parseLong(req.getParameter("selected-beneficiary").strip());
+					selectedAccountNo = Long.parseLong(req.getParameter("selected-account").strip());
 					description = req.getParameter("description").strip();
-					
+										
 					description = (description.length() > 30) ? description.substring(0, 29) : description;
 					
 					// validate selected beneficiary.
@@ -146,6 +141,8 @@ public class FundTransferServlet extends HttpServlet {
 						if(beneficiary == null) {
 							isError = true;
 							msg = "Invalid beneficiary selected !!!";
+						} else {
+							description = (description.length() == 0) ? ("Fund transfer to " + beneficiary.getAccountNo()) : description;
 						}
 					}
 					
@@ -192,7 +189,7 @@ public class FundTransferServlet extends HttpServlet {
 						req.setAttribute("description", description);
 					}
 					
-					if(actionType == 0 || actionType == 1 || actionType == 2) {
+					if(actionType >= 0 && actionType <= 2) {
 						req.getRequestDispatcher("/jsp/customer/fundTransfer.jsp").forward(req, res);
 						return;
 					}
@@ -211,20 +208,12 @@ public class FundTransferServlet extends HttpServlet {
 								// Ensure beneficiary account exists and is active.
 								beneficiaryBranchId = accountDAO.getBranchId(conn, beneficiary.getAccountNo());
 								
-								// Validate whether added beneficiary account exists in DB.
-								if(beneficiaryBranchId == -1) {
-									isError = true;
-									msg = "Beneficiary account does not exist !!!";
-								}
-							
-								if(!isError) {
-									beneficiaryAccount = regularAccountDAO.get(beneficiary.getAccountNo(), beneficiaryBranchId);
+								beneficiaryAccount = regularAccountDAO.get(beneficiary.getAccountNo(), beneficiaryBranchId);
 									
-									// Added beneficiary account is not a regular account.
-									if(beneficiaryAccount == null) {
-										isError = true;
-										msg = "Invalid beneficiary account !!!";
-									}
+								// Added beneficiary account is not a regular account.
+								if(beneficiaryAccount == null) {
+									isError = true;
+									msg = "Invalid beneficiary account !!!";
 								}
 									
 								if(!isError) { 
@@ -234,7 +223,7 @@ public class FundTransferServlet extends HttpServlet {
 											msg = "Beneficiary cannot accept payments now !!!";
 										} 
 										
-										if(account.getAccountNo() == beneficiaryAccount.getAccountNo()) {
+										if(!isError && account.getAccountNo() == beneficiaryAccount.getAccountNo()) {
 											isError = true;
 											msg = "Cannot transfer to same account !!!";
 										}
@@ -246,7 +235,6 @@ public class FundTransferServlet extends HttpServlet {
 											// update balance in cache.
 											account.deductAmount(amount);
 											beneficiaryAccount.addAmount(amount);
-											
 										}
 									}
 									// End of beneficiary synchronized block
@@ -297,6 +285,10 @@ public class FundTransferServlet extends HttpServlet {
 			}
 			// End of synchronized customer block
 		} catch(NullPointerException e) {
+			System.out.println(e.getMessage());
+			exceptionOccured = true;
+			msg = "Internal error !!!";
+		} catch(IndexOutOfBoundsException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;
 			msg = "Internal error !!!";

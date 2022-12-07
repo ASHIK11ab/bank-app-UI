@@ -24,10 +24,7 @@
 				<p>Amount: ${ transaction.getAmount() }</p>
 				<p>Date: ${ transaction.getDate() }</p>
 				<p>Time: ${ transaction.getTime() }</p>
-				
-				<c:if test="${ transaction.getDescription().length() > 0 }">
-					<p>Description: ${ transaction.getDescription() }</p>				
-				</c:if>
+				<p>Description: ${ transaction.getDescription() }</p>				
 			</div>
 		</div>
 	</main>

@@ -12,7 +12,7 @@
 	</jsp:include>
 </head>
 <body>
-	<!-- Globally used variables -->
+	<!-- variables -->
 	<c:set var="neftId" value="${ TransactionType.getId(TransactionType.NEFT) }" />
 	<c:set var="impsId" value="${ TransactionType.getId(TransactionType.IMPS) }" />
 	<c:set var="rtgsId" value="${ TransactionType.getId(TransactionType.RTGS) }" />
