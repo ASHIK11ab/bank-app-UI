@@ -92,11 +92,11 @@ public class CreateAccountServlet extends HttpServlet {
 	        		conn = Factory.getDataSource().getConnection();
 										
 	                if(accountType == RegularAccountType.CURRENT) {
-	                    stmt = conn.prepareStatement("SELECT ra.account_no FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.customer_id = ? AND ra.type_id = ?");
+	                    stmt = conn.prepareStatement("SELECT ra.account_no FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.customer_id = ? AND ra.type_id = ? AND a.closing_date IS NULL");
 	                    stmt.setLong(1, customerId);
 	                    stmt.setInt(2, RegularAccountType.CURRENT.id);
 	                    rs = stmt.executeQuery();
-	
+	                    
 	                    // Customer aldready has a current account.
 	                    if(rs.next()) {
 	                        isEligibleForAccount = false;
@@ -105,7 +105,7 @@ public class CreateAccountServlet extends HttpServlet {
 	                    } 
 	                } 
                 	else {
-	                    stmt = conn.prepareStatement("SELECT ra.account_no FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.customer_id = ? AND a.branch_id = ? AND ra.type_id = ?");
+	                    stmt = conn.prepareStatement("SELECT ra.account_no FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.customer_id = ? AND a.branch_id = ? AND ra.type_id = ? AND a.closing_date IS NULL");
 	                    stmt.setLong(1, customerId);
 	                    stmt.setInt(2, branchId);
 	                    stmt.setInt(3, RegularAccountType.SAVINGS.id);
