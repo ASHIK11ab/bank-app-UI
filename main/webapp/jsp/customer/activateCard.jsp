@@ -22,7 +22,7 @@
 				<input type="password" name="pin" placeholder="4 digit pin of your card" required>
 				
 				<label>Enter cvv:</label>
-				<input type="password" name="cvv" placeholder="3 digit number on back of debit card" requried>
+				<input type="password" name="cvv" placeholder="3 digit number on back of debit card" required>
 				
 				<button>Activate card</button>
 				<a class="button secondary" href="/bank-app/customer/${ cardNo }/view">cancel</a>

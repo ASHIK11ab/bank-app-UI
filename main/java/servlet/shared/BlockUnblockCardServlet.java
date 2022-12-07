@@ -35,7 +35,7 @@ public class BlockUnblockCardServlet extends HttpServlet {
 		RegularAccount account = null;
 		
 		Role role = null;
-		boolean isError = false, exceptionOccured = false;
+		boolean isError = false, exceptionOccured = false, activationValue;
 		String msg = null, userType = "", redirectURI = "", status = "", redirectPage = "";
 		long cardNo = -1, customerId = -1;
 		byte activationType;
@@ -103,36 +103,38 @@ public class BlockUnblockCardServlet extends HttpServlet {
 				
 				synchronized (card) {
 					
-					if(role == Role.CUSTOMER && card.getPin() != pin) {
-						isError = true;
-						msg = "Incorrect pin !!!";
-					}
-					
-					if(!isError && card.isDeactivated()) {
+					if(card.isDeactivated()) {
 						isError = true;
 						msg = "Card is deactivated !!! cannot update card status !!!";
 					}
 					
 					if(!isError && !card.isActivated()) {
 						isError = true;
-						msg = "Card is not activated !!! ask customer to activate card !!!";
+						msg = "Card is not activated !!! activate card first !!!";
+					}
+					
+					if(!isError && role == Role.CUSTOMER && card.getPin() != pin) {
+						isError = true;
+						msg = "Incorrect pin !!!";
 					}
 					
 					// Type 0 - Block, type 1 - Unblock.
-					if(activationType == 0 && !card.getIsActive()) {
+					if(!isError && activationType == 0 && !card.getIsActive()) {
 						isError = true;
 						msg = "Card is aldready blocked !!!";
 					}
 					
-					if(activationType == 1 && card.getIsActive()) {
+					if(!isError && activationType == 1 && card.getIsActive()) {
 						isError = true;
 						msg = "Card is not blocked, cannot unblock !!!";
 					}
 					
 					if(!isError) {
 						conn = Factory.getDataSource().getConnection();
-						cardDAO.setCardActiveStatus(conn, cardNo, (activationType == 0) ? false : true);
-						card.setIsActive((activationType == 0) ? false : true);
+						activationValue = (activationType == 0) ? false : true;
+						cardDAO.setCardActiveStatus(conn, cardNo, activationValue);
+						// cache update.
+						card.setIsActive(activationValue);
 					}
 				}
 			}

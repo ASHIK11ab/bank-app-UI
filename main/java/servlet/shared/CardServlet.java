@@ -3,6 +3,7 @@ package servlet.shared;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -34,6 +35,7 @@ public class CardServlet extends HttpServlet {
 		DebitCard card = null;
 		RegularAccount account = null;
 		
+		LocalDate today = LocalDate.now();
 		Role role = null;
 		boolean isError = false, exceptionOccured = false;
 		String path = req.getPathInfo(), action = "", msg = "";
@@ -101,7 +103,7 @@ public class CardServlet extends HttpServlet {
 		        					}
 		        					break;
 		        	case CUSTOMER: 
-		        					// Card nunber entered does not belong to this customer.
+		        					// Card number entered does not belong to this customer.
 		        					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1
 		        							|| card.isDeactivated()) {
 		        						isError = true;
@@ -145,6 +147,11 @@ public class CardServlet extends HttpServlet {
 									if(!isError && card.isActivated()) {
 										isError = true;
 										msg = "card is aldready activated !!!";
+									}
+									
+									if(!isError && today.isBefore(card.getValidFromDate())) {
+										isError = true;
+										msg = "Can only activate card on or after " + card.getValidFromDate().toString();
 									}
 									
 									if(!isError)

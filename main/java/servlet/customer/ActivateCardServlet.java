@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,6 +33,7 @@ public class ActivateCardServlet extends HttpServlet {
 		DebitCard card = null;
 		Customer customer = null;
 		
+		LocalDate today = LocalDate.now();
 		boolean isError = false, exceptionOccured = false, isCardExists = true;
 		String msg = null;
 		long cardNo = -1, customerId = -1;
@@ -59,16 +62,13 @@ public class ActivateCardServlet extends HttpServlet {
 			if(!isError) {
 				card = cardDAO.get(cardNo);
 				if(card == null) {
-					isError = true;
 					isCardExists = false;
 				} else {
 					customerId = (Long) req.getSession(false).getAttribute("id");
 					customer = customerDAO.get(customerId);
 					
 					// Card nunber entered does not belong to this customer.
-					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1
-							|| card.isDeactivated()) {
-						isError = true;
+					if(customer.getAccountBranchId(AccountCategory.REGULAR, card.getLinkedAccountNo()) == -1) {
 						isCardExists = false;
 					}
 				}
@@ -94,7 +94,12 @@ public class ActivateCardServlet extends HttpServlet {
 						msg = "Card is aldready activated !!!";
 					}
 					
-					if( pin != card.getPin() || cvv != card.getCvv()) {
+					if(!isError && today.isBefore(card.getValidFromDate())) {
+						isError = true;
+						msg = "Can only activate card on or after " + card.getValidFromDate().toString();
+					}
+					
+					if(!isError && card.getPin() != pin || card.getCvv() != cvv) {
 						isError = true;
 						msg = "Incorrect pin or cvv !!!";
 					}

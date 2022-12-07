@@ -8,7 +8,7 @@
 <html>
 <head>
 	<jsp:include page="/jsp/components/htmlHead.jsp">
-		<jsp:param name="title" value="Block / Unblock Management" />
+		<jsp:param name="title" value="Block / Unblock Card" />
 	</jsp:include>
 </head>
 <body>

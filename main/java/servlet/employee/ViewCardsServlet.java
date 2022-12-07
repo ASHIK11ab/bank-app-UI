@@ -22,7 +22,7 @@ import util.Util;
 public class ViewCardsServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		req.setAttribute("actionType", 0);
-		req.getRequestDispatcher("/jsp/employee/viewCards.jsp").include(req, res);
+		req.getRequestDispatcher("/jsp/employee/viewCardsByAccount.jsp").include(req, res);
 	}
 	
 	
@@ -55,7 +55,7 @@ public class ViewCardsServlet extends HttpServlet {
 					req.setAttribute("actionType", 1);
 					req.setAttribute("account", account);
 					req.setAttribute("cards", cards);
-					req.getRequestDispatcher("/jsp/employee/viewCards.jsp").forward(req, res);
+					req.getRequestDispatcher("/jsp/employee/viewCardsByAccount.jsp").forward(req, res);
 				} else {
 					isError = true;
 					msg = "Invalid account details !!!";

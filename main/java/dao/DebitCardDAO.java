@@ -35,7 +35,7 @@ public class DebitCardDAO {
             pin = Util.genPin(4);
             cvv = Util.genPin(3);
             
-            validFromDate = today.plusDays(10);
+            validFromDate = today;
             expiryDate = validFromDate.plusYears(3);
             
             stmt.setLong(1, linkedAccountNo);
