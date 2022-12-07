@@ -81,7 +81,7 @@ public class Customer extends User {
             	if(base == null || target == null)
             		return -1;
             	
-            	if(base.equals(target))
+            	if(base.equals(target) && base.getId() == target.getId())
             		return 0;
             	
             	char baseCharacter, targetCharacter;

@@ -39,7 +39,7 @@ public class BeneficiaryServlet extends HttpServlet {
 		String path = req.getPathInfo(), action = "", msg = "", queryMsg = "", status = "";
 		String [] result;
 		long beneficiaryId, customerId;
-		int type;
+		int typeId;
 		
 		queryMsg = req.getParameter("msg");
 		status = req.getParameter("status");
@@ -78,8 +78,8 @@ public class BeneficiaryServlet extends HttpServlet {
 			beneficiaryId = Integer.parseInt(result[0]);
 			action = result[1];
 			
-			type = Byte.parseByte(req.getParameter("type"));
-			beneficiaryType = BeneficiaryType.getType(type);
+			typeId = Byte.parseByte(req.getParameter("type"));
+			beneficiaryType = BeneficiaryType.getType(typeId);
 						
 			if(beneficiaryType == null) {
 				isError = true;
@@ -97,7 +97,7 @@ public class BeneficiaryServlet extends HttpServlet {
 			
 			if(!isError) {
 				req.setAttribute("beneficiary", beneficiary);
-				req.setAttribute("type", type);
+				req.setAttribute("type", typeId);
 				switch(action) {
 					case "view": 
 								req.getRequestDispatcher("/jsp/customer/displayBeneficiary.jsp").include(req, res);
@@ -135,7 +135,7 @@ public class BeneficiaryServlet extends HttpServlet {
 		} finally {			
 			
 			if(isError || exceptionOccured) {
-				res.sendError(404);
+				res.sendRedirect(String.format("/bank-app/customer/beneficiaries?msg=%s&status=danger", msg));
 			}
 			
 			out.close();

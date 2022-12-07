@@ -29,19 +29,21 @@
 				<input name="action-type" value="${ actionType }" class="hidden" required>
 				
 				<!-- Store beneficiary id incase of update -->
-				<c:if test="${ actionType == 1 }">
-					<input name="beneficiary-id" value="${ beneficiary.getId() }" class="hidden" required>
-					<input name="type" value="${ type }" class="hidden" required>
-				</c:if>
-				
-				<c:if test="${ actionType == 0 }">
-					<label>Select Beneficiary type</label>
-					<select id="beneficiary-type-dropdown" name="type">
-						<option value="-1" hidden disabled selected>select</option>
-						<option value="${ ownBankId }" ${ type == ownBankId ? "selected" : "" }>Own Bank</option>
-						<option value="${ otherBankId }" ${ type == otherBankId ? "selected": "" }>Other Bank</option>
-					</select>
-				</c:if>
+				<c:choose>
+					<c:when test="${ actionType == 1 }">
+						<input name="beneficiary-id" value="${ beneficiary.getId() }" class="hidden" required>
+						<input name="type" value="${ type }" class="hidden" required>
+					</c:when>
+					
+					<c:when test="${ actionType == 0 }">
+						<label>Select Beneficiary type</label>
+						<select id="beneficiary-type-dropdown" name="type">
+							<option value="-1" hidden disabled selected>select</option>
+							<option value="${ ownBankId }" ${ type == ownBankId ? "selected" : "" }>Own Bank</option>
+							<option value="${ otherBankId }" ${ type == otherBankId ? "selected": "" }>Other Bank</option>
+						</select>
+					</c:when>
+				</c:choose>
 				
 				<label>Name:</label>
 				<input type="text" name="name" value="${ beneficiary.getName() }"

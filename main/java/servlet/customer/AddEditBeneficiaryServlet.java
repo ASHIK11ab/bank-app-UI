@@ -30,28 +30,29 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 		BeneficiaryDAO beneficiaryDAO = Factory.getBeneficiaryDAO();
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 				
+		IntegratedBank integratedBank = null;
 		BeneficiaryType type = null;
 		Beneficiary beneficiary = null, tempBeneficiary = null;
 		Customer customer = null;
 		String name = "", ifsc = "", nickName = "", msg = "", bankName = "";
 		boolean isError = false, exceptionOccured = false;
 		long accountNo = 0, customerId, confirmAccountNo, beneficiaryId = -1;
-		int bankId = -1, beneficiaryType = -1, actionType = -1;
+		int bankId = -1, beneficiaryTypeId = -1, actionType = -1;
 		
 		try {
 			customerId = (Long) req.getSession(false).getAttribute("id");
 			
-			beneficiaryType = Integer.parseInt(req.getParameter("type"));
+			beneficiaryTypeId = Integer.parseInt(req.getParameter("type"));
 			actionType = Integer.parseInt(req.getParameter("action-type"));
 			
-			accountNo = Long.parseLong(req.getParameter("account-no"));
+			accountNo = Long.parseLong(req.getParameter("account-no").strip());
 			
-			confirmAccountNo = (actionType == 0) ? Long.parseLong(req.getParameter("confirm-account-no")) : -1;
+			confirmAccountNo = (actionType == 0) ? Long.parseLong(req.getParameter("confirm-account-no").strip()) : -1;
 			
-			name = req.getParameter("name");
+			name = req.getParameter("name").strip();
 			nickName = req.getParameter("nick-name").strip();
 			
-			type = BeneficiaryType.getType(beneficiaryType);
+			type = BeneficiaryType.getType(beneficiaryTypeId);
 			
 			if(type == null) {
 				isError = true;
@@ -65,7 +66,7 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 			
 			if(!isError) {
 				// get the beneficiary id to be updated.
-				beneficiaryId = actionType == 1 ? Long.parseLong(req.getParameter("beneficiary-id")) : -1;
+				beneficiaryId = (actionType == 1) ? Long.parseLong(req.getParameter("beneficiary-id")) : -1;
 				
 				if(type == BeneficiaryType.OTHER_BANK) {
 					bankId = Integer.parseInt(req.getParameter("bank-id"));
@@ -84,7 +85,8 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 			}
 			
 			if(!isError && type == BeneficiaryType.OTHER_BANK) {
-				if(integratedBankDAO.get(bankId) == null) {
+				integratedBank = integratedBankDAO.get(bankId);
+				if(integratedBank == null) {
 					isError = true;
 					msg = "Invalid bank selected !!!";
 				}
@@ -95,14 +97,9 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 				}
 			}
 			
-			if(!isError && name.length() == 0) {
+			if(!isError && !(name.length() >= 2 && name.length() <= 20)) {
 				isError = true;
-				msg = "Name cannot be empty !!!";
-			}
-			
-			if(!isError && name.length() > 20) {
-				isError = true;
-				msg = "Name should be less than 20 characters";
+				msg = "Name should be between 2 to 20 characters";
 			}
 			
 			if(!isError && nickName.length() > 15) {
@@ -114,7 +111,7 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
             if(type == BeneficiaryType.OWN_BANK)
             	tempBeneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName);
             else {
-            	bankName = AppCache.getIntegratedBank(bankId).getName();
+            	bankName = integratedBank.getName();
             	tempBeneficiary = new Beneficiary(beneficiaryId, accountNo, name, nickName, bankId, bankName, ifsc);
             }
 			
@@ -150,8 +147,10 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 							// update beneficiary in DB only when changed.
 							if(!beneficiary.equals(tempBeneficiary)) {
 								synchronized(beneficiary) {
-									
 									beneficiaryDAO.update(type, beneficiaryId, accountNo, name, nickName, bankId, ifsc);
+									
+									// Remove and add beneficiary again to preserve order in 'TreeSet'.
+									customer.removeBeneficiary(type, beneficiaryId);
 									
 									// update in cache.
 									beneficiary.setAccountNo(accountNo);
@@ -162,6 +161,8 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 										beneficiary.setBankId(bankId);
 										beneficiary.setIFSC(ifsc);
 									}
+									
+									customer.addBeneficiary(type, beneficiary);
 								}
 							}
 							
@@ -182,12 +183,12 @@ public class AddEditBeneficiaryServlet extends HttpServlet {
 			if(isError || exceptionOccured) {
 				out.println(Util.createNotification(msg, "danger"));
 				req.setAttribute("actionType", actionType);
-				req.setAttribute("type", beneficiaryType);
+				req.setAttribute("type", beneficiaryTypeId);
 				req.setAttribute("beneficiary", tempBeneficiary);
 				req.setAttribute("banks", integratedBankDAO.getAll());
 				req.getRequestDispatcher("/jsp/customer/createEditBeneficiary.jsp").include(req, res);
 			} else {
-				res.sendRedirect(String.format("/bank-app/customer/beneficiaries/%d/view?type=%d&msg=%s&status=success", beneficiary.getId(), beneficiaryType, msg));
+				res.sendRedirect(String.format("/bank-app/customer/beneficiaries/%d/view?type=%d&msg=%s&status=success", beneficiary.getId(), beneficiaryTypeId, msg));
 			}
 			
 			out.close();
