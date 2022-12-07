@@ -12,9 +12,8 @@ import constant.Role;
 
 public class LogoutServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		Role role = (Role) req.getSession(false).getAttribute("role"); 
 		HttpSession session = req.getSession(false);
 		session.invalidate(); 
-		res.sendRedirect("/bank-app/login/" + Role.getName(role));
+		res.sendRedirect("/bank-app/");
 	}
 }
