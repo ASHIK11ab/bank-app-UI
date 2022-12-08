@@ -15,6 +15,7 @@ import constant.TransactionType;
 import dao.AccountDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Bank;
 import model.Transaction;
 import model.account.RegularAccount;
 import model.account.SavingsAccount;
@@ -25,7 +26,7 @@ import util.Factory;
  */
 public class SavingsIntrestCreditRunnable implements Runnable {
 	public boolean exit = false;
-	private static final int INTREST_CREDIT_DATE = 5;
+	private static final int INTREST_CREDIT_DATE = 8;
 	
 	@Override
 	public void run() {
@@ -52,8 +53,10 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 		
 		String description;
 		
-		long bankAccountNo = AppCache.getBank().getBankAccountNo();
-		int bankAccountBranchId;
+		Bank bank = AppCache.getBank();
+		
+		long bankAccountNo = bank.getBankAccountNo();
+		int bankAccountBranchId = bank.getAccountBranchId();
 		
 		try {
 			while(!exit) {
@@ -63,10 +66,8 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 				
 				try {
 					conn = Factory.getDataSource().getConnection();
-					
-					bankAccountBranchId = accountDAO.getBranchId(conn, bankAccountNo);
-					
-					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.intrest_amount, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ? AND (ra.intrest_calculated_on IS NULL OR ra.intrest_calculated_on != ?)");
+										
+					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.intrest_amount, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ? AND a.closing_date IS NULL AND (ra.intrest_calculated_on IS NULL OR ra.intrest_calculated_on != ?)");
 					
 					stmt2 = conn.prepareStatement("SELECT t.from_account_no, t.amount, at.before_balance FROM transaction t JOIN account_transaction at ON t.id = at.transaction_id WHERE at.account_no = ? AND t.date < ? ORDER BY t.id DESC LIMIT 1");
 				
@@ -88,7 +89,7 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 						
 						// Get yesterday's closing balance of the account.
 						stmt2.setLong(1, accountNo);
-						stmt2.setDate(2, Date.valueOf(today.minusDays(1)));
+						stmt2.setDate(2, Date.valueOf(today));
 						rs2 = stmt2.executeQuery();
 						
 						if(rs2.next()) {
@@ -98,6 +99,9 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 							
 							// Calculate intrest amount for yesterday's closing balance.
 							closing_balance = (fromAccountNo == accountNo) ? beforeBalance - transactionAmount : beforeBalance + transactionAmount; 
+							
+							if(closing_balance < 0)
+								continue;
 							
 							// Update total intrest to be credited.
 							intrest = closing_balance * (SavingsAccount.getIntrestRate() / 365);
@@ -123,7 +127,7 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 											bankAccount.deductAmount(intrestAmount);
 											account.addAmount(intrestAmount);
 											
-											description = "Savings Intrest";
+											description = "Savings Intrest credit to A/C: " + account.getAccountNo();
 											
 											transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, bankAccountNo, accountNo, intrestAmount, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 											
