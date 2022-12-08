@@ -34,7 +34,6 @@ public class PasswordResetServlet extends HttpServlet {
 		AdminDAO adminDAO = Factory.getAdminDAO();
 		
 		User user = null;
-		Employee employeeObject = null;
 		Customer customer = null;
 		
 		Role role = null, forRole = null;
@@ -108,16 +107,15 @@ public class PasswordResetServlet extends HttpServlet {
 			if(!isError) {
 				switch(forRole) {
 					case ADMIN   : user = adminDAO.get(id); break;
-					case EMPLOYEE: employeeObject = employeeDAO.get(id, branchId);
-								   user = (User) employeeObject; 
+					case EMPLOYEE: user = employeeDAO.get(id, branchId);
 								   break;
-					case MANAGER : employeeObject = managerDAO.get(id, branchId);
-							       user = (User) employeeObject;
+					case MANAGER : user = managerDAO.get(id, branchId);
 								   break;
 					case CUSTOMER: 
 									// For customer password reset, get type of password (login / transaction)
 									type = Byte.parseByte(req.getParameter("type"));
 									customer = customerDAO.get(id);
+									user = customer;
 				}
 				
 				if(forRole == Role.CUSTOMER) {
@@ -157,9 +155,9 @@ public class PasswordResetServlet extends HttpServlet {
 					}
 				} else 
 					if(forRole == Role.EMPLOYEE || forRole == Role.MANAGER) {
-						synchronized (employeeObject) {					
+						synchronized (user) {					
 							userDAO.updatePassword(id, newPassword, forRole, (byte) 0, branchId);
-							employeeObject.setPassword(newPassword);
+							user.setPassword(newPassword);
 						}
 					} else {
 						synchronized (customer) {
@@ -171,6 +169,14 @@ public class PasswordResetServlet extends HttpServlet {
 						}
 					}
 				msg = "password updated successfully";
+				
+				// When updating other role's password, logged out the user,
+				// to prevent the user from further accessing the application.
+				if(forRole != role) {
+					synchronized (user) {
+						user.setLoggedInStatus(false);						
+					}
+				}
 			}
 		} catch(NumberFormatException e) {
 			System.out.println(e.getMessage());
