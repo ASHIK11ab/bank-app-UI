@@ -49,7 +49,7 @@ public class CustomerAuthenticationFilter extends HttpFilter {
 				
 				// A removed customer has no access to the application, even when the
 				// associated record exists.
-				if(customer == null || customer.isRemoved()) {
+				if(customer == null || customer.isRemoved() || !customer.isLoggedIn()) {
 					isError = true;
 					session.invalidate();
 				} else {

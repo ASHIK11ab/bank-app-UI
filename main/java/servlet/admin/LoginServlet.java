@@ -43,6 +43,7 @@ public class LoginServlet extends HttpServlet {
 			admin = adminDAO.get(id);    
 			
 	        if((admin != null) && admin.getPassword().equals(password)) {
+	        	admin.setLoggedInStatus(true);
 	        	HttpSession session = req.getSession();
 	        	session.setAttribute("id", admin.getId());
 	        	// 1 hour.

@@ -52,6 +52,7 @@ public class LoginServlet extends HttpServlet {
 			manager = managerDAO.get(id, branchId); 
 			
 	        if((manager != null) && manager.getPassword().equals(password)) {
+	        	manager.setLoggedInStatus(true);
 	        	HttpSession session = req.getSession();
 	        	session.setAttribute("id", manager.getId());
 	        	session.setAttribute("branch-id", manager.getBranchId());

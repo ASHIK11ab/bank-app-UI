@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import constant.Role;
 import dao.EmployeeDAO;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -20,6 +21,8 @@ public class EmployeeAuthenticationFilter extends HttpFilter {
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
 		HttpSession session = req.getSession(false);
 		EmployeeDAO employeeDAO = Factory.getEmployeeDAO();
+		
+		Employee employee = null;
 		boolean isError = false, exceptionOccured = false;
 		long employeeId;
 		int branchId;
@@ -42,10 +45,11 @@ public class EmployeeAuthenticationFilter extends HttpFilter {
 			} else {
 				employeeId = (Long)  session.getAttribute("id");
 				branchId = (Integer) session.getAttribute("branch-id");
+				employee = employeeDAO.get(employeeId, branchId);
 				
-				// Invalid employee, branch id's in session, redirect to login page and 
-				// invalidate session.
-				if(employeeDAO.get(employeeId, branchId) == null) {
+				// Validate employee attributes in session and also validate whether
+				// employee is logged in.
+				if(employee == null || !employee.isLoggedIn()) {
 					isError = true;
 					session.invalidate();
 				} else {

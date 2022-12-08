@@ -7,6 +7,7 @@ public class User {
     private String password;
     private String email;
     private long phone;
+    private boolean isLoggedIn;
 
     public User(long id, String name, String password, String email, long phone) {
         this.id = id;
@@ -14,11 +15,16 @@ public class User {
         this.password = password;
         this.phone = phone;
         this.email = email;
+        this.isLoggedIn = false;
     }
 
     // Getters
     public long getId() {
         return this.id;
+    }
+    
+    public boolean isLoggedIn() {
+    	return this.isLoggedIn;
     }
 
     public String getName() {
@@ -52,6 +58,10 @@ public class User {
     
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public void setLoggedInStatus(boolean status) {
+    	this.isLoggedIn = status;
     }
     
     @Override

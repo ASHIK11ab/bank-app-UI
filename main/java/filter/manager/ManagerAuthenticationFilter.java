@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import constant.Role;
 import dao.ManagerDAO;
+import model.user.Employee;
 import util.Factory;
 
 
@@ -19,6 +20,8 @@ public class ManagerAuthenticationFilter extends HttpFilter {
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
 		HttpSession session = req.getSession(false);
 		ManagerDAO managerDAO = Factory.getManagerDAO();
+		
+		Employee manager = null;
 		boolean isError = false, exceptionOccured = false;
 		long managerId;
 		int branchId;
@@ -42,9 +45,11 @@ public class ManagerAuthenticationFilter extends HttpFilter {
 			} else {
 				managerId = (Long)  session.getAttribute("id");
 				branchId = (Integer) session.getAttribute("branch-id");
+				manager = managerDAO.get(managerId, branchId);
 				
-				// Check for valid manager, branch id's in session.
-				if(managerDAO.get(managerId, branchId) == null) {
+				// Validate manager attributes in session and also validate whether
+				// manager is logged in.
+				if(manager == null || !manager.isLoggedIn()) {
 					isError = true;
 					session.invalidate();
 				} else {

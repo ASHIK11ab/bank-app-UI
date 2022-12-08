@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import constant.Role;
 import dao.AdminDAO;
+import model.user.User;
 import util.Factory;
 
 
@@ -20,6 +21,7 @@ public class AdminAuthenticationFilter extends HttpFilter {
 		HttpSession session = req.getSession(false);
 		
 		boolean exceptionOccured = false, isError = false;
+		User admin = null;
 		long id;
 		Role role = null;
 		
@@ -42,9 +44,10 @@ public class AdminAuthenticationFilter extends HttpFilter {
 				return;
 			} else {
 				id = (Long) session.getAttribute("id");
-
-				// Ensure that admin account exists.
-				if(adminDAO.get(id) == null) {
+				admin = adminDAO.get(id);
+				
+				// Ensure that admin account exists and check whether admin is logged in.
+				if(admin == null || !admin.isLoggedIn()) {
 					isError = true;
 					session.invalidate();
 				} else {
