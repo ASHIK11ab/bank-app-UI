@@ -38,11 +38,11 @@ public class AutoDebitRDRunnable implements Runnable {
 		Transaction transaction = null;
 		RegularAccount debitFromAccount;
 		DepositAccount rdAccount;
-		LocalDate today;
+		LocalDate today, maturityDate, openingDate;
 		String description;
 		boolean monthlyInstallmentPaid = false;
 		float fromAccountBeforeBalance, toAccountBeforeBalance;
-		int monthlyInstallment, branchId, debitFromAccountBranchId;
+		int monthlyInstallment, branchId, debitFromAccountBranchId, tenureMonths;
 		long debitFromAccountNo, rdAccountNo, transactionId;
 		
 		try {
@@ -54,7 +54,7 @@ public class AutoDebitRDRunnable implements Runnable {
 						conn = Factory.getDataSource().getConnection();
 						
 						// Get all unclosed RD's whose recurring date is today.
-						stmt1 = conn.prepareStatement("SELECT da.account_no, da.deposit_amount, da.debit_from_account_no, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE da.type_id = ? AND da.recurring_date = ? AND a.closing_date IS NULL");
+						stmt1 = conn.prepareStatement("SELECT da.account_no, da.deposit_amount, da.debit_from_account_no, da.tenure_months, a.opening_date, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE da.type_id = ? AND da.recurring_date = ? AND a.closing_date IS NULL");
 						stmt2 = conn.prepareStatement("SELECT COUNT(*) FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET recurring_date = ? WHERE account_no = ?");
 						
@@ -68,7 +68,19 @@ public class AutoDebitRDRunnable implements Runnable {
 							rdAccountNo = rs1.getLong("account_no");
 							monthlyInstallment = rs1.getInt("deposit_amount");
 							debitFromAccountNo = rs1.getLong("debit_from_account_no");
+							openingDate = rs1.getDate("opening_date").toLocalDate();
+							tenureMonths = rs1.getInt("tenure_months");
 							branchId = rs1.getInt("branch_id");
+							
+							System.out.println("\nAuto debit RD: Processing A/C: " + rdAccountNo);
+							
+							maturityDate = openingDate.plusMonths(tenureMonths);
+							
+							// If deposit has reached maturity, ignore it, as currently
+							// deposits are closed manually.
+							if(today.isAfter(maturityDate)) {
+								continue;
+							}
 							
 							rdAccount = depositAccountDAO.get(rdAccountNo, branchId);
 							
@@ -81,7 +93,7 @@ public class AutoDebitRDRunnable implements Runnable {
 								rs2 = stmt2.executeQuery();
 								
 								if(rs2.next()) {
-									monthlyInstallmentPaid = (rs2.getInt("count") >= 1) ? true : false;
+									monthlyInstallmentPaid = (rs2.getInt("count") == 1) ? true : false;
 									
 									// Only auto debit for RD if current month installment is not aldready paid.
 									if(!monthlyInstallmentPaid) {
@@ -115,13 +127,13 @@ public class AutoDebitRDRunnable implements Runnable {
 													System.out.println("Auto debited for RD: " + rdAccountNo + " from A/C: " + debitFromAccountNo);
 												} else {
 													// Handle auto debit rd insufficient balance.
-													System.out.println("Insufficient balance or debit from account not active !!!");
-													System.out.println("Cannot auto debit for RD: " + rdAccountNo);
+													System.out.println("Auto Debit RD: Insufficient balance or debit from account not active !!!");
+													System.out.println("Auto Debit RD: Cannot auto debit for RD: " + rdAccountNo);
 												}
 											}
 											// End of synchronized block on debit from account.
 										} else {
-											System.out.println("Montly installment aldready paid rd A/C: " + rdAccountNo);
+											System.out.println("Auto Debit RD: Montly installment aldready paid for A/C: " + rdAccountNo);
 										}
 									}
 								}
