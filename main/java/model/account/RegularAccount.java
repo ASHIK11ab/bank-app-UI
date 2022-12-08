@@ -99,11 +99,9 @@ public abstract class RegularAccount extends Account {
     	
     	Iterator<Transaction> it = this.recentTransactions.iterator();
     	
-    	while(it.hasNext()) {
-    		if(cnt == 10)
-    			break;
-    		
+    	while(it.hasNext() && cnt < 10) {    		
     		transactions.add(it.next());
+    		cnt++;
     	}
     	
     	return transactions;
