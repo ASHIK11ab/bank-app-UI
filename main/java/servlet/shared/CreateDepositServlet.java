@@ -187,6 +187,12 @@ public class CreateDepositServlet extends HttpServlet {
 					msg = "Invalid debit from account details !!!";
 				}
 				
+				// During deposit creation by employee debit from account must belong to branch of employee.
+				if(!isError && role == Role.EMPLOYEE && debitFromAccount.getBranchId() != branchId) {
+					isError = true;
+					msg = "Invalid debit from account details !!!";
+				}
+				
 				// When customer creates deposit ensure that debit from account and payout belongs to the customer.
 				if(!isError && role == Role.CUSTOMER && 
 						(debitFromAccount.getCustomerId() != customerId || payoutAccount.getCustomerId() != customerId)) {
