@@ -148,15 +148,7 @@ public class ManagerDAO {
 		Statement stmt = null;
 		ResultSet rs = null;
 		
-		TreeSet<Employee> managers = new TreeSet<Employee>(new Comparator<Employee>() {
-			@Override
-			public int compare(Employee base, Employee target) {
-				if(base.getId() == target.getId())
-					return 0;
-				
-				return Util.compareByName(base.getName(), target.getName());
-			}
-		});
+		TreeSet<Employee> managers = new TreeSet<Employee>();
 		
 		Employee manager = null;
 		boolean exceptionOccured = false;

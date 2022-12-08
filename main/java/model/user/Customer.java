@@ -24,6 +24,7 @@ import model.Beneficiary;
 import model.account.RegularAccount;
 import model.card.DebitCard;
 import util.Factory;
+import util.Util;
 
 
 public class Customer extends User {
@@ -82,28 +83,10 @@ public class Customer extends User {
             	if(base == null || target == null)
             		return -1;
             	
-            	if(base.equals(target) && base.getId() == target.getId())
+            	if(base.getId() == target.getId())
             		return 0;
             	
-            	char baseCharacter, targetCharacter;
-            	    	
-            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
-            	
-            	for(int index = 0; index < minLength; ++index) {
-            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
-            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
-            		
-            		if(baseCharacter != targetCharacter) {
-            			return baseCharacter - targetCharacter;
-            		}
-            	}
-            	
-            	// When first 'minLength' characters are same, string with lesser length
-            	// is stored first.
-            	if(base.getName().length() <= target.getName().length())
-            		return -1;
-            	else
-            		return 1;
+            	return Util.compareByName(base.getName(), target.getName());
             }
         };
 

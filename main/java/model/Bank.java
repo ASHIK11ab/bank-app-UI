@@ -1,6 +1,7 @@
 package model;
 
 import model.user.*;
+import util.Util;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,25 +66,7 @@ public class Bank {
             		return 0;
             	}
             	
-            	char baseCharacter, targetCharacter;
-            	    	
-            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
-            	
-            	for(int index = 0; index < minLength; ++index) {
-            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
-            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
-            		
-            		if(baseCharacter != targetCharacter) {
-            			return baseCharacter - targetCharacter;
-            		}
-            	}
-            	
-            	// When first 'minLength' characters are same, string with lesser length
-            	// is stored first.
-            	if(base.getName().length() >= target.getName().length())
-            		return 1;
-            	else
-            		return -1;
+            	return Util.compareByName(base.getName(), target.getName());
             }
         };
         
@@ -102,25 +85,7 @@ public class Bank {
             	if(key1 == key2)
             		return 0;
             	
-            	char baseCharacter, targetCharacter;
-            	    	
-            	int minLength = (base.getName().length() < target.getName().length()) ? base.getName().length() : target.getName().length();
-            	
-            	for(int index = 0; index < minLength; ++index) {
-            		baseCharacter = Character.toLowerCase(base.getName().charAt(index));
-            		targetCharacter = Character.toLowerCase(target.getName().charAt(index));
-            		
-            		if(baseCharacter != targetCharacter) {
-            			return baseCharacter - targetCharacter;
-            		}
-            	}
-            	
-            	// When first 'minLength' characters are same, string with lesser length
-            	// is stored first.
-            	if(base.getName().length() >= target.getName().length())
-            		return 1;
-            	else
-            		return -1;
+            	return Util.compareByName(base.getName(), target.getName());
             }
         };
         
