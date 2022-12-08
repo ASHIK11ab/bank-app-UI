@@ -19,6 +19,7 @@ import dao.AccountDAO;
 import dao.CustomerDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
+import model.Bank;
 import model.Branch;
 import model.account.RegularAccount;
 import model.user.Customer;
@@ -40,6 +41,7 @@ public class RemoveCustomerServlet extends HttpServlet {
 		RegularAccountDAO regularAccountDAO = Factory.getRegularAccountDAO();
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		
+		Bank bank = AppCache.getBank();
 		Branch branch = null;
 		Customer customer = null;
 		RegularAccount account = null;
@@ -89,6 +91,10 @@ public class RemoveCustomerServlet extends HttpServlet {
 		            			case CURRENT: branch.setCurrentAccountCnt(branch.getCurrentAccountCnt() - 1); break;
 	            			}									
 						}
+	            		
+	            		synchronized (bank) {
+	    					bank.setCustomerCnt(bank.getCustomerCnt() - 1);
+	    				}
 					}
 				}
 			}

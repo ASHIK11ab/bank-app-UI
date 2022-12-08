@@ -74,8 +74,8 @@ public class AppListener implements ServletContextListener {
 	private void loadCache() {
         Connection conn = null;
         PreparedStatement stmt1 = null, stmt2 = null, stmt3 = null, stmt4 = null, stmt5 = null;
-        PreparedStatement stmt6 = null, stmt7 = null;
-        ResultSet rs1 = null, rs2 = null, rs3 = null, rs4 = null, rs5 = null, rs6 = null, rs7 = null;
+        PreparedStatement stmt6 = null, stmt7 = null, stmt8 = null;
+        ResultSet rs1 = null, rs2 = null, rs3 = null, rs4 = null, rs5 = null, rs6 = null, rs7 = null, rs8 = null;
         
         AccountDAO accountDAO = Factory.getAccountDAO();
 
@@ -121,7 +121,8 @@ public class AppListener implements ServletContextListener {
             stmt5 = conn.prepareStatement("SELECT COUNT(*) FROM employee WHERE branch_id = ?");
 			stmt6 = conn.prepareStatement("SELECT ra.type_id, COUNT(*) FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.branch_id = ? AND a.closing_date IS NULL GROUP BY ra.type_id;");
 			stmt7 = conn.prepareStatement("SELECT COUNT(*) FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.branch_id = ? AND a.closing_date IS NULL");
-
+			stmt8 = conn.prepareStatement("SELECT COUNT(*) FROM customer WHERE removed_date IS NULL");
+			
             rs1 = stmt1.executeQuery();
             if(rs1.next()) {
                 bankName = rs1.getString("name");
@@ -212,6 +213,11 @@ public class AppListener implements ServletContextListener {
                 		CurrentAccount.setMinimumBalance(minimumBalance);
                 	}
                 }
+                
+                
+                rs8 = stmt8.executeQuery();
+                if(rs8.next())
+                	bank.setCustomerCnt(rs8.getInt("count"));
             }
         } catch(SQLException e) {
             System.out.println(e);

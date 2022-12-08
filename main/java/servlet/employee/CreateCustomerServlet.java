@@ -18,6 +18,7 @@ import dao.CustomerDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.Address;
+import model.Bank;
 import model.Branch;
 import model.user.Customer;
 import model.account.RegularAccount;
@@ -30,6 +31,7 @@ public class CreateCustomerServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
         Connection conn = null;
         
+        Bank bank = AppCache.getBank();
         Branch branch = null;
         Customer customer = null;
         Address address = null;
@@ -152,6 +154,10 @@ public class CreateCustomerServlet extends HttpServlet {
             			case SAVINGS: branch.setSavingsAccountCnt(branch.getSavingsAccountCnt() + 1); break;
             			case CURRENT: branch.setCurrentAccountCnt(branch.getCurrentAccountCnt() + 1); break;
         			}									
+				}
+        		
+        		synchronized (bank) {
+					bank.setCustomerCnt(bank.getCustomerCnt() + 1);
 				}
         		
 	        	req.setAttribute("customer", customer);

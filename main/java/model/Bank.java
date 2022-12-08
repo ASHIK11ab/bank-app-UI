@@ -28,6 +28,7 @@ public class Bank {
     private SortedMap<Integer, Branch> branches; 
     
     private ConcurrentHashMap<Long, Customer> customers;
+    private int customerCnt;
     
     // Internal hashmap '_integratedBanks' used by Integrated banks comparator for 
     // sorting branches based on values.
@@ -96,6 +97,7 @@ public class Bank {
         this.integratedBanks = Collections.synchronizedSortedMap(new TreeMap<Integer, IntegratedBank>(integratedBankComparator));
         
         this.customers = new ConcurrentHashMap<Long, Customer>();
+        this.customerCnt = 0;
         this.cardAccountBranchMap = new ConcurrentHashMap<Long, Properties>();
     }
 
@@ -158,6 +160,10 @@ public class Bank {
     public User getAdmin() {
         return this.admin;
     }
+    
+    public int getCustomerCnt() {
+    	return this.customerCnt;
+    }
 
 
     public Customer getCustomer(long customerId) {
@@ -188,5 +194,9 @@ public class Bank {
     // Setters
     public void setAdmin(User admin) {
         this.admin = admin;
+    }
+    
+    public void setCustomerCnt(int cnt) {
+    	this.customerCnt = cnt;
     }
 }
