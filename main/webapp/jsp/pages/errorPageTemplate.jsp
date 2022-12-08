@@ -25,9 +25,9 @@
 			
 				<h1 style="color: red">${ param.text }</h1>
 				
-				<jsp:include page="/jsp/components/footer.jsp" />
 			</div>
 		</main>
+		<jsp:include page="/jsp/components/footer.jsp" />
 	</c:when>
 	</c:choose>
 </body>
