@@ -26,7 +26,7 @@ import util.Factory;
  */
 public class SavingsIntrestCreditRunnable implements Runnable {
 	public boolean exit = false;
-	private static final int INTREST_CREDIT_DATE = 8;
+	private static final int INTREST_CREDIT_DATE = 5;
 	
 	@Override
 	public void run() {

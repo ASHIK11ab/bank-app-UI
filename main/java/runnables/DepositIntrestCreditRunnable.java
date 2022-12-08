@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import cache.AppCache;
 import constant.Constants;
 import constant.DepositAccountType;
+import constant.RegularAccountType;
 import constant.TransactionType;
 import dao.AccountDAO;
 import dao.DepositAccountDAO;
@@ -59,10 +60,11 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		Transaction transaction = null;
 		RegularAccount bankAccount = null;
 		DepositAccount account = null;
-		LocalDate today = null;
+		LocalDate today = null, openingDate = null, maturityDate = null;
 		boolean isEligibleForIntrest;
 		String description = "";
 		float intrestRate, intrestAmount = 0, fromAccountBeforeBalance, toAccountBeforeBalance;
+		int tenureMonths = -1;
 		byte typeId;
 		
 		// FD -> variable 'deposit amount' is the amount deposited.
@@ -82,9 +84,9 @@ public class DepositIntrestCreditRunnable implements Runnable {
 					
 					try {
 						conn = Factory.getDataSource().getConnection();
-						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?)");
+						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, da.tenure_months, a.opening_date, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?)");
 						// Check whether monthly installment paid for RD.
-						stmt2 = conn.prepareStatement("SELECT to_account_no FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
+						stmt2 = conn.prepareStatement("SELECT COUNT(*) FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ?, intrest_credited_date = ? WHERE account_no = ?");
 						
 						// Prevent crediting intrest again when server is restarted on 'DEPOSIT_INTREST_CREDIT_DATE'.
@@ -101,8 +103,19 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							intrestRate = rs1.getFloat("rate_of_intrest");
 							depositAmount = rs1.getInt("deposit_amount");
 							intrestCreditedMonthCnt = rs1.getInt("intrest_credited_month_cnt");
+							openingDate = rs1.getDate("opening_date").toLocalDate();
+							tenureMonths = rs1.getInt("tenure_months");
 							branchId = rs1.getInt("branch_id");
-														
+							
+							System.out.println("\nDeposit credit: Processing A/C: " + accountNo + ", " + DepositAccountType.getType(typeId));
+											
+							maturityDate = openingDate.plusMonths(tenureMonths);
+							// Check whether deposit has reached maturity.
+							if(today.isAfter(maturityDate)) {
+								System.out.println("Deposit credit: A/C: " + accountNo + " has reached maturity. skipping");
+								continue;
+							}
+							
 							if(typeId == DepositAccountType.RD.id) {
 								stmt2.setLong(1, accountNo);
 								stmt2.setDate(2, Date.valueOf(today.withDayOfMonth(1)));
@@ -112,7 +125,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 								/* Installment of this month was not made on RD, account is
 									not eligible for intrest */
 								if(!rs2.next()) {
-									isEligibleForIntrest = false;
+									isEligibleForIntrest = (rs2.getInt("count") == 1) ? true : false;
 								}
 							}
 							
@@ -150,14 +163,16 @@ public class DepositIntrestCreditRunnable implements Runnable {
 											transaction = new Transaction(transactionId, TransactionType.NEFT.id, bankAccountNo, accountNo, intrestAmount, LocalDateTime.now(), description, fromAccountBeforeBalance);
 											bankAccount.addTransaction(transaction);
 											
-											System.out.println("Intrest credited for A/C: " + accountNo);
+											System.out.println("Deposit credit: Intrest of rupees " + intrestAmount + " credited for A/C: " + accountNo);
 										} else {
-											System.out.println("Insufficient balance in bank Account !!!");
+											System.out.println("Deposit credit: Insufficient balance in bank Account !!!");
 											break;
 										}
 									}
 								}
-							}							
+							} else {
+								System.out.println("Deposit credit: A/C: " + accountNo + " not eligible for intrest credit");
+							}
 						}						
 					} catch(SQLException e) {
 						System.out.println(e.getMessage());

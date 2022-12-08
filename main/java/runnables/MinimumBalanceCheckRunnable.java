@@ -27,7 +27,7 @@ import util.Factory;
  */
 public class MinimumBalanceCheckRunnable implements Runnable {
 	public boolean exit = false;
-	private static final int MINIMUM_BALANCE_DEBIT_DATE = 8;
+	private static final int MINIMUM_BALANCE_DEBIT_DATE = 1;
 	
 	@Override
 	public void run() {
