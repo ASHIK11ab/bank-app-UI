@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import constant.AccountCategory;
+import constant.DepositAccountType;
 import constant.Role;
 import dao.CustomerDAO;
 import dao.DepositAccountDAO;
@@ -56,8 +57,10 @@ public class DepositServlet extends HttpServlet {
 			if(path == null || path.equals("/")) {
 				req.setAttribute("actionType", 0);
 				
-				if(role == Role.CUSTOMER)
-					req.setAttribute("customerDeposits", customer.getDepositAccounts());
+				if(role == Role.CUSTOMER) {					
+					req.setAttribute("fdAccounts", customer.getDepositAccounts(DepositAccountType.FD));
+					req.setAttribute("rdAccounts", customer.getDepositAccounts(DepositAccountType.RD));
+				}
 				
 				req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res);
 				return;
@@ -143,8 +146,10 @@ public class DepositServlet extends HttpServlet {
 				out.println(Util.createNotification(msg, "danger"));
 				req.setAttribute("actionType", 0);
 				
-				if(role == Role.CUSTOMER)
-					req.setAttribute("customerDeposits", customer.getDepositAccounts());
+				if(role == Role.CUSTOMER) {					
+					req.setAttribute("fdAccounts", customer.getDepositAccounts(DepositAccountType.FD));
+					req.setAttribute("rdAccounts", customer.getDepositAccounts(DepositAccountType.RD));
+				}
 				
 				req.getRequestDispatcher("/jsp/components/viewDeposit.jsp").include(req, res);
 				out.close();

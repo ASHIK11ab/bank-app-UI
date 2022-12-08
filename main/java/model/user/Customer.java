@@ -11,12 +11,15 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import constant.AccountCategory;
 import constant.BeneficiaryType;
+import constant.DepositAccountType;
 import constant.RegularAccountType;
 import dao.RegularAccountDAO;
 import model.Address;
@@ -51,9 +54,12 @@ public class Customer extends User {
     private int currentAccountBranchId;
 
     // A/C no to branch id mapping.
-    private ConcurrentHashMap<Long, Integer> depositAccounts;
+    private SortedMap<Long, Integer> fdAccounts;
+    private SortedMap<Long, Integer> rdAccounts;
+
     
     private Comparator<Beneficiary> beneficiaryComparator; 
+    private Comparator<Long> accountNoComparator; 
    
 
     public Customer(long id, String name, String password, long phone,
@@ -89,6 +95,15 @@ public class Customer extends User {
             	return Util.compareByName(base.getName(), target.getName());
             }
         };
+        
+        this.accountNoComparator = new Comparator<Long>() {
+        	@Override
+    		public int compare(Long element1, Long element2) {
+    			if(element1.equals(element2))
+    				return 0;
+    			return (element1 < element2) ? -1 : 1;
+    		}
+        };
 
         this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
         this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
@@ -97,13 +112,15 @@ public class Customer extends User {
         this.currentAccountNo = -1;
         this.currentAccountBranchId = -1;
         
-        this.depositAccounts = new ConcurrentHashMap<Long, Integer>();
+        this.fdAccounts = Collections.synchronizedSortedMap(new TreeMap<Long, Integer>(accountNoComparator));
+        this.rdAccounts = Collections.synchronizedSortedMap(new TreeMap<Long, Integer>(accountNoComparator));
     }
 
 
     // Add a mapping of account no and branch (if exists).
     public void addAccountBranchMapping(AccountCategory category, int accountType, long accountNo, int branchId) {        
     	RegularAccountType type;
+    	DepositAccountType depositType;
     	
     	switch(category) {
 	    	case REGULAR: 
@@ -116,7 +133,13 @@ public class Customer extends User {
 					            			  break;
 				            }
 				            break;
-	    	case DEPOSIT: this.depositAccounts.put(accountNo, branchId);
+	    	case DEPOSIT: depositType = DepositAccountType.getType(accountType);
+	    				  switch(depositType) {
+		    				  case FD: this.fdAccounts.put(accountNo, branchId);
+		    				  		   break;
+		    				  case RD: this.rdAccounts.put(accountNo, branchId);
+		    				  		   break;
+	    				  }
 	    	              break;
 	    	default: break;
     	}
@@ -138,8 +161,11 @@ public class Customer extends User {
 				        	}
 				            break;
 				            
-	    	case DEPOSIT:   if(this.depositAccounts.containsKey(accountNo)) {
-					    		this.depositAccounts.remove(accountNo);
+	    	case DEPOSIT:   if(this.fdAccounts.containsKey(accountNo)) {
+					    		this.fdAccounts.remove(accountNo);
+					    	} else {
+					    		if(this.rdAccounts.containsKey(accountNo))
+					    			this.rdAccounts.remove(accountNo);
 					    	}
 	    				    break;
 	    	default: break;
@@ -200,8 +226,11 @@ public class Customer extends User {
 				        	
 				            break;
 				            
-	    	case DEPOSIT:   if(this.depositAccounts.containsKey(accountNo)) {
-					    		branchId = this.depositAccounts.get(accountNo);
+	    	case DEPOSIT:   if(this.fdAccounts.containsKey(accountNo)) {
+					    		branchId = this.fdAccounts.get(accountNo);
+					    	} else {
+					    		if(this.rdAccounts.containsKey(accountNo))
+					    			branchId = this.rdAccounts.get(accountNo);
 					    	}
 	    				    break;
 	    	default: break;
@@ -210,7 +239,7 @@ public class Customer extends User {
     	return branchId;
     }
     
-    // Returns a list of active accoutn no's of the customer.
+    // Returns a list of active account no's of the customer.
     public Properties getActiveAccounts(AccountCategory category) throws SQLException {
     	Properties activeAccounts = new Properties();
     	RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
@@ -292,8 +321,12 @@ public class Customer extends User {
     	return this.currentAccountNo;
     }
     
-    public Collection<Long> getDepositAccounts() {
-    	return this.depositAccounts.keySet();
+    public Collection<Long> getDepositAccounts(DepositAccountType type) {
+    	switch(type) {
+	    	case FD: return this.fdAccounts.keySet();
+	    	case RD: return this.rdAccounts.keySet();
+	    	default: return null;
+    	}
     }
     
     public byte getAge() {

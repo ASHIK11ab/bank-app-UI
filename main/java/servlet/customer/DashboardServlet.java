@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import constant.BeneficiaryType;
+import constant.DepositAccountType;
 import model.user.Customer;
 import util.Factory;
 
@@ -39,8 +40,13 @@ public class DashboardServlet extends HttpServlet {
 			stats.add(prop);
 			
 			prop = new Properties();
-			prop.put("title", "Deposit Accounts");
-			prop.put("cnt", customer.getDepositAccounts().size());
+			prop.put("title", "Fixed Deposits (FD)");
+			prop.put("cnt", customer.getDepositAccounts(DepositAccountType.FD).size());
+			stats.add(prop);
+			
+			prop = new Properties();
+			prop.put("title", "Recurring Deposits (RD)");
+			prop.put("cnt", customer.getDepositAccounts(DepositAccountType.RD).size());
 			stats.add(prop);
 			
 			prop = new Properties();

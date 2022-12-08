@@ -34,19 +34,24 @@
 							
 							<c:when test="${ role == Role.CUSTOMER }">
 								<c:choose>
-									<c:when test="${ customerDeposits.size() > 0 }">
+									<c:when test="${ fdAccounts.size() + rdAccounts.size() > 0 }">
 										<label>Select Deposit:</label>
 										<select name="account-no" required>
-											<option value="-1" selected disabled hidden>select account</option>
-											<c:forEach items="${ requestScope.customerDeposits }" var="accountNo">
+											<option value="-1" selected disabled hidden>select account</option>											
+											<c:forEach items="${ fdAccounts }" var="accountNo">
 												<option value="${ accountNo }">
-													${ accountNo }
+													${ accountNo } (FD)
+												</option>
+											</c:forEach>
+											<c:forEach items="${ rdAccounts }" var="accountNo">
+												<option value="${ accountNo }">
+													${ accountNo } (RD)
 												</option>
 											</c:forEach>
 										</select>
 									</c:when>
 									
-									<c:when test="${ customerDeposits.size() == 0 }">
+									<c:when test="${ fdAccounts.size() + rdAccounts.size() == 0 }">
 										<h1>No deposits</h1>
 										<a class="button" href="/bank-app/customer/deposit/create">Create Deposit</a>
 									</c:when>
@@ -56,7 +61,7 @@
 						</c:choose>
 						
 						<!-- Hide submit button when no deposit account to display for customer. -->
-						<c:if test="${ role == Role.EMPLOYEE || customerDeposits.size() > 0 }">
+						<c:if test="${ role == Role.EMPLOYEE || fdAccounts.size() + rdAccounts.size() > 0 }">
 							<button>submit</button>
 						</c:if>
 					</form>
