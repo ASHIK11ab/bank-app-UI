@@ -143,6 +143,12 @@ public class CreateEditBranchServlet extends HttpServlet {
 								synchronized (branch) {							
 									if(!branch.equals(temp)) {
 										branchDAO.createUpdate(conn, name, address, (byte) 1, branch.getId());
+										manager = branch.getManager();
+										
+										if(manager != null)
+											synchronized (manager) {
+												manager.setBranchName(name);
+											}
 									}
 						            	
 								}

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,6 +22,7 @@ import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.Bank;
 import model.Branch;
+import model.Transaction;
 import model.account.RegularAccount;
 import model.user.Customer;
 import util.Factory;
@@ -31,7 +33,7 @@ public class RemoveCustomerServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
 		String msg = "";
-		long accountNo = -1;
+		long accountNo = -1, transactionId;
 		int branchId;
 		float beforeBalance = 0;
 		boolean exceptionOccured = false, isError = false;
@@ -42,6 +44,7 @@ public class RemoveCustomerServlet extends HttpServlet {
 		CustomerDAO customerDAO = Factory.getCustomerDAO();
 		
 		Bank bank = AppCache.getBank();
+		Transaction transaction = null;
 		Branch branch = null;
 		Customer customer = null;
 		RegularAccount account = null;
@@ -78,8 +81,11 @@ public class RemoveCustomerServlet extends HttpServlet {
                     	// If account has balance, credit balance as cash to user, create a transaction record.
                     	if(account.getBalance() > 0) {
                     		beforeBalance = accountDAO.updateBalance(conn, accountNo, 0, account.getBalance());
-                    		transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+                    		transactionId = transactionDAO.create(conn, TransactionType.CASH.id, ("Closing of A/C: " + accountNo), accountNo, null, beforeBalance, true, false, beforeBalance, 0);
+                    		transaction = new Transaction(transactionId, TransactionType.CASH.id, account.getAccountNo(), -1, account.getBalance(), LocalDateTime.now(), ("Closing of A/C: " + account.getAccountNo()), beforeBalance);
+
                     		account.deductAmount(beforeBalance);
+                    		account.addTransaction(transaction);
                     	}
                     	accountDAO.closeAccount(conn, account, AccountCategory.REGULAR);
 						customerDAO.removeCustomer(conn, customer.getId(), accountNo);

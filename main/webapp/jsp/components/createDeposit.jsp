@@ -136,11 +136,17 @@
 						
 					<h3>Debit from account Details:</h3>
 					<p>A/C No: ${ debitFromAccount.getAccountNo() }</p>
-					<p>Branch: ${ debitFromAccount.getBranchName() }</p>
+					
+					<c:if test="${ role == Role.CUSTOMER }">
+						<p>Branch: ${ debitFromAccount.getBranchName() }</p>
+					</c:if>
 					
 					<h3>Payout account Details:</h3>
 					<p>A/C No: ${ payoutAccount.getAccountNo() }</p>
-					<p>Branch Name: ${ payoutAccount.getBranchName() }</p>
+					
+					<c:if test="${ role == Role.CUSTOMER }">
+						<p>Branch Name: ${ payoutAccount.getBranchName() }</p>
+					</c:if>
 					
 					<h3>Deposit details:</h3>
 					<p>Deposit type: ${ DepositAccountType.getName(depositType) }</p>

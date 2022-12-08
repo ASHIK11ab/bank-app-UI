@@ -170,8 +170,12 @@ public class AccountDAO {
 				
 				// deactivate all linked cards
 				linkedCards = regularAccount.getCards();
-				for(DebitCard card : linkedCards)
+				for(DebitCard card : linkedCards) {
 					cardDAO.deactivateCard(conn, card.getCardNo());
+					synchronized (card) {
+						card.deactivateCard();
+					}
+				}
 			}
 			
 			// update in cache.

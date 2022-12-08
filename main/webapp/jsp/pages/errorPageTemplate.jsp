@@ -16,12 +16,19 @@
 	<c:when test="${ sessionScope.role != null }">
 		<c:set var="userType" value="${ Role.getName(sessionScope.role) }" />
 		<jsp:include page="/jsp/${ userType }/components/navbar.jsp" />
+		<main class="container">
+			<div class="wrapper">
+			
+				<h1 style="color: red">${ param.text }</h1>
+				
+			</div>
+		</main>
 	</c:when>
 	
 	<c:when test="${ sessionScope.role == null }">
+		<jsp:include page="/jsp/components/generalNavbar.jsp" />
 		<main class="container">
 			<div class="wrapper">
-				<jsp:include page="/jsp/components/generalNavbar.jsp" />
 			
 				<h1 style="color: red">${ param.text }</h1>
 				
