@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.TreeSet;
 
 import cache.AppCache;
 import model.Branch;
@@ -140,12 +143,21 @@ public class ManagerDAO {
 	}
 	
 	
-	public LinkedList<Employee> getAll() throws SQLException {
+	public Collection<Employee> getAll() throws SQLException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		
-		LinkedList<Employee> managers = new LinkedList<Employee>();
+		TreeSet<Employee> managers = new TreeSet<Employee>(new Comparator<Employee>() {
+			@Override
+			public int compare(Employee base, Employee target) {
+				if(base.getId() == target.getId())
+					return 0;
+				
+				return Util.compareByName(base.getName(), target.getName());
+			}
+		});
+		
 		Employee manager = null;
 		boolean exceptionOccured = false;
 		String msg = "", branchName = "";

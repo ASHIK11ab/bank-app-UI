@@ -51,6 +51,29 @@ public class Util {
     }
     
     
+    public static int compareByName(String baseName, String targetName) {
+    	char baseCharacter, targetCharacter;
+    	
+    	int minLength = (baseName.length() < targetName.length()) ? baseName.length() : targetName.length();
+    	
+    	for(int index = 0; index < minLength; ++index) {
+    		baseCharacter = Character.toLowerCase(baseName.charAt(index));
+    		targetCharacter = Character.toLowerCase(targetName.charAt(index));
+    		
+    		if(baseCharacter != targetCharacter) {
+    			return baseCharacter - targetCharacter;
+    		}
+    	}
+    	
+    	// When first 'minLength' characters are same, string with lesser length
+    	// is stored first.
+    	if(baseName.length() < targetName.length())
+    		return -1;
+    	else
+    		return 1;
+    }
+    
+    
     public static String createNotification(String msg, String status) {
     	String html = "";
     	html += "<div class='notification " + status + "'>";

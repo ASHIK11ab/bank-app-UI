@@ -3,6 +3,7 @@ package servlet.admin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedList;
 
 import javax.servlet.ServletException;
@@ -22,7 +23,7 @@ public class ManagersServlet extends HttpServlet {
 		PrintWriter out = res.getWriter();
 		
 		boolean exceptionOccured = false;
-		LinkedList<Employee> managers;
+		Collection<Employee> managers;
 		String queryMsg, status, msg = "";
 		
 		queryMsg = req.getParameter("msg");
