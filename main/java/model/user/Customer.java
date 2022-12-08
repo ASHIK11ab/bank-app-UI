@@ -46,7 +46,7 @@ public class Customer extends User {
     private SortedSet<Beneficiary> otherBankBeneficiaries;
     
     // Mapping of A/C(s) no's to corresponding branch Id.
-    private ConcurrentHashMap<Long, Integer> savingsAccounts;
+    private SortedMap<Long, Integer> savingsAccounts;
 
     // A customer can have only one current account.
     // A/C no, branch Id
@@ -107,7 +107,8 @@ public class Customer extends User {
 
         this.ownBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
         this.otherBankBeneficiaries = Collections.synchronizedSortedSet(new TreeSet<Beneficiary>(beneficiaryComparator));
-        this.savingsAccounts = new ConcurrentHashMap<Long, Integer>();
+        
+        this.savingsAccounts = Collections.synchronizedSortedMap(new TreeMap<Long, Integer>(accountNoComparator));
 
         this.currentAccountNo = -1;
         this.currentAccountBranchId = -1;
