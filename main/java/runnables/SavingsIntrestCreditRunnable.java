@@ -67,7 +67,7 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 				try {
 					conn = Factory.getDataSource().getConnection();
 										
-					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.intrest_amount, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ? AND a.closing_date IS NULL AND (ra.intrest_calculated_on IS NULL OR ra.intrest_calculated_on != ?)");
+					stmt1 = conn.prepareStatement("SELECT ra.account_no, ra.intrest_amount, a.branch_id FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE ra.active = true AND ra.type_id = ? AND (ra.intrest_calculated_on IS NULL OR ra.intrest_calculated_on != ?)");
 					
 					stmt2 = conn.prepareStatement("SELECT t.from_account_no, t.amount, at.before_balance FROM transaction t JOIN account_transaction at ON t.id = at.transaction_id WHERE at.account_no = ? AND t.date < ? ORDER BY t.id DESC LIMIT 1");
 				
@@ -87,6 +87,8 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 						intrestAmount = rs1.getFloat("intrest_amount");
 						accountBranchId = rs1.getInt("branch_id");
 						
+						System.out.println("\nSavings intrest credit: Processing A/C: " + accountNo);
+						
 						// Get yesterday's closing balance of the account.
 						stmt2.setLong(1, accountNo);
 						stmt2.setDate(2, Date.valueOf(today));
@@ -100,7 +102,7 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 							// Calculate intrest amount for yesterday's closing balance.
 							closing_balance = (fromAccountNo == accountNo) ? beforeBalance - transactionAmount : beforeBalance + transactionAmount; 
 							
-							if(closing_balance < 0)
+							if(closing_balance <= 0)
 								continue;
 							
 							// Update total intrest to be credited.
@@ -137,7 +139,7 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 											transaction = new Transaction(transactionId, TransactionType.NEFT.id, bankAccountNo, accountNo, intrestAmount, dateTime, description, fromAccountBeforeBalance);
 											bankAccount.addTransaction(transaction);
 											
-											System.out.println("Savings intrest credited for A/C: " + accountNo);
+											System.out.println("Savings intrest of rupees " + intrestAmount + " credited to A/C: " + accountNo);
 											
 											// Reset intrest for next quarter
 											intrestAmount = 0;
@@ -149,6 +151,9 @@ public class SavingsIntrestCreditRunnable implements Runnable {
 									}
 								}
 								// End of synchronized block on bank account.
+							} else {
+								System.out.println("Savings intrest credit: Intrest of amount: " + intrest + " added to A/C: " + accountNo);
+								System.out.println("Savings intrest credit: Total intrest to be paid for A/C: " + accountNo + " is: " + intrestAmount);
 							}
 							
 							if(!insufficientBalance) {

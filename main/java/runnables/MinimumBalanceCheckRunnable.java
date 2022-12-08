@@ -27,7 +27,7 @@ import util.Factory;
  */
 public class MinimumBalanceCheckRunnable implements Runnable {
 	public boolean exit = false;
-	private static final int MINIMUM_BALANCE_DEBIT_DATE = 1;
+	private static final int MINIMUM_BALANCE_DEBIT_DATE = 8;
 	
 	@Override
 	public void run() {
@@ -60,7 +60,6 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 		try {
 			while(!exit) {
 				today = LocalDate.now();
-				
 				System.out.println("Minimum balance check thread started: " + LocalDateTime.now());
 				
 				try {
@@ -79,7 +78,7 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 					
 					rs1 = stmt1.executeQuery();
 					
-					// Get all active savings accounts along with the previously calculated closing balance details.
+					// Get all active accounts along with the previously calculated closing balance details.
 					while(rs1.next()) {
 						typeId = rs1.getInt("type_id");
 						accountNo = rs1.getLong("account_no");
@@ -87,8 +86,10 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 						closing_balance_calculated_days = rs1.getInt("closing_balance_calculated_days");
 						accountBranchId = rs1.getInt("branch_id");
 						
+						System.out.println("\nMin bal check: Processing A/C: " + accountNo + ", " + RegularAccountType.getType(typeId));
+						
 						stmt2.setLong(1, accountNo);
-						stmt2.setDate(2, Date.valueOf(today.minusDays(1)));
+						stmt2.setDate(2, Date.valueOf(today));
 						rs2 = stmt2.executeQuery();
 						
 						// Get yesterday's closing balance of the account.
@@ -103,6 +104,8 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 							// Update accounts closing balance details
 							sum_closing_balance += closing_balance;
 							closing_balance_calculated_days++;
+							
+							System.out.println("Min bal check: A/C: " + accountNo + " avg balance: " + (sum_closing_balance / closing_balance_calculated_days));
 							
 							// If today is minimum balance debit date, if applicable,
 							// Debit charges.
@@ -130,7 +133,7 @@ public class MinimumBalanceCheckRunnable implements Runnable {
 											account.deductAmount(Constants.MINIMUM_BALANCE_DEFECIT_CHARGES);
 											bankAccount.addAmount(Constants.MINIMUM_BALANCE_DEFECIT_CHARGES);
 											
-											description = "Minimum balance defecit";
+											description = "Min balance defecit charges for A/C: " + account.getAccountNo();
 											
 											transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, accountNo, bankAccountNo, Constants.MINIMUM_BALANCE_DEFECIT_CHARGES, true, true, fromAccountBeforeBalance, toAccountBeforeBalance);
 											
