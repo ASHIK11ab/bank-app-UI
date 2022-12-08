@@ -15,7 +15,7 @@
 		<h1>Welcome to <span class="bank-name">Your Bank</span></h1>
 		<section>
 			<h2>About <span class="bank-name">Your Bank</span></h2>
-			<p> For the past 50 years <span class="bank-name">Your Bank</span> has been the serving
+			<p> For the past 50 years <span class="bank-name">Your Bank</span> has been serving
 			the people. <span class="bank-name">Your Bank</span> has been a key player in the Digital 
 			India initiative.</p>
 		</section>

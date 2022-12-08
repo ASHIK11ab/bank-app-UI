@@ -189,7 +189,14 @@ public class Bank {
     public Branch getBranch(int branchId) {
         return this.branches.get(branchId);
     }
+    
+    public String getSupportEmail() {
+    	return this.supportEmail;
+    }
 
+    public long getSupportPhone() {
+    	return this.supportPhone;
+    }
 
     // Setters
     public void setAdmin(User admin) {
