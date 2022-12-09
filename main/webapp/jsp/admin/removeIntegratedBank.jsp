@@ -13,17 +13,35 @@
 	
 	<main class="container">
 		<div class="wrapper">
-			<h1>Remove Integrated Bank</h1>
+			<h1>${ actionType == 0 ? 'Remove Integrated Bank' : 'Confirm Integrated Bank details' }</h1>
 			<form action="/bank-app/admin/integrated-banks/bank/delete" method="post">
+				<input name="actionType" value="${ actionType }" class="hidden">
 				
-				<jsp:include page="/jsp/components/genericDropdown.jsp">
-					<jsp:param name="labelName" value="Select Bank:" />
-					<jsp:param name="name" value="bank-id" />
-					<jsp:param name="placeholderOptionText" value="select bank" />
-					<jsp:param name="displayId" value="${ false }" />
-				</jsp:include>
+				<c:if test="${ actionType == 1 }">
+					<c:set var="selectedId" value="${ bank.getId() }" scope="request" />
+				</c:if>
 				
-				<button>Remove bank</button>
+				<div class="${ actionType == 1 ? 'hidden' : '' }">
+					<jsp:include page="/jsp/components/genericDropdown.jsp">
+						<jsp:param name="labelName" value="Select Bank:" />
+						<jsp:param name="name" value="bank-id" />
+						<jsp:param name="placeholderOptionText" value="select bank" />
+						<jsp:param name="displayId" value="${ false }" />
+					</jsp:include>
+				</div>
+				
+				<c:if test="${ actionType == 1 }">
+					<h3>Integrated Bank details</h3>
+					<p>Bank Name: ${ bank.getName() }</p>
+					<p>Bank Email: ${ bank.getEmail() }</p>
+					<p>You are about to remove the integrated bank. This action cannot be reversed. Proceed to remove integrated bank</p>
+				</c:if>
+				
+				<button class="danger" >Remove bank</button>
+				
+				<c:if test="${ actionType == 1 }">
+					<a class="button secondary" href="/bank-app/admin/integrated-banks/bank/delete">Cancel</a>
+				</c:if>
 			</form>
 		</div>
 	</main>

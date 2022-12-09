@@ -22,6 +22,7 @@ public class RemoveIntegratedBankServlet extends HttpServlet {
 		IntegratedBankDAO integratedBankDAO = Factory.getIntegratedBankDAO();
 		Collection<IntegratedBank> integratedBanks = integratedBankDAO.getAll();
 		req.setAttribute("values", integratedBanks);
+		req.setAttribute("actionType", 0);
 		req.getRequestDispatcher("/jsp/admin/removeIntegratedBank.jsp").include(req, res);
 	}
 	
@@ -33,21 +34,38 @@ public class RemoveIntegratedBankServlet extends HttpServlet {
 		IntegratedBank bank = null;
 		boolean isError = false, exceptionOccured = false;
 		String msg = "";
-		int integratedBankId;
+		int integratedBankId, actionType;
 		
 		try {
 			integratedBankId = Integer.parseInt(req.getParameter("bank-id"));
+			actionType = Integer.parseInt(req.getParameter("actionType"));
 			
-			bank = integratedBankDAO.get(integratedBankId);
-			
-			if(bank == null) {
+			if(actionType != 0 && actionType != 1) {
 				isError = true;
-				msg = "Integrated bank does not exist !!!";
+				msg = "Invalid action !!!";
 			}
 			
 			if(!isError) {
+				bank = integratedBankDAO.get(integratedBankId);
+				
+				if(bank == null) {
+					isError = true;
+					msg = "Integrated bank does not exist !!!";
+				}
+			}
+			
+			// ask for confirmation.
+			if(!isError && actionType == 0) {
+				req.setAttribute("actionType", 1);
+				req.setAttribute("bank", bank);
+				req.setAttribute("values", Factory.getIntegratedBankDAO().getAll());
+				req.getRequestDispatcher("/jsp/admin/removeIntegratedBank.jsp").include(req, res);
+			}
+			
+			if(!isError && actionType == 1) {
 				integratedBankDAO.delete(integratedBankId);
-				msg = "integrated bank deleted successfully";				
+				msg = "integrated bank deleted successfully";
+				res.sendRedirect(String.format("/bank-app/admin/integrated-banks?msg=%s&status=success", msg));
 			}
 			
 		} catch(NumberFormatException e) {
@@ -64,10 +82,7 @@ public class RemoveIntegratedBankServlet extends HttpServlet {
 				out.println(Util.createNotification(msg, "danger"));
 				doGet(req, res);
 				out.close();
-			} else {
-				res.sendRedirect(String.format("/bank-app/admin/integrated-banks?msg=%s&status=success", msg));
 			}
-			
 		}
 	}
 }
