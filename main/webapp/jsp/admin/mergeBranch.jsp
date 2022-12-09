@@ -12,9 +12,11 @@
 
 	<jsp:include page="/jsp/admin/components/navbar.jsp" />
 	
+	<c:set var="title" value='${ actionType == 0 ? "Merge Branches" : "Confirm Branch Details for Merge" }' />
+	
 	<main class="container">
 		<section>
-			<h1>Merge Branches</h1>
+			<h1>${ title }</h1>
 			
 			<c:choose>
 				<c:when test="${ branches.size() == 1 }">
@@ -23,23 +25,45 @@
 				
 				<c:when test="${ branches.size() > 1 }">
 					<c:set var="values" value="${ branches }" scope="request" />
+					
 					<form action="/bank-app/admin/branches/merge" method="post">
+						<input name="action-type" value="${ actionType }" class="hidden">
 						
-						<jsp:include page="/jsp/components/genericDropdown.jsp">
-							<jsp:param name="labelName" value="Base branch:" />
-							<jsp:param name="name" value="base-branch-id" />
-							<jsp:param name="placeholderOptionText" value="select branch" />
-							<jsp:param name="displayId" value="${ false }" />
-						</jsp:include>
+						<div class="${ actionType == 1 ? 'hidden' : '' }">
+							<c:set var="selectedId" value="${ baseBranch.getId() }" scope="request" />
+							
+							<jsp:include page="/jsp/components/genericDropdown.jsp">
+								<jsp:param name="labelName" value="Base branch:" />
+								<jsp:param name="name" value="base-branch-id" />
+								<jsp:param name="placeholderOptionText" value="select branch" />
+								<jsp:param name="displayId" value="${ false }" />
+							</jsp:include>
+							
+							<c:set var="selectedId" value="${ targetBranch.getId() }" scope="request" />
+							
+							<jsp:include page="/jsp/components/genericDropdown.jsp">
+								<jsp:param name="labelName" value="Target branch:" />
+								<jsp:param name="name" value="target-branch-id" />
+								<jsp:param name="placeholderOptionText" value="select branch" />
+								<jsp:param name="displayId" value="${ false }" />
+							</jsp:include>
+						</div>
 						
-						<jsp:include page="/jsp/components/genericDropdown.jsp">
-							<jsp:param name="labelName" value="Target branch:" />
-							<jsp:param name="name" value="target-branch-id" />
-							<jsp:param name="placeholderOptionText" value="select branch" />
-							<jsp:param name="displayId" value="${ false }" />
-						</jsp:include>
+						<c:if test="${ actionType == 1 }">
+							<h3>Base branch details:</h3>
+							<p>Branch: ${ baseBranch.getName() }</p>
+							<p>Address: ${ baseBranch.getAddress() }</p>
+							
+							<h3>Target branch details:</h3>
+							<p>Branch: ${ targetBranch.getName() }</p>
+							<p>Address: ${ targetBranch.getAddress() }</p>
+						</c:if>
 						
 						<button>merge branches</button>
+						
+						<c:if test="${ actionType == 1 }">
+							<a class="button secondary" href="/bank-app/admin/branches/merge">Cancel</a>
+						</c:if>
 					</form>
 				</c:when>
 			</c:choose>

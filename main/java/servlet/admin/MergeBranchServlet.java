@@ -31,6 +31,7 @@ public class MergeBranchServlet extends HttpServlet {
 		BranchDAO branchDAO = Factory.getBranchDAO();
 		Collection<Branch> branches = branchDAO.getAll();
 		req.setAttribute("branches", branches);
+		req.setAttribute("actionType", 0);
 		req.getRequestDispatcher("/jsp/admin/mergeBranch.jsp").include(req, res);
 	}
 	
@@ -45,26 +46,43 @@ public class MergeBranchServlet extends HttpServlet {
 		
 		boolean isError = false, exceptionOccured = false;
 		String msg = "";
-		int baseBranchId, targetBranchId;
+		int baseBranchId, targetBranchId, actionType;
 		
 		try {
 			baseBranchId = Integer.parseInt(req.getParameter("base-branch-id"));
 			targetBranchId = Integer.parseInt(req.getParameter("target-branch-id"));
+			actionType = Integer.parseInt(req.getParameter("action-type"));
 			
-			if(baseBranchId == targetBranchId) {
+			if(actionType != 0 && actionType != 1) {
+				isError = true;
+				msg = "Invalid action !!!";
+			}
+			
+			if(!isError && baseBranchId == targetBranchId) {
 				isError = true;
 				msg = "Base and target branches cannot be same !!!";
 			}
 			
-			baseBranch = branchDAO.get(baseBranchId);
-			targetBranch = branchDAO.get(targetBranchId);
-			
-			if(!isError && (baseBranch == null || targetBranch == null)) {
-				isError = true;
-				msg = "Invalid branches selected !!!";
+			if(!isError) {	
+				baseBranch = branchDAO.get(baseBranchId);
+				targetBranch = branchDAO.get(targetBranchId);
+				
+				if(baseBranch == null || targetBranch == null) {
+					isError = true;
+					msg = "Invalid branches selected !!!";
+				}
 			}
 			
-			if(!isError) {
+			// Ask for confirmation.
+			if(!isError && actionType == 0) {
+				req.setAttribute("actionType", 1);
+				req.setAttribute("branches", Factory.getBranchDAO().getAll());
+				req.setAttribute("baseBranch", baseBranch);
+				req.setAttribute("targetBranch", targetBranch);
+				req.getRequestDispatcher("/jsp/admin/mergeBranch.jsp").include(req, res);
+			}
+			
+			if(!isError && actionType == 1) {
 				synchronized (baseBranch) {
 					synchronized (targetBranch) {
 						conn = Factory.getDataSource().getConnection();
@@ -103,7 +121,6 @@ public class MergeBranchServlet extends HttpServlet {
 						AppCache.getBank().removeBranch(baseBranchId);
 					}
 				}
-				
 				res.sendRedirect(String.format("/bank-app/admin/branches?msg=branches merged successfully&status=success"));
 			}
 		} catch(NumberFormatException e) {
