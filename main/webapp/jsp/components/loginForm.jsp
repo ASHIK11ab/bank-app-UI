@@ -12,6 +12,8 @@
 	</jsp:include>
 </head>
 <body>
+	<jsp:include page="/jsp/components/generalNavbar.jsp" />
+
 	<main class="container">
 		<div class="wrapper">
 			<h1 class="app-name">Your Bank</h1>
@@ -39,5 +41,8 @@
 			</section>
 		</div>
 	</main>
+	
+	<jsp:include page="/jsp/components/footer.jsp" />
+
 </body>
 </html>
