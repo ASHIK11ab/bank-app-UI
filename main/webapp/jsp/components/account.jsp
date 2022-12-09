@@ -16,4 +16,8 @@
 	<c:if test="${ account.isClosed() }">
 		<strong>Account closed on: ${ account.getClosingDate() }</strong>
 	</c:if>
+	
+	<c:set var="nominee" value="${ account.getNominee() }" scope="request" />
+	<h2>Nominee Details:</h2>
+	<jsp:include page="/jsp/components/nominee/nomiee.jsp" />
 </section>

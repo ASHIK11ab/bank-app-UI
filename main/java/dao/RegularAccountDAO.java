@@ -115,15 +115,19 @@ public class RegularAccountDAO {
 		
 		DebitCardDAO cardDAO = Factory.getDebitCardDAO();
 		TransactionDAO transactionDAO = Factory.getTransactionDAO();
+		NomineeDAO nomineeDAO = Factory.getNomineeDAO();
+		
 		LinkedList<Transaction> recentTransactions = null;
 		
 		Branch branch = AppCache.getBranch(branchId);
+		
 		RegularAccount account = null;
+		Nominee nominee = null;
 		LocalDate openingDate, closingDate;
 		boolean exceptionOccured = false, isActive;
 		String msg = "", customerName = "";
 		float balance;
-		long customerId;
+		long customerId, nomineeId;
 		int type_id = -1;
 		
 		if(branch == null) {
@@ -149,11 +153,14 @@ public class RegularAccountDAO {
 			        balance = rs1.getFloat("balance");
 			        openingDate = rs1.getDate("opening_date").toLocalDate();
 			        isActive = rs1.getBoolean("active");
+			        nomineeId = rs1.getLong("nominee_id");
 			        
 			        if(rs1.getDate("closing_date") != null)
 			        	closingDate = rs1.getDate("closing_date").toLocalDate();
 			        else
 			        	closingDate = null;
+			        
+					nominee = nomineeDAO.get(conn, nomineeId);
 			        
 					stmt2.setLong(1, customerId);
 					rs2 = stmt2.executeQuery();
@@ -162,8 +169,8 @@ public class RegularAccountDAO {
 					
 					// update getting nominee
 					switch(RegularAccountType.getType(type_id)) {
-						case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
-						case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, null, branchId, balance, openingDate, closingDate, isActive); break;
+						case SAVINGS : account = new SavingsAccount(accountNo, customerId, customerName, nominee, branchId, balance, openingDate, closingDate, isActive); break;
+						case CURRENT : account = new CurrentAccount(accountNo, customerId, customerName, nominee, branchId, balance, openingDate, closingDate, isActive); break;
 					}
 					
 					// Cache recent transactions of account.
@@ -175,7 +182,7 @@ public class RegularAccountDAO {
 					// Load cards linked with account.
 					for(DebitCard card : cardDAO.getAll(conn, accountNo))
 						account.addDebitCard(card);
-					
+										
 					// ADD to cache.
 					branch.addAccount(AccountCategory.REGULAR, account.getTypeId(), account);
 					System.out.println("fetched from db regular account");
