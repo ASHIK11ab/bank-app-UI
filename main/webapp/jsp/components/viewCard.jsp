@@ -47,6 +47,7 @@
 													</option>
 												</c:forEach>
 											</select>
+											
 										</c:when>
 										
 										<c:when test="${ cards.size() == 0 }">
@@ -56,8 +57,12 @@
 								</c:when>
 							
 							</c:choose>
-						
-							<button>submit</button>
+							
+							<c:set var="cardsCnt" value="${ cards.size() }" />
+							
+							<c:if test="${ role == Role.EMPLOYEE || (role == Role.CUSTOMER && cardsCnt > 0) }">
+								<button>submit</button>
+							</c:if>
 						</section>
 					</form>
 				</c:when>

@@ -45,7 +45,7 @@ public class CreateEditBranchServlet extends HttpServlet {
 		
 		try {
 			type = Byte.parseByte(req.getParameter("type"));
-			name = req.getParameter("name");
+			name = req.getParameter("name").toLowerCase();
 			doorNo = req.getParameter("door-no");
 			street = req.getParameter("street");
 			city = req.getParameter("city");

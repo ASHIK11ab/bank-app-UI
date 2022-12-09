@@ -32,7 +32,7 @@ public class AddEditIntegratedBankServlet extends HttpServlet {
 		
 		try {
 			type = Byte.parseByte(req.getParameter("type-id"));
-			name = req.getParameter("name");
+			name = req.getParameter("name").toLowerCase();
 			email = req.getParameter("email");
 			phone = Long.parseLong(req.getParameter("phone"));
 			apiURL = req.getParameter("api-url");

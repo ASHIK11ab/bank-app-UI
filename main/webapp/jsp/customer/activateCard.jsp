@@ -25,7 +25,7 @@
 				<input type="password" name="cvv" placeholder="3 digit number on back of debit card" required>
 				
 				<button>Activate card</button>
-				<a class="button secondary" href="/bank-app/customer/${ cardNo }/view">cancel</a>
+				<a class="button secondary" href="/bank-app/customer/card/${ cardNo }/view">cancel</a>
 			</form>
 		</div>
 	</main>
