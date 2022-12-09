@@ -449,6 +449,15 @@
 		<servlet-name>CreateAccountServlet</servlet-name>
 		<url-pattern>/employee/account/create/existing-customer</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DeactivateCardServlet</servlet-name>
+		<servlet-class>servlet.employee.DeactivateCardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DeactivateCardServlet</servlet-name>
+		<url-pattern>/employee/deactivate-card</url-pattern>
+	</servlet-mapping>
 	<!-- End of employee servlet mappings -->
 	
 	<!-- Customer servlets and mappings -->

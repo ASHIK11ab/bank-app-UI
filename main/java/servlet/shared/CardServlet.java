@@ -139,7 +139,7 @@ public class CardServlet extends HttpServlet {
 										}
 										break;
 					case "activate":
-									if(role == Role.EMPLOYEE) {
+									if(role != Role.CUSTOMER) {
 										isError = true;
 										msg = "page not found !!!";
 									}
@@ -156,6 +156,22 @@ public class CardServlet extends HttpServlet {
 									
 									if(!isError)
 										req.getRequestDispatcher("/jsp/customer/activateCard.jsp").forward(req, res);
+									break;
+									
+					case "deactivate":
+									if(role != Role.EMPLOYEE) {
+										isError = true;
+										msg = "page not found !!!";
+									}
+									
+									if(!isError && card.isDeactivated()) {
+										isError = true;
+										msg = "card is aldready dactivated !!!";
+									}
+									
+									if(!isError) {
+										req.getRequestDispatcher("/jsp/employee/deactivateCard.jsp").forward(req, res);
+									}
 									break;
 					default: 
 							isError = true;
@@ -200,7 +216,7 @@ public class CardServlet extends HttpServlet {
 		} finally {
 			
 			if(isError || exceptionOccured) {
-				res.sendError(500);
+				res.sendRedirect(String.format("/bank-app/%s/card/", userType));
 			}
 			
 		}

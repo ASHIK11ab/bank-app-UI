@@ -72,7 +72,11 @@
 						<jsp:include page="/jsp/components/card.jsp" />
 						
 						<c:if test="${ role == Role.CUSTOMER && !card.isActivated() && !LocalDate.now().isBefore(card.getValidFromDate()) }">
-							<a class="button" href="/bank-app/${ userType }/card/${ cardNo }/activate">Activate card</a>
+							<a class="button" href="/bank-app/customer/card/${ cardNo }/activate">Activate card</a>
+						</c:if>
+						
+						<c:if test="${ role == Role.EMPLOYEE && !card.isDeactivated() }">
+							<a class="button danger" href="/bank-app/employee/card/${ cardNo }/deactivate">Deactivate card</a>
 						</c:if>
 						
 						<c:if test="${ card.isActivated() && !card.isDeactivated() }">
