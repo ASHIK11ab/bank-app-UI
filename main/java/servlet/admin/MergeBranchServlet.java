@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import cache.AppCache;
 import constant.AccountCategory;
+import constant.RegularAccountType;
 import dao.AccountDAO;
 import dao.BranchDAO;
 import model.Branch;
@@ -38,7 +40,8 @@ public class MergeBranchServlet extends HttpServlet {
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
-		PreparedStatement stmt = null;
+		PreparedStatement stmt = null, stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
 		
 		Branch baseBranch = null, targetBranch = null;
 		BranchDAO branchDAO = Factory.getBranchDAO();
@@ -87,6 +90,9 @@ public class MergeBranchServlet extends HttpServlet {
 					synchronized (targetBranch) {
 						conn = Factory.getDataSource().getConnection();
 						stmt = conn.prepareStatement("UPDATE account SET branch_id = ? WHERE branch_id = ?");
+						stmt1 = conn.prepareStatement(AccountDAO.BRANCH_REGULAR_ACCOUNT_COUNT_QUERY);
+						stmt2 = conn.prepareStatement(AccountDAO.BRANCH_DEPOSIT_ACCOUNT_COUNT_QUERY);
+						
 						stmt.setInt(1, targetBranchId);
 						stmt.setInt(2, baseBranchId);
 						stmt.executeUpdate();
@@ -115,7 +121,22 @@ public class MergeBranchServlet extends HttpServlet {
 								targetBranch.addAccount(AccountCategory.DEPOSIT, account.getTypeId(), account);
 							}
 						}
-					
+						
+						// update stats
+		    			stmt1.setInt(1, targetBranchId);
+		    			rs1 = stmt1.executeQuery();
+		    			while(rs1.next()) {
+		    				switch(RegularAccountType.getType(rs1.getInt("type_id"))) {
+			    				case SAVINGS: targetBranch.setSavingsAccountCnt(rs1.getInt("count")); break;
+			    				case CURRENT: targetBranch.setCurrentAccountCnt(rs1.getInt("count")); break;
+		    				}
+		    			}
+		    			
+		    			stmt2.setInt(1, targetBranchId);
+		    			rs2 = stmt2.executeQuery();
+		    			if(rs2.next())
+		    				targetBranch.setDepositAccountCnt(rs2.getInt("count"));
+											
 						branchDAO.delete(conn, baseBranchId);
 						// remove branch from cache.
 						AppCache.getBank().removeBranch(baseBranchId);

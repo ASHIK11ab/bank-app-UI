@@ -119,8 +119,8 @@ public class AppListener implements ServletContextListener {
             stmt4 = conn.prepareStatement("SELECT * FROM regular_account_type");
             
             stmt5 = conn.prepareStatement("SELECT COUNT(*) FROM employee WHERE branch_id = ?");
-			stmt6 = conn.prepareStatement("SELECT ra.type_id, COUNT(*) FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.branch_id = ? AND a.closing_date IS NULL GROUP BY ra.type_id;");
-			stmt7 = conn.prepareStatement("SELECT COUNT(*) FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.branch_id = ? AND a.closing_date IS NULL");
+			stmt6 = conn.prepareStatement(AccountDAO.BRANCH_REGULAR_ACCOUNT_COUNT_QUERY);
+			stmt7 = conn.prepareStatement(AccountDAO.BRANCH_DEPOSIT_ACCOUNT_COUNT_QUERY);
 			stmt8 = conn.prepareStatement("SELECT COUNT(*) FROM customer WHERE removed_date IS NULL");
 			
             rs1 = stmt1.executeQuery();

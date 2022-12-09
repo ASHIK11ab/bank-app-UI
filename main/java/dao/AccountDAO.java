@@ -19,6 +19,8 @@ import util.Factory;
 
 public class AccountDAO {
 	static final String ACCOUNT_CREATION_QUERY = "INSERT INTO account (customer_id, branch_id, balance, opening_date, nominee_id) VALUES (?, ?, ?, ?, ?)";
+	public static final String BRANCH_REGULAR_ACCOUNT_COUNT_QUERY = "SELECT ra.type_id, COUNT(*) FROM regular_account ra LEFT JOIN account a ON ra.account_no = a.account_no WHERE a.branch_id = ? AND a.closing_date IS NULL GROUP BY ra.type_id";
+	public static final String BRANCH_DEPOSIT_ACCOUNT_COUNT_QUERY = "SELECT COUNT(*) FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.branch_id = ? AND a.closing_date IS NULL";
 	
 	public boolean delete(Connection conn, long accountNo) throws SQLException {
 		PreparedStatement stmt = null;
