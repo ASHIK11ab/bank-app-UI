@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,11 +16,13 @@ import constant.DebitCardType;
 import constant.RegularAccountType;
 import constant.TransactionType;
 import dao.CustomerDAO;
+import dao.NomineeDAO;
 import dao.RegularAccountDAO;
 import dao.TransactionDAO;
 import model.Address;
 import model.Bank;
 import model.Branch;
+import model.Nominee;
 import model.user.Customer;
 import model.account.RegularAccount;
 import util.Factory;
@@ -42,6 +45,7 @@ public class CreateCustomerServlet extends HttpServlet {
         TransactionDAO transactionDAO = Factory.getTransactionDAO();
         CustomerDAO customerDAO = Factory.getCustomerDAO();
         RegularAccountDAO accountDAO = Factory.getRegularAccountDAO();
+        NomineeDAO nomineeDAO = Factory.getNomineeDAO();
 		
 		String name = "", email = "", pan = "", martialStatus = "", occupation = "";
         String doorNo = "", street = "", city = "", state = "", msg = "";
@@ -50,6 +54,11 @@ public class CreateCustomerServlet extends HttpServlet {
         int pincode = -1, income = -1, branchId, accountTypeId = -1, cardTypeId = -1;
         char gender = ' ';
         byte age = 0;
+        
+        Nominee nominee = null;
+        String nomineeName = "", nomineeRelationship = "";
+        long nomineePhone = -1, nomineeAdhaar = -1;
+        boolean nomineeRequired = true;
         
         try {
         	branchId = (Integer) req.getSession(false).getAttribute("branch-id");
@@ -74,6 +83,15 @@ public class CreateCustomerServlet extends HttpServlet {
         	city = req.getParameter("city");
         	state = req.getParameter("state");
         	pincode = Integer.parseInt(req.getParameter("pincode"));
+        	
+        	nomineeRequired = (Integer.parseInt(req.getParameter("nominee-facility")) == 1) ? true : false;
+        	
+        	if(nomineeRequired) {
+        		nomineeName = req.getParameter("nominee-name").strip();
+        		nomineeAdhaar = Long.parseLong(req.getParameter("nominee-adhaar"));
+        		nomineePhone = Long.parseLong(req.getParameter("nominee-phone"));
+        		nomineeRelationship = req.getParameter("nominee-relationship").strip();
+        	}
         	
         	// Validate user input
         	accountType = RegularAccountType.getType(accountTypeId);
@@ -137,15 +155,51 @@ public class CreateCustomerServlet extends HttpServlet {
         		msg = "state should be less than 15 characters";
         	}
         	
+        	if(!isError && nomineeRequired) {        		        		
+            	if(!isError && Util.getNoOfDigits(nomineePhone) != 10) {
+    				isError = true;
+            		msg = "Invalid nominee phone number";
+            	}
+            	
+            	if(!isError && Util.getNoOfDigits(nomineeAdhaar) != 12) {
+    				isError = true;
+            		msg = "Invalid nominee adhaar number";
+            	}
+            	
+            	if(!isError) {
+            		if(nomineeName.length() < 3) {            			
+	            		isError = true;
+	            		msg = "Nominee name should be a minimum of 3 characters !!!";
+            		} else {
+                		nomineeName = (nomineeName.length() > 15) ? nomineeName.substring(1, 15) : nomineeName;
+            		}
+            	}
+            	
+            	if(!isError) {
+            		if(nomineeRelationship.length() < 3) {            			
+	            		isError = true;
+	            		msg = "Invalid relationship";
+            		} else {
+                    	nomineeRelationship = (nomineeRelationship.length() > 15) ? nomineeRelationship.substring(1, 15) : nomineeRelationship;
+            		}
+            	}
+        	}
+        	
         	// Create new customer.
         	if(!isError) {	
 	            address = new Address(doorNo, street, city, state, pincode);
-	        	
+	            
 	        	conn = Factory.getDataSource().getConnection();
 	        	customer = customerDAO.create(conn, name, phone, email, age, gender, 
 	        									martialStatus, occupation, income, adhaar, 
 	        									pan, address);
-	        	account = accountDAO.create(conn, customer.getId(), name, branchId, accountType, cardTypeId, null);
+	        	
+	        	// Create nominee if requested.
+	        	if(nomineeRequired) {
+	        		nominee = nomineeDAO.create(conn, nomineeName, nomineeAdhaar, nomineePhone, nomineeRelationship, customer.getId());
+	        	}
+	        	
+	        	account = accountDAO.create(conn, customer.getId(), name, branchId, accountType, cardTypeId, nominee);
 	        	
         		transactionDAO.create(conn, TransactionType.CASH.id, ("Deposit to A/C: " + account.getAccountNo()), null, account.getAccountNo(), account.getBalance(), false, true, -1, 0);
 	        	
@@ -190,9 +244,12 @@ public class CreateCustomerServlet extends HttpServlet {
 	            customer = new Customer(-1, name, "", phone, email, age,
 					                    gender, martialStatus, occupation, income, adhaar, pan, 
 					                    "", address, null);
+	            nominee = new Nominee(-1, nomineeName, nomineeAdhaar, nomineePhone, nomineeRelationship);
 	            
 				out.println(Util.createNotification(msg, "danger"));
 				req.setAttribute("customer", customer);
+				req.setAttribute("nomineeRequired", nomineeRequired);
+				req.setAttribute("nominee", nominee);
 				req.setAttribute("accountType", accountTypeId);
     			req.setAttribute("cardType", cardTypeId);
     			req.getRequestDispatcher("/jsp/employee/createCustomer.jsp").include(req, res);

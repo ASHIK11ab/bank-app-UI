@@ -5,6 +5,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import dao.*;
+import model.Nominee;
 
 // Contains the singleton objects of DAO and Data Source.
 public class Factory {
@@ -24,6 +25,7 @@ public class Factory {
 	private static DepositAccountDAO depositAccountDAO;
 	private static DebitCardDAO debitCardDAO;
 	private static BeneficiaryDAO beneficiaryDAO;
+	private static NomineeDAO nomineeDAO;
 	
 	public static void init() throws Exception {
 		try {
@@ -43,6 +45,7 @@ public class Factory {
 			userDAO = new UserDAO();
 			debitCardDAO = new DebitCardDAO();
 			beneficiaryDAO = new BeneficiaryDAO();
+			nomineeDAO = new NomineeDAO();
 		} catch(NamingException e) {
 			throw new Exception(e.getMessage());
 		}
@@ -104,5 +107,9 @@ public class Factory {
 	
 	public static BeneficiaryDAO getBeneficiaryDAO() {
 		return beneficiaryDAO;
+	}
+	
+	public static NomineeDAO getNomineeDAO() {
+		return nomineeDAO;
 	}
 }

@@ -8,7 +8,7 @@
 	
 <label>Email:</label>
 <input type="email" placeholder="customer email" name="email" 
-	maxlength="30" value="${ customer.getEmail() }" required>
+	maxlength="30" value="${ customer.getEmail() }">
 	
 <label>Phone:</label>
 <input type="number" placeholder="contact number" name="phone" 

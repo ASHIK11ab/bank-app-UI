@@ -22,9 +22,30 @@
 					<jsp:include page="/jsp/components/customerDetailsForm.jsp" />
 				</section>
 				
+				<h2>Nominee details:</h2>
+				<label>Nominee facility:</label>
+				<div>
+					<div class="nominee-input-group">
+						<input type="radio" name="nominee-facility" value="1" class="nominee-facility-input" 
+							required>
+						<span>Yes</span>
+					</div>
+					<div class="nominee-input-group">
+						<input type="radio" name="nominee-facility" value="0" class="nominee-facility-input"
+							required>
+						<span>No</span>
+					</div>
+				</div>
+				
+				<div id="nominee-section" class="hidden">
+					<jsp:include page="/jsp/components/nominee/nomineeForm.jsp" />
+				</div>
+				
 				<button>Create Customer</button>
 			</form>
 		</div>
 	</main>
+	
+	<script src="/bank-app/js/nomineeForm.js"></script>
 </body>
 </html>

@@ -170,6 +170,12 @@ a.button.danger, button.danger {
     color: #fff;
 }
 
+.nominee-input-group .nominee-facility-input {
+    display: inline;
+    width: auto;
+    margin: 0 10px 20px 0;
+}
+
 
 @keyframes slide-from-top {
 	0% {
