@@ -7,8 +7,10 @@
 <p>Valid From: ${ card.getValidFromDate() }</p>
 <p>Expiry Date: ${ card.getExpiryDate() }</p>
 
-<c:if test="${ card.isActivated() }">
+<c:if test="${ card.isActivated() && !card.isDeactivated() }">
 	<p>Active: <c:out value='${ card.getIsActive() ? "Yes" : "No" }'/></p>
+</c:if>
+<c:if test="${ card.isActivated() }">
 	<p>Card Activated on: ${ card.getActivatedDate() }</p>
 </c:if>
 <c:if test="${ !card.isActivated() && !card.isDeactivated() }">
