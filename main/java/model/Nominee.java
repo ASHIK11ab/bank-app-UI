@@ -3,13 +3,13 @@ package model;
 public class Nominee {
     private final long id;
     private String name;
-    private String adhaar;
-    private String phone;
+    private long adhaar;
+    private long phone;
     private String relationship;
     
 
-    public Nominee(long id, String name, String adhaar, 
-                    String phone, String relationship) {
+    public Nominee(long id, String name, long adhaar, 
+                    long phone, String relationship) {
         this.id = id;
         this.name = name;
         this.adhaar = adhaar;
@@ -18,10 +18,22 @@ public class Nominee {
     }
     
     public long getId() {
-    	return id;
+    	return this.id;
     }
     
     public String getName() {
-    	return name;
+    	return this.name;
+    }
+    
+    public long getPhone() {
+    	return this.phone;
+    }
+    
+    public long getAdhaar() {
+    	return this.adhaar;
+    }
+    
+    public String getRelationship() {
+    	return this.relationship;
     }
 }
