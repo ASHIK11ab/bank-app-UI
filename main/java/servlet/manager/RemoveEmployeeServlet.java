@@ -35,6 +35,7 @@ public class RemoveEmployeeServlet extends HttpServlet {
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id"); 
 			employees = employeeDAO.getAll(branchId);
 			req.setAttribute("employees", employees);
+			req.setAttribute("actionType", 0);
 			req.getRequestDispatcher("/jsp/manager/removeEmployee.jsp").include(req, res);
 		}  catch(ClassCastException e) {
 			System.out.println(e.getMessage());
@@ -56,26 +57,48 @@ public class RemoveEmployeeServlet extends HttpServlet {
 		Employee employee = null;
 		String msg = "";
 		long employeeId = -1;
-		int branchId = -1;
-		boolean exceptionOccured = false;
+		int branchId = -1, actionType;
+		boolean exceptionOccured = false, isError = false;
 		
 		try {
 			employeeId = Long.parseLong(req.getParameter("id"));
+			actionType = Integer.parseInt(req.getParameter("actionType"));
+			
 			branchId = (Integer) req.getSession(false).getAttribute("branch-id");
 			branch = AppCache.getBranch(branchId);
 			
-			employee = employeeDAO.get(employeeId, branchId);
+			if(actionType != 0 && actionType != 1) {
+				isError = true;
+				msg = "Invalid action !!!";
+			}
 			
-			if(employee != null) {
-				synchronized (employee) {
-					employeeDAO.delete(employeeId, branchId);
-					synchronized (branch) {
-						branch.setEmployeeCnt(branch.getEmployeeCnt() - 1);
+			if(!isError) {
+				
+				employee = employeeDAO.get(employeeId, branchId);
+				
+				if(employee != null) {
+					
+					if(actionType == 0) {
+						// Request for confirmation.
+						req.setAttribute("employee", employee);
+						req.setAttribute("actionType", 1);
+						req.getRequestDispatcher("/jsp/manager/removeEmployee.jsp").include(req, res);
+					} else {
+						// Remove employee.						
+						synchronized (branch) {
+							synchronized (employee) {
+								employeeDAO.delete(employeeId, branchId);
+								out.println(Util.createNotification("Employee removed successfully", "success"));
+							}
+							
+							branch.setEmployeeCnt(branch.getEmployeeCnt() - 1);
+						}
+						doGet(req, res);
 					}
-					out.println(Util.createNotification("Employee removed successfully", "success"));
+				} else {
+					isError = true;
+					msg = "Employee does not exist !!!";
 				}
-			} else {
-				out.println(Util.createNotification("employee does not exist !!!", "danger"));
 			}
 			
 		} catch(ClassCastException e) {
@@ -90,10 +113,11 @@ public class RemoveEmployeeServlet extends HttpServlet {
 			exceptionOccured = true;
 			msg = e.getMessage();
 		} finally {
-			if(exceptionOccured)
+			if(isError || exceptionOccured) {			
 				out.println(Util.createNotification(msg, "danger"));
+				doGet(req, res);
+			}
 			
-			doGet(req, res);
 		}
 	}
 }
