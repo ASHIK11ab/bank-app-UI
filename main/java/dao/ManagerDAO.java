@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.TreeSet;
 
 import cache.AppCache;
+import model.Bank;
 import model.Branch;
 import model.user.Employee;
 import util.Factory;
@@ -143,68 +144,15 @@ public class ManagerDAO {
 	}
 	
 	
-	public Collection<Employee> getAll() throws SQLException {
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		
+	public Collection<Employee> getAll() {
 		TreeSet<Employee> managers = new TreeSet<Employee>();
 		
-		Employee manager = null;
-		boolean exceptionOccured = false;
-		String msg = "", branchName = "";
+		Bank bank = AppCache.getBank();
 		
-		long phone, id;
-		String password;
-        String name;
-        String email;
-        int branchId;
+		for(Branch branch : bank.getBranches())
+			managers.add(branch.getManager());
 		
-		try {
-			conn = Factory.getDataSource().getConnection();
-			stmt = conn.createStatement();	
-			rs = stmt.executeQuery("SELECT * FROM manager");
-			
-			while(rs.next()) {
-				id = rs.getLong("id");
-                name = rs.getString("name");
-                password = rs.getString("password");
-                email = rs.getString("email");
-                phone = rs.getLong("phone");
-                branchId = rs.getInt("branch_id");
-				
-                // Get from cache
-				branchName = AppCache.getBranch(branchId).name;
-					
-				manager = new Employee(id, name, password, email, phone, branchId, branchName);				
-				managers.add(manager);
-			}
-		} catch(SQLException e) {
-			System.out.println(e.getMessage());
-			exceptionOccured = true;
-			msg = "internal error";
-		} finally {
-			
-            try {
-                if(rs != null)
-                    rs.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-            
-            try {
-                if(stmt != null)
-                    stmt.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-
-            try {
-                if(conn != null)
-                    conn.close();
-            } catch(SQLException e) { System.out.println(e.getMessage()); }
-        }
-		
-		if(exceptionOccured)
-			throw new SQLException(msg);
-		else
-			return managers;
+		return managers;
 	}
 	
 	

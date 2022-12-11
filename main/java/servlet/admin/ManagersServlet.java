@@ -18,13 +18,12 @@ import util.Util;
 
 
 public class ManagersServlet extends HttpServlet {
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException , IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException , IOException {
 		ManagerDAO managerDAO = Factory.getManagerDAO();
 		PrintWriter out = res.getWriter();
 		
-		boolean exceptionOccured = false;
 		Collection<Employee> managers;
-		String queryMsg, status, msg = "";
+		String queryMsg, status;
 		
 		queryMsg = req.getParameter("msg");
 		status = req.getParameter("status");
@@ -32,19 +31,10 @@ public class ManagersServlet extends HttpServlet {
 		if(queryMsg != null && status != null)
 			out.println(Util.createNotification(queryMsg, status));
 		
-		try {
-			managers = managerDAO.getAll();
-			req.setAttribute("managers", managers);
-			req.getRequestDispatcher("/jsp/admin/managers.jsp").include(req, res);
-		} catch(SQLException e) {
-			exceptionOccured = true;
-			msg = e.getMessage();
-		} finally {
-			
-			if(exceptionOccured)
-				out.println(Util.createNotification(msg, "danger"));
-			
-			out.close();
-		}
+		managers = managerDAO.getAll();
+		req.setAttribute("managers", managers);
+		req.getRequestDispatcher("/jsp/admin/managers.jsp").include(req, res);
+		
+		out.close();
 	}
 }
