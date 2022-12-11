@@ -20,15 +20,14 @@ import util.Util;
 
 
 public class TransferManagerServlet extends HttpServlet {
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		BranchDAO branchDAO = Factory.getBranchDAO();
-		Collection<Branch> branches = branchDAO.getAll();
-		req.setAttribute("values", branches);
-		req.getRequestDispatcher("/jsp/admin/transferManager.jsp").include(req, res);
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		req.setAttribute("values", Factory.getBranchDAO().getAll());
+		req.setAttribute("actionType", 0);
+		req.getRequestDispatcher("/jsp/admin/transferManagers.jsp").include(req, res);
 	}
 	
 	
-	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		
@@ -38,16 +37,22 @@ public class TransferManagerServlet extends HttpServlet {
 		Employee firstBranchManager = null, secondBranchManager = null;
 		Branch firstBranch = null, secondBranch = null;
 
-		int firstBranchId = -1, secondBranchId = -1;
+		int firstBranchId = -1, secondBranchId = -1, actionType;
 		boolean isError = false, exceptionOccured = false;
-		String msg = "", status;
+		String msg = "";
 		
 		try {
 			firstBranchId = Integer.parseInt(req.getParameter("first-branch-id"));
 			secondBranchId = Integer.parseInt(req.getParameter("second-branch-id"));
+			actionType = Integer.parseInt(req.getParameter("actionType"));
+			
+			if(actionType != 0 && actionType != 1) {
+				isError = true;
+				msg = "Invalid action !!!";
+			}
 			
 			// Cannot transfer to same branch.
-			if(firstBranchId == secondBranchId) {
+			if(!isError && firstBranchId == secondBranchId) {
 				isError = true;
 				msg = "cannot transfer to same branch";
 			}
@@ -63,7 +68,15 @@ public class TransferManagerServlet extends HttpServlet {
 	            }
 			}
 			
-			if(!isError) {
+			if(!isError && actionType == 0) {
+				req.setAttribute("baseBranchManager", firstBranch.getManager());
+				req.setAttribute("targetBranchManager", secondBranch.getManager());
+				req.setAttribute("actionType", 1);
+				req.getRequestDispatcher("/jsp/admin/transferManagers.jsp").include(req, res);
+			}
+			
+			// Perform transfer
+			if(!isError && actionType == 1) {
 				conn = Factory.getDataSource().getConnection();
 	            stmt = conn.prepareStatement("UPDATE manager SET branch_id = ? WHERE id = ?");
 	            
@@ -89,11 +102,12 @@ public class TransferManagerServlet extends HttpServlet {
 		                secondBranchManager.setBranchName(firstBranch.getName());
 		                
 		                firstBranch.assignManager(secondBranchManager);
-		                secondBranch.assignManager(firstBranchManager);
-		                
-		                msg = "managers transfer successfull";
+		                secondBranch.assignManager(firstBranchManager);		                
 					}
 	            }
+	            
+	            out.println(Util.createNotification("Managers transfer successfull", "success"));
+	            doGet(req, res);
 			}
 		}  catch(NumberFormatException e) {			
 			System.out.println(e.getMessage());
@@ -114,10 +128,11 @@ public class TransferManagerServlet extends HttpServlet {
                     conn.close();
             } catch(SQLException e) { System.out.println(e.getMessage()); }
             
-            
-            status = (isError || exceptionOccured) ? "danger" : "success";
-            out.println(Util.createNotification(msg, status));
-            doGet(req, res);
+            if(isError || exceptionOccured) {
+                out.println(Util.createNotification(msg, "danger"));
+                doGet(req, res);
+            }
+
             out.close();
         }
 	}
