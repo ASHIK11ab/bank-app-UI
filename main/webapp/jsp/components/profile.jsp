@@ -30,6 +30,7 @@
 				</c:when>
 				
 				<c:when test="${ sessionScope.role != Role.CUSTOMER }">
+					<p>Id: ${ user.getId() }</p>
 					<p>Name: ${ user.getName() }</p>
 					<p>Phone: ${ user.getPhone() }</p>
 					<p>Email: ${ user.getEmail() }</p>
