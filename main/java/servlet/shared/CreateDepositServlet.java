@@ -88,6 +88,7 @@ public class CreateDepositServlet extends HttpServlet {
 		Branch branch = null;
 		
 		LocalDate today = LocalDate.now();
+		boolean inFirstHalfOfMonth = (today.getDayOfMonth() >= 1 && today.getDayOfMonth() <= 15);
 		boolean isError = false, exceptionOccured = false, isSufficientBalance = false;
 		String msg = "", customerName, description = "";
 		long payoutAccountNo, debitFromAccountNo, customerId = -1, transactionId;
@@ -136,12 +137,20 @@ public class CreateDepositServlet extends HttpServlet {
 					amount = Integer.parseInt(req.getParameter("rd-amount"));
 					recurringDate = Integer.parseInt(req.getParameter("recurring-date"));
 					
-					if((recurringDate >= 1) && (recurringDate <= 15)) {
-						nextRecurringDate = today.withDayOfMonth(recurringDate).plusMonths(1);
+					if(inFirstHalfOfMonth) {
+						if(!(recurringDate >= 1 && recurringDate <= 15)) {
+							isError = true;
+							msg = "Monthly installment date should be between 1 to 15";
+						}
 					} else {
-						isError = true;
-						msg = "Monthly installment date should be between 1 to 15";
+						if(!(recurringDate >= 16 && recurringDate <= 28)) {
+							isError = true;
+							msg = "Monthly installment date should be between 16 to 28";
+						}
 					}
+					
+					if(!isError)
+						nextRecurringDate = today.plusMonths(1).withDayOfMonth(recurringDate);
 				} else {
 					amount = Integer.parseInt(req.getParameter("fd-amount"));
 				}
@@ -230,64 +239,53 @@ public class CreateDepositServlet extends HttpServlet {
 			if(!isError && actionType == 1) {
 				customerId = debitFromAccount.getCustomerId();
 				customerName = debitFromAccount.getCustomerName();
-				
-				/* Incase of RD if deposit account create date is after 15 th of the month
-					dont debit for RD, set recurring date to next month and create account */
-				
-				if(depositType == DepositAccountType.RD.id && today.getDayOfMonth() > 15) {
-					
-					// create deposit account
-	            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, 0, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
-					out.println(Util.createNotification("Deposit created successfully, initial deposit amount will be auto debited on next recurring date", "success"));
-	            	req.setAttribute("account", account);
-	            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").include(req, res);
-				
-				} else {
-					synchronized (debitFromAccount) {
-						stmt = conn.prepareStatement("SELECT balance FROM account WHERE account_no = ?");
-				            
-						stmt.setLong(1, debitFromAccountNo);
-			            rs = stmt.executeQuery();
-		
-			            if(rs.next()) {
-			                balance = rs.getFloat("balance");
-			                if(balance >= amount)
-			                    isSufficientBalance = true;
-			            }
-	            
-			            if(isSufficientBalance) {
-			            	// Deduct amount from debit from account.
-			            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
-			            	
-			            	// create deposit account
-			            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
-			            	
-			            	// update debit from account amount in cache.
-			            	debitFromAccount.deductAmount(amount);
-			            	
-			            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
-			            	
-			            	transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
-			            	
-			            	// Add transaction record to cached debit from account.
-			            	transaction = new Transaction(transactionId, TransactionType.NEFT.id, debitFromAccountNo, account.getAccountNo(), amount, LocalDateTime.now(), description, beforeBalance);
-			            	debitFromAccount.addTransaction(transaction);
-			            	
-			            	req.setAttribute("account", account);
-			            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").forward(req, res);
-			            } else {
-			            	isError = true;
-			            	msg = "Insufficient balance in debit from account !!!";
-			            }
-					}
-					// End of synchronised block
+
+				synchronized (debitFromAccount) {
+					stmt = conn.prepareStatement("SELECT balance FROM account WHERE account_no = ?");
+			            
+					stmt.setLong(1, debitFromAccountNo);
+		            rs = stmt.executeQuery();
+	
+		            if(rs.next()) {
+		                balance = rs.getFloat("balance");
+		                if(balance >= amount)
+		                    isSufficientBalance = true;
+		            }
+            
+		            if(isSufficientBalance) {
+		            	// Deduct amount from debit from account.
+		            	beforeBalance = accountDAO.updateBalance(conn, debitFromAccountNo, 0, amount);
+		            	
+		            	// create deposit account
+		            	account = depositAccountDAO.create(conn, customerId, customerName, branchId, depositType, null, amount, tenureMonths, payoutAccountNo, debitFromAccountNo, nextRecurringDate, amount);
+		            	
+		            	// update debit from account amount in cache.
+		            	debitFromAccount.deductAmount(amount);
+		            	
+		            	description = DepositAccountType.getType(depositType).toString() + " withdrawal for A/C: " + account.getAccountNo();
+		            	
+		            	transactionId = transactionDAO.create(conn, TransactionType.NEFT.id, description, debitFromAccountNo, account.getAccountNo(), amount, true, true, beforeBalance, 0);	            	
+		            	
+		            	// Add transaction record to cached debit from account.
+		            	transaction = new Transaction(transactionId, TransactionType.NEFT.id, debitFromAccountNo, account.getAccountNo(), amount, LocalDateTime.now(), description, beforeBalance);
+		            	debitFromAccount.addTransaction(transaction);
+		            	
+		            	req.setAttribute("account", account);
+		            	req.getRequestDispatcher("/jsp/components/depositCreationSuccess.jsp").forward(req, res);
+		            } else {
+		            	isError = true;
+		            	msg = "Insufficient balance in debit from account !!!";
+		            }
 				}
+				// End of synchronised block
+//				}
 				
 				if(!isError)
 	        		synchronized (branch) {
 	        			branch.setDepositAccountCnt(branch.getDepositAccountCnt() + 1);									
 					}
 			}
+			// End of action type 1 block.
 		} catch(ClassCastException e) {
 			System.out.println(e.getMessage());
 			exceptionOccured = true;

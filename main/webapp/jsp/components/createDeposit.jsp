@@ -17,6 +17,8 @@
 	<c:set var="fdIntrest" value="${ DepositAccount.getTypeIntrestRate(DepositAccountType.FD) }" />
 	<c:set var="rdIntrest" value="${ DepositAccount.getTypeIntrestRate(DepositAccountType.RD) }" />
 	<c:set var="userType" value="${ Role.getName(sessionScope.role) }" />
+	
+	<c:set var="todayDay" value="${ LocalDate.now().getDayOfMonth() }" />
 
 	<jsp:include page="/jsp/${ userType }/components/navbar.jsp" />
 	
@@ -112,7 +114,10 @@
 						<input type="number" placeholder="Monthly installment amount (minimum 1000 rupees)" name="rd-amount"
 							 value="${ amount }">
 						
-						<label>Monthly installment date (Between 1 to 15 of every month):</label>
+						<label>
+							Monthly installment date
+							${ (todayDay >= 1 && todayDay <= 15) ? '(Between 1 to 15)' : '(Between 16 to 28)' }:
+						</label>
 						<input type="number" name="recurring-date" placeholder="Date to debit amount for RD account"
 							value="${ recurringDate }">
 					</div>
