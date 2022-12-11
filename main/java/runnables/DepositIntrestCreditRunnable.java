@@ -100,7 +100,7 @@ public class DepositIntrestCreditRunnable implements Runnable {
 					
 					try {
 						conn = Factory.getDataSource().getConnection();
-						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, da.tenure_months, a.opening_date, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?) AND date_part('day', recurring_date) BETWEEN ? AND ?");
+						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, da.tenure_months, a.opening_date, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?) AND (type_id = ? OR (type_id = ? AND date_part('day', recurring_date) BETWEEN ? AND ?))");
 						// Check whether monthly installment paid for RD.
 						stmt2 = conn.prepareStatement("SELECT COUNT(*) FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ?, intrest_credited_date = ? WHERE account_no = ?");
@@ -108,9 +108,13 @@ public class DepositIntrestCreditRunnable implements Runnable {
 						// Prevent crediting intrest again when server is restarted on 'DEPOSIT_INTREST_CREDIT_DATE'.
 						stmt1.setDate(1, Date.valueOf(today));
 						
-						// Only retrieve deposits which are applicable for the respective batch (i.e. first or second).
-						stmt1.setInt(2, batchRecurringStartDay);
-						stmt1.setInt(3, batchRecurringEndDay);
+						// Get all deposits
+						stmt1.setInt(2, DepositAccountType.FD.id);
+						stmt1.setInt(3, DepositAccountType.RD.id);
+						
+						// In case of rd, Only retrieve deposits which are applicable for the respective batch (i.e. first or second).
+						stmt1.setInt(4, batchRecurringStartDay);
+						stmt1.setInt(5, batchRecurringEndDay);
 						
 						rs1 = stmt1.executeQuery();
 						
