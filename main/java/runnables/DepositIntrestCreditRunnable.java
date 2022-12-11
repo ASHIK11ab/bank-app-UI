@@ -27,7 +27,8 @@ import util.Factory;
 
 // Intrest is credited on monthly basis.
 public class DepositIntrestCreditRunnable implements Runnable {
-	private final int DEPOSIT_INTREST_CREDIT_DATE = 21;
+	private final int FIRST_BATCH_INTREST_CREDIT_DATE = 21;
+	private final int SECOND_BATCH_INTREST_CREDIT_DATE = 11;
 	
 	private boolean exit = false;
 	
@@ -74,23 +75,42 @@ public class DepositIntrestCreditRunnable implements Runnable {
 		
 		long bankAccountNo = bank.getBankAccountNo();
 		int bankAccountBranchId = bank.getAccountBranchId();
-
+		
+		boolean isProcessingFirstBatch;
+		// Range of dates which is applicable for the respective batch.
+		// 1 to 15 for first batch and 16 to 28 for second batch.
+		int batchRecurringStartDay, batchRecurringEndDay;
+		
 		try {
 			while(!exit) {
 				today = LocalDate.now();
-				if(today.getDayOfMonth() == DEPOSIT_INTREST_CREDIT_DATE) {
+				if(today.getDayOfMonth() == FIRST_BATCH_INTREST_CREDIT_DATE || today.getDayOfMonth() == SECOND_BATCH_INTREST_CREDIT_DATE) {
+					
+					isProcessingFirstBatch = (today.getDayOfMonth() == FIRST_BATCH_INTREST_CREDIT_DATE);
+					
+					batchRecurringStartDay = (isProcessingFirstBatch) ? 1 : 16;
+					batchRecurringEndDay = (isProcessingFirstBatch) ? 15: 28;
 					
 					System.out.println("\nIntrest credit for deposit account started started: " + LocalDateTime.now());
 					
+					if(isProcessingFirstBatch)
+						System.out.println("Deposit intrest credit: Processing first batch deposits");
+					else
+						System.out.println("Deposit intrest credit: Processing second batch deposits");
+					
 					try {
 						conn = Factory.getDataSource().getConnection();
-						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, da.tenure_months, a.opening_date, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?)");
+						stmt1 = conn.prepareStatement("SELECT da.account_no, da.type_id, da.rate_of_intrest, da.deposit_amount, da.intrest_credited_month_cnt, da.tenure_months, a.opening_date, a.branch_id FROM deposit_account da LEFT JOIN account a ON da.account_no = a.account_no WHERE a.closing_date IS NULL AND (da.intrest_credited_date IS NULL OR da.intrest_credited_date != ?) AND date_part('day', recurring_date) BETWEEN ? AND ?");
 						// Check whether monthly installment paid for RD.
 						stmt2 = conn.prepareStatement("SELECT COUNT(*) FROM transaction WHERE to_account_no = ? AND date BETWEEN ? AND ?");
 						stmt3 = conn.prepareStatement("UPDATE deposit_account SET intrest_credited_month_cnt = ?, intrest_credited_date = ? WHERE account_no = ?");
 						
 						// Prevent crediting intrest again when server is restarted on 'DEPOSIT_INTREST_CREDIT_DATE'.
 						stmt1.setDate(1, Date.valueOf(today));
+						
+						// Only retrieve deposits which are applicable for the respective batch (i.e. first or second).
+						stmt1.setInt(2, batchRecurringStartDay);
+						stmt1.setInt(3, batchRecurringEndDay);
 						
 						rs1 = stmt1.executeQuery();
 						
@@ -118,8 +138,18 @@ public class DepositIntrestCreditRunnable implements Runnable {
 							
 							if(typeId == DepositAccountType.RD.id) {
 								stmt2.setLong(1, accountNo);
-								stmt2.setDate(2, Date.valueOf(today.withDayOfMonth(1)));
-								stmt2.setDate(3, Date.valueOf(today.withDayOfMonth(20)));
+								
+								// Grace period of 5 days is provided for customer's to make manual RD payment
+								// incase of unsuccessfull auto debit.
+								if(isProcessingFirstBatch) {
+									stmt2.setDate(2, Date.valueOf(today.withDayOfMonth(batchRecurringStartDay)));
+									stmt2.setDate(3, Date.valueOf(today.withDayOfMonth(batchRecurringEndDay + 5)));
+								} else {
+									stmt2.setDate(2, Date.valueOf(today.minusMonths(1).withDayOfMonth(batchRecurringStartDay)));
+									stmt2.setDate(3, Date.valueOf(today.minusMonths(1).withDayOfMonth(batchRecurringEndDay).plusDays(5)));
+								}
+								
+
 								rs2 = stmt2.executeQuery();
 								
 								/* Installment of this month was not made on RD, account is
