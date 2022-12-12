@@ -161,7 +161,7 @@
 					<c:choose>
 						<c:when test="${ DepositAccountType.getType(depositType) == DepositAccountType.FD }">
 							<p>Deposit amount: ${ amount }</p>
-							<p><strong>Maturity value: ${ String.format("%.2f", (amount * fdIntrest * tenureMonths) + amount) }</strong></p>
+							<p><strong>Maturity value: ${ String.format("%.2f", (amount * (fdIntrest/12) * tenureMonths) + amount) }</strong></p>
 							<p>Maturity Date: ${ LocalDate.now().plusMonths(tenureMonths) }</p>
 							<p style="color: red; font-weight: 600;">Note:</p>
 							<p>The maturity value is only applicable subject to the condition that the deposit is only closed on maturity.</p>
@@ -170,7 +170,7 @@
 						<c:when test="${ DepositAccountType.getType(depositType) == DepositAccountType.RD }">
 							<p>Monthly installment amount: ${ amount }</p>
 							<p>Monthly installment debit date: ${ recurringDate } th day of every month</p>
-							<p><strong>Maturity value: ${ String.format("%.2f", ((amount * ((tenureMonths * (tenureMonths + 1)) / 2) * rdIntrest) + (amount*tenureMonths))) }</strong></p>
+							<p><strong>Maturity value: ${ String.format("%.2f", ((amount * ((tenureMonths * (tenureMonths + 1)) / 2) * (rdIntrest/12)) + (amount*tenureMonths))) }</strong></p>
 							<p>Maturity Date: ${ LocalDate.now().plusMonths(tenureMonths) }</p>
 							<p style="color: red; font-weight: 600;">Note:</p>
 							<p>The maturity value is only applicable subject to the condition that the deposit is only closed on maturity and all the montly installments are paid on date.</p>
