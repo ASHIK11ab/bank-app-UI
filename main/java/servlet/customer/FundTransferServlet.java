@@ -299,7 +299,12 @@ public class FundTransferServlet extends HttpServlet {
 		} catch(SQLException e) {
 			exceptionOccured = true;
 			msg = e.getMessage();
-		} finally {			
+		} finally {
+			
+			try {
+				if(conn != null)
+					conn.close();
+			} catch(SQLException e) { System.out.println(e.getMessage()); }
 			
 			if(isError || exceptionOccured) {
 				out.println(Util.createNotification(msg, "danger"));
