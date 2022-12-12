@@ -40,15 +40,24 @@ public class AutoDebitRDRunnable implements Runnable {
 		DepositAccount rdAccount;
 		LocalDate today, maturityDate, openingDate;
 		String description;
-		boolean monthlyInstallmentPaid = false;
+		boolean monthlyInstallmentPaid = false, isProcessingFirstBatch;
 		float fromAccountBeforeBalance, toAccountBeforeBalance;
-		int monthlyInstallment, branchId, debitFromAccountBranchId, tenureMonths;
+		int monthlyInstallment, branchId, debitFromAccountBranchId, tenureMonths, batchRecurringStartDate;
 		long debitFromAccountNo, rdAccountNo, transactionId;
 		
 		try {
 			while(!exit) {
 				today = LocalDate.now();
 				try {
+					
+					if(today.getDayOfMonth() >= 1 && today.getDayOfMonth() <= 15) {
+						isProcessingFirstBatch = true;
+						batchRecurringStartDate = 1;
+					} else {
+						isProcessingFirstBatch = false;
+						batchRecurringStartDate = 16;
+					}
+					
 					System.out.println("\nAuto Debit for RD thread started: " + LocalDateTime.now());
 						
 					conn = Factory.getDataSource().getConnection();
@@ -79,6 +88,7 @@ public class AutoDebitRDRunnable implements Runnable {
 						// If deposit has reached maturity, ignore it, as currently
 						// deposits are closed manually.
 						if(today.isAfter(maturityDate)) {
+							System.out.println("Auto debit RD: A/C: " + rdAccountNo + " has reached maturity skipping.");
 							continue;
 						}
 						
@@ -87,7 +97,7 @@ public class AutoDebitRDRunnable implements Runnable {
 						synchronized (rdAccount) {
 							// Check if monthly installment payment has been made aldready.
 							stmt2.setLong(1, rdAccountNo);
-							stmt2.setDate(2, Date.valueOf(today.withDayOfMonth(1)));
+							stmt2.setDate(2, Date.valueOf(today.withDayOfMonth(batchRecurringStartDate)));
 							stmt2.setDate(3, Date.valueOf(today));
 							
 							rs2 = stmt2.executeQuery();
